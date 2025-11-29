@@ -1,0 +1,82 @@
+[
+  {
+    "trip_id": "TR001",
+    "trip_name": "Costa Rica Adventure",
+    "region": "Central America",
+    "start_date": "2025-01-15",
+    "end_date": "2025-01-22",
+    "status": "Active"
+  },
+  {
+    "trip_id": "TR002",
+    "trip_name": "Patagonia Explorer",
+    "region": "South America",
+    "start_date": "2025-02-10",
+    "end_date": "2025-02-24",
+    "status": "Planning"
+  },
+  {
+    "trip_id": "TR003",
+    "trip_name": "European Alps Trek",
+    "region": "Europe",
+    "start_date": "2025-03-05",
+    "end_date": "2025-03-18",
+    "status": "Active"
+  },
+  {
+    "trip_id": "TR004",
+    "trip_name": "Morocco Desert Journey",
+    "region": "Africa",
+    "start_date": "2025-02-20",
+    "end_date": "2025-03-02",
+    "status": "Active"
+  },
+  {
+    "trip_id": "TR005",
+    "trip_name": "New Zealand South Island",
+    "region": "Oceania",
+    "start_date": "2025-04-01",
+    "end_date": "2025-04-15",
+    "status": "Planning"
+  },
+  {
+    "trip_id": "TR006",
+    "trip_name": "Iceland Northern Lights",
+    "region": "Europe",
+    "start_date": "2025-01-25",
+    "end_date": "2025-02-03",
+    "status": "Active"
+  },
+  {
+    "trip_id": "TR007",
+    "trip_name": "Japan Cultural Experience",
+    "region": "Asia",
+    "start_date": "2025-03-12",
+    "end_date": "2025-03-26",
+    "status": "Completed"
+  },
+  {
+    "trip_id": "TR008",
+    "trip_name": "Peru Machu Picchu",
+    "region": "South America",
+    "start_date": "2025-02-15",
+    "end_date": "2025-02-28",
+    "status": "Active"
+  },
+  {
+    "trip_id": "TR009",
+    "trip_name": "Canadian Rockies",
+    "region": "North America",
+    "start_date": "2025-05-10",
+    "end_date": "2025-05-20",
+    "status": "Planning"
+  },
+  {
+    "trip_id": "TR010",
+    "trip_name": "Vietnam & Cambodia",
+    "region": "Asia",
+    "start_date": "2025-01-20",
+    "end_date": "2025-02-05",
+    "status": "Active"
+  }
+]
