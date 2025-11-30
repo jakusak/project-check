@@ -33,6 +33,14 @@ export default function Cart() {
   const { user } = useAuth();
   const { toast } = useToast();
   
+  const reasonOptions = [
+    "Need more standard inventory equipment",
+    "We ran out of this item",
+    "Item is lost",
+    "Item was not delivered to the OPS Area",
+    "Item is broken/non re-usable",
+  ];
+  
   const [cart, setCart] = useState<CartItem[]>([]);
   const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
@@ -240,14 +248,21 @@ export default function Cart() {
                       <Label htmlFor={`reason-${item.item.id}`}>
                         Reason for Request *
                       </Label>
-                      <Input
-                        id={`reason-${item.item.id}`}
+                      <Select
                         value={item.reason}
-                        onChange={(e) => updateReason(item.item.id, e.target.value)}
-                        placeholder="Why do you need this item?"
-                        className="mt-1"
-                        required
-                      />
+                        onValueChange={(value) => updateReason(item.item.id, value)}
+                      >
+                        <SelectTrigger id={`reason-${item.item.id}`} className="mt-1">
+                          <SelectValue placeholder="Select a reason..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {reasonOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 ))
