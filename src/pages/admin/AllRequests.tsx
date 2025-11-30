@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 interface Request {
   id: string;
   status: string;
-  delivery_region: string;
+  ops_area: string;
+  hub: string;
   required_by_date: string;
   created_at: string;
   line_items_count: number;
@@ -43,7 +44,8 @@ export default function AllRequests() {
       const formatted = data?.map((req: any) => ({
         id: req.id,
         status: req.status,
-        delivery_region: req.delivery_region,
+        ops_area: req.ops_area || req.delivery_region || "N/A",
+        hub: req.hub || "N/A",
         required_by_date: req.required_by_date,
         created_at: req.created_at,
         line_items_count: req.equipment_request_line_items[0]?.count || 0,
@@ -58,8 +60,8 @@ export default function AllRequests() {
         return "secondary";
       case "approved":
         return "default";
-      case "fulfilled":
-        return "outline";
+      case "declined":
+        return "destructive";
       default:
         return "secondary";
     }
@@ -69,7 +71,7 @@ export default function AllRequests() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">All Requests</h1>
-        <p className="text-muted-foreground">Manage all equipment requests</p>
+        <p className="text-muted-foreground">Review and approve equipment requisitions</p>
       </div>
 
       <Card>
@@ -82,16 +84,17 @@ export default function AllRequests() {
               <TableRow>
                 <TableHead>Request #</TableHead>
                 <TableHead>Date Submitted</TableHead>
+                <TableHead>Ops Area</TableHead>
+                <TableHead>HUB</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Items Count</TableHead>
-                <TableHead>Region</TableHead>
                 <TableHead>Required By</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {requests.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No requests found
                   </TableCell>
                 </TableRow>
@@ -102,19 +105,20 @@ export default function AllRequests() {
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => navigate(`/admin/request/${request.id}`)}
                   >
-                    <TableCell className="font-medium">
-                      {request.id.slice(0, 8)}...
+                    <TableCell className="font-medium font-mono text-sm">
+                      {request.id.slice(0, 8)}
                     </TableCell>
                     <TableCell>
                       {new Date(request.created_at).toLocaleDateString()}
                     </TableCell>
+                    <TableCell>{request.ops_area}</TableCell>
+                    <TableCell>{request.hub}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(request.status)}>
                         {request.status}
                       </Badge>
                     </TableCell>
                     <TableCell>{request.line_items_count}</TableCell>
-                    <TableCell>{request.delivery_region}</TableCell>
                     <TableCell>
                       {new Date(request.required_by_date).toLocaleDateString()}
                     </TableCell>

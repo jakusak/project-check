@@ -4,26 +4,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check, X } from "lucide-react";
+
+interface LineItem {
+  id: string;
+  equipment_id: string;
+  quantity: number;
+  reason: string;
+  approval_status: string;
+  decline_reason: string | null;
+  equipment_items: {
+    name: string;
+    sku: string;
+    category: string;
+  };
+}
 
 interface RequestDetail {
   id: string;
   status: string;
-  delivery_region: string;
+  ops_area: string;
+  hub: string;
   required_by_date: string;
   notes: string | null;
   created_at: string;
-  line_items: Array<{
-    id: string;
-    quantity: number;
-    equipment_items: {
-      name: string;
-      sku: string;
-      image_url: string | null;
-    };
-  }>;
+  user_id: string;
 }
 
 export default function RequestDetail() {
@@ -31,60 +39,147 @@ export default function RequestDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [request, setRequest] = useState<RequestDetail | null>(null);
-  const [status, setStatus] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
+  const [declineReasons, setDeclineReasons] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    loadRequest();
+    if (id) {
+      loadRequestDetails();
+    }
   }, [id]);
 
-  const loadRequest = async () => {
-    const { data, error } = await supabase
+  const loadRequestDetails = async () => {
+    const { data: requestData, error: requestError } = await supabase
       .from("equipment_requests")
-      .select(`
-        *,
-        equipment_request_line_items(
-          id,
-          quantity,
-          equipment_items(name, sku, image_url)
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .single();
 
-    if (error) {
+    if (requestError) {
       toast({
         title: "Error loading request",
+        description: requestError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: itemsData, error: itemsError } = await supabase
+      .from("equipment_request_line_items")
+      .select(`
+        *,
+        equipment_items (
+          name,
+          sku,
+          category
+        )
+      `)
+      .eq("request_id", id);
+
+    if (itemsError) {
+      toast({
+        title: "Error loading items",
+        description: itemsError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRequest(requestData as any);
+    setLineItems(itemsData || []);
+  };
+
+  const handleApprove = async (itemId: string) => {
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("equipment_request_line_items")
+        .update({
+          approval_status: "approved",
+          approved_by: user?.id,
+          approved_at: new Date().toISOString(),
+          decline_reason: null,
+        })
+        .eq("id", itemId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Item approved",
+        description: "The item has been approved successfully",
+      });
+
+      loadRequestDetails();
+    } catch (error: any) {
+      toast({
+        title: "Error approving item",
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      setRequest(data as any);
-      setStatus(data.status);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const updateStatus = async () => {
-    setSaving(true);
-    const { error } = await supabase
-      .from("equipment_requests")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) {
+  const handleDecline = async (itemId: string) => {
+    const reason = declineReasons[itemId];
+    if (!reason || !reason.trim()) {
       toast({
-        title: "Error updating status",
+        title: "Decline reason required",
+        description: "Please provide a reason for declining this item",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("equipment_request_line_items")
+        .update({
+          approval_status: "declined",
+          decline_reason: reason,
+          approved_by: user?.id,
+          approved_at: new Date().toISOString(),
+        })
+        .eq("id", itemId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Item declined",
+        description: "The item has been declined",
+      });
+
+      loadRequestDetails();
+      setDeclineReasons({ ...declineReasons, [itemId]: "" });
+    } catch (error: any) {
+      toast({
+        title: "Error declining item",
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Status updated",
-        description: "Request status has been updated successfully",
-      });
-      loadRequest();
+    } finally {
+      setIsLoading(false);
     }
-    setSaving(false);
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "secondary";
+      case "approved":
+        return "default";
+      case "declined":
+        return "destructive";
+      default:
+        return "outline";
+    }
   };
 
   if (!request) {
@@ -98,116 +193,159 @@ export default function RequestDetail() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
+        <Button variant="ghost" onClick={() => navigate("/admin/requests")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold">Request Details</h1>
-          <p className="text-muted-foreground">#{request.id.slice(0, 8)}...</p>
+          <p className="text-muted-foreground font-mono">#{request.id.slice(0, 8)}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Requested Items</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {request.line_items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                  <div className="w-20 h-20 bg-muted rounded overflow-hidden flex-shrink-0">
-                    {item.equipment_items.image_url ? (
-                      <img
-                        src={item.equipment_items.image_url}
-                        alt={item.equipment_items.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                        No image
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{item.equipment_items.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      SKU: {item.equipment_items.sku}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">Qty: {item.quantity}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Request Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant="secondary" className="mt-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Request Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <span className="text-sm text-muted-foreground">Ops Area:</span>
+              <p className="font-medium">{request.ops_area || "N/A"}</p>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">HUB:</span>
+              <p className="font-medium">{request.hub || "N/A"}</p>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Required By:</span>
+              <p className="font-medium">
+                {new Date(request.required_by_date).toLocaleDateString()}
+              </p>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Status:</span>
+              <div className="mt-1">
+                <Badge variant={getStatusVariant(request.status)}>
                   {request.status}
                 </Badge>
               </div>
+            </div>
+            {request.notes && (
               <div>
-                <p className="text-sm text-muted-foreground">Delivery Region</p>
-                <p className="font-medium">{request.delivery_region}</p>
+                <span className="text-sm text-muted-foreground">Notes:</span>
+                <p className="font-medium">{request.notes}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Required By</p>
-                <p className="font-medium">
-                  {new Date(request.required_by_date).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Submitted</p>
-                <p className="font-medium">
-                  {new Date(request.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              {request.notes && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Notes</p>
-                  <p className="font-medium">{request.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Update Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="fulfilled">Fulfilled</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={updateStatus}
-                disabled={saving || status === request.status}
-                className="w-full"
-              >
-                {saving ? "Saving..." : "Update Status"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Submission Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <span className="text-sm text-muted-foreground">Submitted:</span>
+              <p className="font-medium">
+                {new Date(request.created_at).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">User ID:</span>
+              <p className="font-mono text-sm">{request.user_id.slice(0, 8)}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Requested Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item</TableHead>
+                  <TableHead>SKU</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Qty</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lineItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">
+                      {item.equipment_items.name}
+                    </TableCell>
+                    <TableCell>{item.equipment_items.sku}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {item.equipment_items.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell className="max-w-xs">
+                      <p className="text-sm">{item.reason}</p>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(item.approval_status)}>
+                        {item.approval_status}
+                      </Badge>
+                      {item.decline_reason && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {item.decline_reason}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {item.approval_status === "pending" && (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApprove(item.id)}
+                              disabled={isLoading}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDecline(item.id)}
+                              disabled={isLoading || !declineReasons[item.id]?.trim()}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Decline
+                            </Button>
+                          </div>
+                          <Input
+                            placeholder="Decline reason (required)"
+                            value={declineReasons[item.id] || ""}
+                            onChange={(e) =>
+                              setDeclineReasons({
+                                ...declineReasons,
+                                [item.id]: e.target.value,
+                              })
+                            }
+                            className="text-sm"
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

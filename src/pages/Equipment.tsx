@@ -75,7 +75,15 @@ export default function Equipment() {
     }
   };
 
-  const categories = Array.from(new Set(items.map((item) => item.category)));
+  const categoryOptions = [
+    "Bike Equipment",
+    "Trailer Equipment",
+    "Trip Equipment",
+    "IT Equipment",
+    "Other"
+  ];
+  
+  const categories = Array.from(new Set(items.map((item) => item.category))).filter(Boolean);
 
   const addToCart = (item: EquipmentItem) => {
     const existing = cart.find((c) => c.item.id === item.id);
@@ -123,7 +131,7 @@ export default function Equipment() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
+            {categoryOptions.map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>

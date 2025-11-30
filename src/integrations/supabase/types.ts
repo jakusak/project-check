@@ -46,21 +46,36 @@ export type Database = {
       }
       equipment_request_line_items: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          decline_reason: string | null
           equipment_id: string
           id: string
           quantity: number
+          reason: string | null
           request_id: string
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          decline_reason?: string | null
           equipment_id: string
           id?: string
           quantity: number
+          reason?: string | null
           request_id: string
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          decline_reason?: string | null
           equipment_id?: string
           id?: string
           quantity?: number
+          reason?: string | null
           request_id?: string
         }
         Relationships: [
@@ -84,8 +99,10 @@ export type Database = {
         Row: {
           created_at: string
           delivery_region: string
+          hub: string | null
           id: string
           notes: string | null
+          ops_area: string | null
           required_by_date: string
           status: string
           user_id: string
@@ -93,8 +110,10 @@ export type Database = {
         Insert: {
           created_at?: string
           delivery_region: string
+          hub?: string | null
           id?: string
           notes?: string | null
+          ops_area?: string | null
           required_by_date: string
           status?: string
           user_id: string
@@ -102,11 +121,85 @@ export type Database = {
         Update: {
           created_at?: string
           delivery_region?: string
+          hub?: string | null
           id?: string
           notes?: string | null
+          ops_area?: string | null
           required_by_date?: string
           status?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_sync_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          hub: string
+          id: string
+          item_id: string
+          netsuite_transaction_id: string | null
+          quantity: number
+          request_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          hub: string
+          id?: string
+          item_id: string
+          netsuite_transaction_id?: string | null
+          quantity: number
+          request_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          hub?: string
+          id?: string
+          item_id?: string
+          netsuite_transaction_id?: string | null
+          quantity?: number
+          request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_sync_logs_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_sync_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_area_to_hub: {
+        Row: {
+          created_at: string | null
+          hub: string
+          id: string
+          ops_area: string
+        }
+        Insert: {
+          created_at?: string | null
+          hub: string
+          id?: string
+          ops_area: string
+        }
+        Update: {
+          created_at?: string | null
+          hub?: string
+          id?: string
+          ops_area?: string
         }
         Relationships: []
       }
