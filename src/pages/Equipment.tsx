@@ -83,6 +83,7 @@ export default function Equipment() {
     "Other"
   ];
   
+  // Get unique categories from actual items for display
   const categories = Array.from(new Set(items.map((item) => item.category))).filter(Boolean);
 
   const addToCart = (item: EquipmentItem) => {
@@ -131,7 +132,7 @@ export default function Equipment() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categoryOptions.map((category) => (
+            {categories.map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
