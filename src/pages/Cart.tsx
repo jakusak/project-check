@@ -44,7 +44,7 @@ export default function Cart() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
-  const [requiredByDate, setRequiredByDate] = useState("");
+  const [urgency, setUrgency] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -107,10 +107,10 @@ export default function Cart() {
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedOpsArea || !requiredByDate) {
+    if (!selectedOpsArea || !urgency) {
       toast({
         title: "Missing required fields",
-        description: "Please select an Ops Area and required date",
+        description: "Please select an Ops Area and urgency level",
         variant: "destructive",
       });
       return;
@@ -142,7 +142,7 @@ export default function Cart() {
           ops_area: selectedOpsArea,
           hub: hub,
           delivery_region: selectedOpsArea, // Keep for backward compatibility
-          required_by_date: requiredByDate,
+          required_by_date: urgency,
           notes,
         })
         .select()
@@ -295,14 +295,16 @@ export default function Cart() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="date">Required By Date *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={requiredByDate}
-                    onChange={(e) => setRequiredByDate(e.target.value)}
-                    required
-                  />
+                  <Label htmlFor="urgency">Urgency *</Label>
+                  <Select value={urgency} onValueChange={setUrgency} required>
+                    <SelectTrigger id="urgency">
+                      <SelectValue placeholder="Select urgency level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Urgent">Urgent</SelectItem>
+                      <SelectItem value="Needed soon">Needed soon</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
