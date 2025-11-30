@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import VanModule from "./pages/VanModule";
 import UnitLoads from "./pages/UnitLoads";
+import Warehouses from "./pages/Warehouses";
 import Equipment from "./pages/Equipment";
 import Cart from "./pages/Cart";
 import MyRequests from "./pages/MyRequests";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/van-module" element={<VanModule />} />
               <Route path="/unit-loads" element={<UnitLoads />} />
+              <Route path="/warehouses" element={<Warehouses />} />
               <Route path="/equipment" element={<Equipment />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/my-requests" element={<MyRequests />} />
