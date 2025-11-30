@@ -1,7 +1,7 @@
 import { Link, useLocation, Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
-import { Home, Package, ClipboardList, Settings, LogOut } from "lucide-react";
+import { Home, Package, ClipboardList, Settings, LogOut, Truck } from "lucide-react";
 
 export default function Layout() {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -21,6 +21,7 @@ export default function Layout() {
 
   const navItems = [
     { to: "/", label: "Dashboard", icon: Home },
+    { to: "/van-module", label: "Van Module", icon: Truck },
     { to: "/equipment", label: "Equipment Catalog", icon: Package },
     { to: "/my-requests", label: "My Requests", icon: ClipboardList },
   ];

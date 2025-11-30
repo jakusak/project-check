@@ -7,6 +7,7 @@ import { AuthProvider } from "@/integrations/supabase/auth";
 import Auth from "./pages/Auth";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
+import VanModule from "./pages/VanModule";
 import Equipment from "./pages/Equipment";
 import Cart from "./pages/Cart";
 import MyRequests from "./pages/MyRequests";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/van-module" element={<VanModule />} />
               <Route path="/equipment" element={<Equipment />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/my-requests" element={<MyRequests />} />
