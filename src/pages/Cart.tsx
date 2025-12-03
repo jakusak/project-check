@@ -43,6 +43,7 @@ export default function Cart() {
   
   const [cart, setCart] = useState<CartItem[]>([]);
   const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
+  const [submittedBy, setSubmittedBy] = useState("");
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
   const [urgency, setUrgency] = useState("");
   const [notes, setNotes] = useState("");
@@ -107,10 +108,10 @@ export default function Cart() {
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedOpsArea || !urgency) {
+    if (!submittedBy || !selectedOpsArea || !urgency) {
       toast({
         title: "Missing required fields",
-        description: "Please select an Ops Area and urgency level",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -278,6 +279,19 @@ export default function Cart() {
             </CardHeader>
             <CardContent>
               <form onSubmit={submitRequest} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="submitted-by">Submitted By *</Label>
+                  <Select value={submittedBy} onValueChange={setSubmittedBy} required>
+                    <SelectTrigger id="submitted-by">
+                      <SelectValue placeholder="Select who is submitting" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Submitted by Field Staff">Submitted by Field Staff</SelectItem>
+                      <SelectItem value="Submitted by OPX">Submitted by OPX</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="ops-area">Ops Area *</Label>
                   <Select value={selectedOpsArea} onValueChange={setSelectedOpsArea} required>
