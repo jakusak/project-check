@@ -210,7 +210,7 @@ export default function RequestDetail() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
-              <span className="text-sm text-muted-foreground">Ops Area:</span>
+              <span className="text-sm text-muted-foreground">Request submitted from OPS Area:</span>
               <p className="font-medium">{request.ops_area || "N/A"}</p>
             </div>
             <div>
