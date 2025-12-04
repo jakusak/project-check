@@ -16,6 +16,7 @@ import MyRequests from "./pages/MyRequests";
 import AllRequests from "./pages/admin/AllRequests";
 import RequestDetail from "./pages/admin/RequestDetail";
 import ManageEquipment from "./pages/admin/ManageEquipment";
+import ManageUsers from "./pages/admin/ManageUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/admin/requests" element={<AllRequests />} />
               <Route path="/admin/request/:id" element={<RequestDetail />} />
               <Route path="/admin/equipment" element={<ManageEquipment />} />
+              <Route path="/admin/users" element={<ManageUsers />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
