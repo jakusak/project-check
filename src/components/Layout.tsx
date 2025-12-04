@@ -30,7 +30,7 @@ export default function Layout() {
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
     { to: "/equipment", label: "Equipment" },
-    { to: "/my-requests", label: "My Requests" },
+    { to: "/my-requests", label: "Equipment Request" },
   ];
 
   const adminNavItems = [
