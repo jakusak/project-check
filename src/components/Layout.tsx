@@ -29,8 +29,11 @@ export default function Layout() {
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
-    { to: "/equipment", label: "Equipment" },
-    { to: "/my-requests", label: "Equipment Request" },
+  ];
+
+  const equipmentNavItems = [
+    { to: "/equipment", label: "Equipment Catalog" },
+    { to: "/my-requests", label: "Equipment Request History/Status" },
   ];
 
   const adminNavItems = [
@@ -70,6 +73,37 @@ export default function Layout() {
                 {item.label}
               </Link>
             ))}
+
+            {/* Equipment Request Dropdown */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  location.pathname === "/equipment" || location.pathname === "/my-requests"
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Equipment Request
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="absolute left-0 top-full mt-1 w-64 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                {equipmentNavItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === item.to
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
             
             {/* Admin Dropdown */}
             {isAdmin && (
