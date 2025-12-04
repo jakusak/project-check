@@ -1,7 +1,7 @@
 import { Link, useLocation, Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
-import { Home, Package, ClipboardList, Settings, LogOut, Truck, BoxIcon, Warehouse, Users, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import backroadsLogo from "@/assets/backroads-logo.png";
 
@@ -25,18 +25,18 @@ export default function Layout() {
   }
 
   const navItems = [
-    { to: "/", label: "Dashboard", icon: Home },
-    { to: "/van-module", label: "Van Module", icon: Truck },
-    { to: "/unit-loads", label: "Unit Loads", icon: BoxIcon },
-    { to: "/warehouses", label: "Warehouses", icon: Warehouse },
-    { to: "/equipment", label: "Equipment", icon: Package },
-    { to: "/my-requests", label: "My Requests", icon: ClipboardList },
+    { to: "/", label: "Dashboard" },
+    { to: "/van-module", label: "Van Module" },
+    { to: "/unit-loads", label: "Unit Loads" },
+    { to: "/warehouses", label: "Warehouses" },
+    { to: "/equipment", label: "Equipment" },
+    { to: "/my-requests", label: "My Requests" },
   ];
 
   const adminNavItems = [
-    { to: "/admin/requests", label: "All Requests", icon: ClipboardList },
-    { to: "/admin/equipment", label: "Manage Equipment", icon: Settings },
-    { to: "/admin/users", label: "Manage Users", icon: Users },
+    { to: "/admin/requests", label: "All Requests" },
+    { to: "/admin/equipment", label: "Manage Equipment" },
+    { to: "/admin/users", label: "Manage Users" },
   ];
 
   return (
@@ -61,18 +61,17 @@ export default function Layout() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                   location.pathname === item.to
                     ? "bg-sidebar-accent text-primary-foreground"
                     : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
                 )}
               >
-                <item.icon className="h-4 w-4" />
                 {item.label}
               </Link>
             ))}
             
-            {/* Admin Dropdown - simplified for now */}
+            {/* Admin Dropdown */}
             {isAdmin && (
               <div className="relative group">
                 <button
@@ -83,7 +82,6 @@ export default function Layout() {
                       : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
                   )}
                 >
-                  <Settings className="h-4 w-4" />
                   Admin
                   <ChevronDown className="h-3 w-3" />
                 </button>
@@ -93,13 +91,12 @@ export default function Layout() {
                       key={item.to}
                       to={item.to}
                       className={cn(
-                        "flex items-center gap-2 px-4 py-2.5 text-sm transition-colors",
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
                         location.pathname === item.to
                           ? "bg-accent text-accent-foreground"
                           : "text-foreground hover:bg-muted"
                       )}
                     >
-                      <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>
                   ))}
