@@ -167,7 +167,7 @@ export default function Equipment() {
         {paginatedItems.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-4">
-              <div className="aspect-square bg-muted rounded-md mb-4 overflow-hidden">
+              <div className="aspect-video bg-muted rounded-md mb-3 overflow-hidden">
                 {item.image_url ? (
                   <img
                     src={item.image_url}
