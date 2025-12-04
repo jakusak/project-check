@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useRegion, REGION_LABELS, REGION_HUBS, Region } from "@/contexts/RegionContext";
 
 interface CartItem {
   item: {
@@ -21,17 +22,20 @@ interface CartItem {
   };
   quantity: number;
   reason: string;
+  region?: Region;
 }
 
 interface OpsArea {
   ops_area: string;
   hub: string;
+  region: string | null;
 }
 
 export default function Cart() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { selectedRegion, clearRegion } = useRegion();
   
   const reasonOptions = [
     "Need more standard inventory equipment",
@@ -43,6 +47,7 @@ export default function Cart() {
   
   const [cart, setCart] = useState<CartItem[]>([]);
   const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
+  const [filteredOpsAreas, setFilteredOpsAreas] = useState<OpsArea[]>([]);
   const [submittedBy, setSubmittedBy] = useState("");
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
   const [urgency, setUrgency] = useState("");
@@ -53,7 +58,6 @@ export default function Cart() {
     const storedCart = localStorage.getItem("equipment_cart");
     if (storedCart) {
       const parsedCart = JSON.parse(storedCart);
-      // Ensure all items have reason field
       setCart(parsedCart.map((item: CartItem) => ({
         ...item,
         reason: item.reason || ""
@@ -61,6 +65,20 @@ export default function Cart() {
     }
     loadOpsAreas();
   }, []);
+
+  // Filter OPS Areas by selected region
+  useEffect(() => {
+    if (selectedRegion && opsAreas.length > 0) {
+      const filtered = opsAreas.filter(area => area.region === selectedRegion);
+      setFilteredOpsAreas(filtered);
+      // Reset selected ops area if it's not in the filtered list
+      if (selectedOpsArea && !filtered.some(a => a.ops_area === selectedOpsArea)) {
+        setSelectedOpsArea("");
+      }
+    } else {
+      setFilteredOpsAreas(opsAreas);
+    }
+  }, [selectedRegion, opsAreas]);
 
   const loadOpsAreas = async () => {
     const { data, error } = await supabase
@@ -105,6 +123,21 @@ export default function Cart() {
     localStorage.setItem("equipment_cart", JSON.stringify(updated));
   };
 
+  // Determine the hub based on region
+  const getHubForRequest = (): string => {
+    if (!selectedRegion) return "";
+    
+    // For non-Europe regions, use the fixed hub
+    const fixedHub = REGION_HUBS[selectedRegion];
+    if (fixedHub) {
+      return fixedHub;
+    }
+    
+    // For Europe, get hub from selected OPS Area
+    const selectedArea = filteredOpsAreas.find(area => area.ops_area === selectedOpsArea);
+    return selectedArea?.hub || "";
+  };
+
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -117,7 +150,6 @@ export default function Cart() {
       return;
     }
 
-    // Validate all items have reasons
     const missingReasons = cart.filter(item => !item.reason.trim());
     if (missingReasons.length > 0) {
       toast({
@@ -131,9 +163,7 @@ export default function Cart() {
     setLoading(true);
 
     try {
-      // Find the hub for selected ops area
-      const selectedArea = opsAreas.find(area => area.ops_area === selectedOpsArea);
-      const hub = selectedArea?.hub || "";
+      const hub = getHubForRequest();
 
       const { data: request, error: requestError } = await supabase
         .from("equipment_requests")
@@ -142,7 +172,7 @@ export default function Cart() {
           status: "pending",
           ops_area: selectedOpsArea,
           hub: hub,
-          delivery_region: selectedOpsArea, // Keep for backward compatibility
+          delivery_region: selectedRegion || selectedOpsArea,
           required_by_date: urgency,
           notes,
         })
@@ -166,6 +196,7 @@ export default function Cart() {
       if (lineItemsError) throw lineItemsError;
 
       localStorage.removeItem("equipment_cart");
+      clearRegion();
       toast({
         title: "Request submitted",
         description: "Your equipment request has been submitted successfully",
@@ -182,12 +213,28 @@ export default function Cart() {
     }
   };
 
+  // Check if this region has a single hub (auto-assigned)
+  const isAutoHub = selectedRegion && REGION_HUBS[selectedRegion] !== null;
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Request Cart</h1>
         <p className="text-muted-foreground">Review and submit your equipment request</p>
       </div>
+
+      {/* Region Indicator */}
+      {selectedRegion && (
+        <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+          <span className="text-sm">Requesting for region:</span>
+          <Badge variant="secondary">{REGION_LABELS[selectedRegion]}</Badge>
+          {isAutoHub && (
+            <span className="text-sm text-muted-foreground ml-2">
+              → Fulfilled by: <strong>{REGION_HUBS[selectedRegion]}</strong>
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
@@ -299,13 +346,24 @@ export default function Cart() {
                       <SelectValue placeholder="Select Ops Area" />
                     </SelectTrigger>
                     <SelectContent>
-                      {opsAreas.map((area) => (
+                      {filteredOpsAreas.map((area) => (
                         <SelectItem key={area.ops_area} value={area.ops_area}>
-                          {area.ops_area} → {area.hub}
+                          {area.ops_area}
+                          {!isAutoHub && ` → ${area.hub}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {isAutoHub && selectedOpsArea && (
+                    <p className="text-xs text-muted-foreground">
+                      Hub automatically assigned: {REGION_HUBS[selectedRegion!]}
+                    </p>
+                  )}
+                  {!isAutoHub && selectedOpsArea && (
+                    <p className="text-xs text-muted-foreground">
+                      Hub: {filteredOpsAreas.find(a => a.ops_area === selectedOpsArea)?.hub}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -335,7 +393,7 @@ export default function Cart() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={cart.length === 0 || loading}
+                  disabled={cart.length === 0 || loading || !selectedRegion}
                 >
                   {loading ? "Submitting..." : "Submit Request"}
                 </Button>

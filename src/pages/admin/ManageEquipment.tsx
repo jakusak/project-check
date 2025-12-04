@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Upload, X, Image } from "lucide-react";
 
@@ -17,6 +19,7 @@ interface EquipmentItem {
   category: string;
   image_url: string | null;
   availability: boolean;
+  regions: string[] | null;
 }
 
 const CATEGORIES = [
@@ -25,6 +28,12 @@ const CATEGORIES = [
   "Trip Equipment",
   "IT Equipment",
   "Other",
+];
+
+const REGIONS = [
+  { key: "usa_lappa", label: "USA & Lappa" },
+  { key: "canada", label: "Canada" },
+  { key: "europe", label: "Europe" },
 ];
 
 export default function ManageEquipment() {
@@ -41,6 +50,7 @@ export default function ManageEquipment() {
     category: "",
     image_url: "",
     availability: true,
+    regions: ["europe", "usa_lappa", "canada"] as string[],
   });
 
   useEffect(() => {
@@ -73,6 +83,7 @@ export default function ManageEquipment() {
         category: item.category,
         image_url: item.image_url || "",
         availability: item.availability,
+        regions: item.regions || ["europe", "usa_lappa", "canada"],
       });
     } else {
       setEditingItem(null);
@@ -82,6 +93,7 @@ export default function ManageEquipment() {
         category: "",
         image_url: "",
         availability: true,
+        regions: ["europe", "usa_lappa", "canada"],
       });
     }
     setDialogOpen(true);
@@ -159,8 +171,25 @@ export default function ManageEquipment() {
     setFormData(prev => ({ ...prev, image_url: "" }));
   };
 
+  const toggleRegion = (regionKey: string) => {
+    setFormData(prev => ({
+      ...prev,
+      regions: prev.regions.includes(regionKey)
+        ? prev.regions.filter(r => r !== regionKey)
+        : [...prev.regions, regionKey]
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.regions.length === 0) {
+      toast({
+        title: "Please select at least one region",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const data = {
       ...formData,
@@ -297,6 +326,26 @@ export default function ManageEquipment() {
                 </Select>
               </div>
 
+              {/* Regions Selection */}
+              <div className="space-y-2">
+                <Label>Regions *</Label>
+                <div className="flex flex-wrap gap-3">
+                  {REGIONS.map((region) => (
+                    <div key={region.key} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`region-${region.key}`}
+                        checked={formData.regions.includes(region.key)}
+                        onCheckedChange={() => toggleRegion(region.key)}
+                      />
+                      <Label htmlFor={`region-${region.key}`} className="cursor-pointer text-sm">
+                        {region.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">Select which regions this item is available in</p>
+              </div>
+
               {/* Image Upload Section */}
               <div className="space-y-2">
                 <Label>Image</Label>
@@ -390,6 +439,7 @@ export default function ManageEquipment() {
                 <TableHead>Name</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Regions</TableHead>
                 <TableHead>Available</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -397,7 +447,7 @@ export default function ManageEquipment() {
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No equipment items found
                   </TableCell>
                 </TableRow>
@@ -420,6 +470,15 @@ export default function ManageEquipment() {
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.sku}</TableCell>
                     <TableCell>{item.category}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {item.regions?.map(r => (
+                          <Badge key={r} variant="outline" className="text-xs">
+                            {REGIONS.find(reg => reg.key === r)?.label || r}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell>{item.availability ? "Yes" : "No"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
