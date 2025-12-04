@@ -3,6 +3,7 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
 import { Home, Package, ClipboardList, Settings, LogOut, Truck, BoxIcon, Warehouse, Users, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import backroadsLogo from "@/assets/backroads-logo.png";
 
 export default function Layout() {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -45,16 +46,12 @@ export default function Layout() {
         <div className="flex items-center h-14 px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 mr-8">
-            <div className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center border border-primary-foreground/20">
-              <svg 
-                viewBox="0 0 24 24" 
-                className="w-6 h-6 text-primary-foreground"
-                fill="currentColor"
-              >
-                <path d="M21.5 12c0-1.5-.5-2.9-1.3-4.1l-2.6 2.6c.2.5.4 1 .4 1.5 0 2.2-1.8 4-4 4-.5 0-1-.1-1.5-.4l-2.6 2.6c1.2.8 2.6 1.3 4.1 1.3 4.1 0 7.5-3.4 7.5-7.5zM14 12c0-1.1-.9-2-2-2-.2 0-.4 0-.6.1l-2.5-2.5C9.6 7.2 10.3 7 11 7c2.8 0 5 2.2 5 5 0 .7-.2 1.4-.4 2l-2.5-2.5c.1-.2.1-.4.1-.6zM2.5 4.3l2.5 2.5c-1.4 1.4-2.4 3.2-2.8 5.2h3c.4-1.2 1-2.2 1.9-3.1l1.4 1.4c-.8.8-1.3 2-1.3 3.2 0 2.8 2.2 5 5 5 1.2 0 2.4-.5 3.2-1.3l2.6 2.6 1.4-1.4L3.9 2.9 2.5 4.3z"/>
-              </svg>
-            </div>
-            <span className="font-semibold text-lg tracking-tight">Backroads Ops</span>
+            <img 
+              src={backroadsLogo} 
+              alt="Backroads Logo" 
+              className="w-9 h-9 rounded-full object-cover"
+            />
+            <span className="font-bold text-sm tracking-wide">BACKROADS OPS DASHBOARD</span>
           </Link>
 
           {/* Main Navigation */}
