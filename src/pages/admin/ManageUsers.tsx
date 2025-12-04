@@ -37,11 +37,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { UserPlus, Trash2, Shield, Users } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
+import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User } from "lucide-react";
 
-type AppRole = Database["public"]["Enums"]["app_role"];
+type AppRole = 'admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
 
 interface UserRole {
   id: string;
@@ -49,11 +49,44 @@ interface UserRole {
   role: AppRole;
 }
 
+const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ReactNode; color: string; description: string }> = {
+  admin: {
+    label: "Admin",
+    icon: <Shield className="h-3 w-3" />,
+    color: "bg-red-100 text-red-800 border-red-200",
+    description: "Full system access, can manage all settings"
+  },
+  field_staff: {
+    label: "Field Staff",
+    icon: <User className="h-3 w-3" />,
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+    description: "Can request equipment from the catalog"
+  },
+  opx: {
+    label: "OPX",
+    icon: <MapPin className="h-3 w-3" />,
+    color: "bg-purple-100 text-purple-800 border-purple-200",
+    description: "Reviews and approves Field Staff requests"
+  },
+  hub_admin: {
+    label: "Hub Admin",
+    icon: <Warehouse className="h-3 w-3" />,
+    color: "bg-green-100 text-green-800 border-green-200",
+    description: "Fulfills OPX-approved requests at the Hub"
+  },
+  user: {
+    label: "User",
+    icon: <User className="h-3 w-3" />,
+    color: "bg-gray-100 text-gray-800 border-gray-200",
+    description: "Basic user access"
+  },
+};
+
 export default function ManageUsers() {
   const { isAdmin, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [newUserId, setNewUserId] = useState("");
-  const [newRole, setNewRole] = useState<AppRole>("user");
+  const [newRole, setNewRole] = useState<AppRole>("field_staff");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: userRoles, isLoading } = useQuery({
@@ -82,7 +115,7 @@ export default function ManageUsers() {
       queryClient.invalidateQueries({ queryKey: ["user-roles"] });
       toast.success("Role added successfully");
       setNewUserId("");
-      setNewRole("user");
+      setNewRole("field_staff");
       setDialogOpen(false);
     },
     onError: (error: Error) => {
@@ -136,6 +169,15 @@ export default function ManageUsers() {
     return <Navigate to="/" />;
   }
 
+  // Group roles by user
+  const rolesByUser = userRoles?.reduce((acc, role) => {
+    if (!acc[role.user_id]) {
+      acc[role.user_id] = [];
+    }
+    acc[role.user_id].push(role);
+    return acc;
+  }, {} as Record<string, UserRole[]>) || {};
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -183,10 +225,21 @@ export default function ManageUsers() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    {Object.entries(ROLE_CONFIG).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          {config.icon}
+                          <span>{config.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {newRole && (
+                  <p className="text-xs text-muted-foreground">
+                    {ROLE_CONFIG[newRole].description}
+                  </p>
+                )}
               </div>
             </div>
             <DialogFooter>
@@ -203,6 +256,25 @@ export default function ManageUsers() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Role Legend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Role Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {Object.entries(ROLE_CONFIG).map(([key, config]) => (
+              <div key={key} className="flex items-start gap-2 p-2 rounded-md border">
+                <Badge className={`${config.color} border`} variant="outline">
+                  {config.icon}
+                  <span className="ml-1">{config.label}</span>
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -223,35 +295,48 @@ export default function ManageUsers() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User ID</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>Roles</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {userRoles.map((userRole) => (
-                  <TableRow key={userRole.id}>
+                {Object.entries(rolesByUser).map(([userId, roles]) => (
+                  <TableRow key={userId}>
                     <TableCell className="font-mono text-sm">
-                      {userRole.user_id}
+                      {userId}
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        userRole.role === "admin" 
-                          ? "bg-primary/10 text-primary" 
-                          : "bg-muted text-muted-foreground"
-                      }`}>
-                        {userRole.role === "admin" && <Shield className="h-3 w-3" />}
-                        {userRole.role}
-                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {roles.map((userRole) => {
+                          const config = ROLE_CONFIG[userRole.role as AppRole];
+                          return (
+                            <Badge 
+                              key={userRole.id} 
+                              className={`${config.color} border`} 
+                              variant="outline"
+                            >
+                              {config.icon}
+                              <span className="ml-1">{config.label}</span>
+                            </Badge>
+                          );
+                        })}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteRoleMutation.mutate(userRole.id)}
-                        disabled={deleteRoleMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        {roles.map((userRole) => (
+                          <Button
+                            key={userRole.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteRoleMutation.mutate(userRole.id)}
+                            disabled={deleteRoleMutation.isPending}
+                            title={`Remove ${ROLE_CONFIG[userRole.role as AppRole].label} role`}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        ))}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -263,13 +348,15 @@ export default function ManageUsers() {
 
       <Card>
         <CardHeader>
-          <CardTitle>How to Add Users</CardTitle>
+          <CardTitle>Workflow Overview</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>1. Open your backend dashboard and navigate to <strong>Authentication → Users</strong></p>
-          <p>2. Click <strong>"Invite user"</strong> and enter their email address</p>
-          <p>3. Once they accept the invitation, copy their <strong>User ID</strong> from the users list</p>
-          <p>4. Come back here and click <strong>"Add Role"</strong> to assign them a role</p>
+          <p><strong>1. Field Staff</strong> → Requests equipment from the catalog</p>
+          <p><strong>2. OPX</strong> → Reviews requests for their assigned OPS Areas, can modify quantities</p>
+          <p><strong>3. Hub Admin</strong> → Fulfills OPX-approved requests for their assigned Hubs</p>
+          <p className="mt-4 text-xs">
+            After assigning roles, go to <strong>Manage Assignments</strong> to link OPX users to OPS Areas and Hub Admins to Hubs.
+          </p>
         </CardContent>
       </Card>
     </div>

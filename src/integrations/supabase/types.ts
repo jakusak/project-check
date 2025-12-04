@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       equipment_items: {
         Row: {
           availability: boolean
@@ -55,6 +79,8 @@ export type Database = {
           decline_reason: string | null
           equipment_id: string
           id: string
+          modified_by_opx: string | null
+          original_quantity: number | null
           quantity: number
           reason: string | null
           request_id: string
@@ -66,6 +92,8 @@ export type Database = {
           decline_reason?: string | null
           equipment_id: string
           id?: string
+          modified_by_opx?: string | null
+          original_quantity?: number | null
           quantity: number
           reason?: string | null
           request_id: string
@@ -77,6 +105,8 @@ export type Database = {
           decline_reason?: string | null
           equipment_id?: string
           id?: string
+          modified_by_opx?: string | null
+          original_quantity?: number | null
           quantity?: number
           reason?: string | null
           request_id?: string
@@ -106,6 +136,10 @@ export type Database = {
           id: string
           notes: string | null
           ops_area: string | null
+          opx_notes: string | null
+          opx_reviewed_at: string | null
+          opx_reviewed_by: string | null
+          opx_status: string | null
           required_by_date: string
           status: string
           user_id: string
@@ -117,6 +151,10 @@ export type Database = {
           id?: string
           notes?: string | null
           ops_area?: string | null
+          opx_notes?: string | null
+          opx_reviewed_at?: string | null
+          opx_reviewed_by?: string | null
+          opx_status?: string | null
           required_by_date: string
           status?: string
           user_id: string
@@ -128,8 +166,36 @@ export type Database = {
           id?: string
           notes?: string | null
           ops_area?: string | null
+          opx_notes?: string | null
+          opx_reviewed_at?: string | null
+          opx_reviewed_by?: string | null
+          opx_status?: string | null
           required_by_date?: string
           status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hub_admin_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          hub: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          hub: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          hub?: string
+          id?: string
           user_id?: string
         }
         Relationships: []
@@ -185,6 +251,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ops_area_to_hub: {
         Row: {
           created_at: string | null
@@ -206,6 +305,30 @@ export type Database = {
           id?: string
           ops_area?: string
           region?: string | null
+        }
+        Relationships: []
+      }
+      opx_area_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          ops_area: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          ops_area: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          ops_area?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -241,7 +364,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "field_staff" | "opx" | "hub_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -369,7 +492,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "field_staff", "opx", "hub_admin"],
     },
   },
 } as const

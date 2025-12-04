@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import backroadsLogo from "@/assets/backroads-logo.png";
-import { useRegion, REGION_LABELS, Region } from "@/contexts/RegionContext";
+import { useRegion, Region } from "@/contexts/RegionContext";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Layout() {
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, isOPX, isHubAdmin, signOut, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
@@ -49,6 +50,7 @@ export default function Layout() {
     { to: "/admin/requests", label: "All Requests" },
     { to: "/admin/equipment", label: "Manage Equipment" },
     { to: "/admin/users", label: "Manage Users" },
+    { to: "/admin/assignments", label: "Manage Assignments" },
   ];
 
   return (
@@ -128,6 +130,36 @@ export default function Layout() {
                 </Link>
               </div>
             </div>
+
+            {/* OPX Dashboard Link */}
+            {(isOPX || isAdmin) && (
+              <Link
+                to="/opx/dashboard"
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === "/opx/dashboard"
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                OPX Review
+              </Link>
+            )}
+
+            {/* Hub Dashboard Link */}
+            {(isHubAdmin || isAdmin) && (
+              <Link
+                to="/hub/dashboard"
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === "/hub/dashboard"
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Hub Fulfillment
+              </Link>
+            )}
             
             {/* Admin Dropdown */}
             {isAdmin && (
@@ -165,6 +197,7 @@ export default function Layout() {
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button
               variant="ghost"
               size="sm"

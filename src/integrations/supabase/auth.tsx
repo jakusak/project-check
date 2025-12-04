@@ -3,10 +3,16 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { useToast } from "@/hooks/use-toast";
 
+type AppRole = 'admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isOPX: boolean;
+  isHubAdmin: boolean;
+  isFieldStaff: boolean;
+  roles: AppRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
@@ -18,9 +24,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const isAdmin = roles.includes('admin');
+  const isOPX = roles.includes('opx');
+  const isHubAdmin = roles.includes('hub_admin');
+  const isFieldStaff = roles.includes('field_staff');
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -30,10 +41,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           setTimeout(() => {
-            checkAdminStatus(session.user.id);
+            checkUserRoles(session.user.id);
           }, 0);
         } else {
-          setIsAdmin(false);
+          setRoles([]);
         }
       }
     );
@@ -42,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdminStatus(session.user.id);
+        checkUserRoles(session.user.id);
       }
       setLoading(false);
     });
@@ -50,15 +61,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkUserRoles = async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
+      .eq("user_id", userId);
     
-    setIsAdmin(!!data);
+    if (data) {
+      setRoles(data.map(r => r.role as AppRole));
+    } else {
+      setRoles([]);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -107,11 +120,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setIsAdmin(false);
+    setRoles([]);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      isAdmin, 
+      isOPX, 
+      isHubAdmin, 
+      isFieldStaff,
+      roles,
+      loading, 
+      signIn, 
+      signUp, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );
