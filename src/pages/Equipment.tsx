@@ -28,6 +28,8 @@ export default function Equipment() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,7 +56,13 @@ export default function Equipment() {
     }
     
     setFilteredItems(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [search, categoryFilter, items]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   const loadEquipment = async () => {
     const { data, error } = await supabase
@@ -119,7 +127,7 @@ export default function Equipment() {
         </Button>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4 items-center">
         <Input
           placeholder="Search by name or SKU..."
           value={search}
@@ -139,10 +147,24 @@ export default function Equipment() {
             ))}
           </SelectContent>
         </Select>
+        <div className="flex items-center gap-2 ml-auto">
+          <span className="text-sm text-muted-foreground">Show:</span>
+          <Select value={itemsPerPage.toString()} onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="12">12</SelectItem>
+              <SelectItem value="24">24</SelectItem>
+              <SelectItem value="48">48</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredItems.map((item) => (
+        {paginatedItems.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-4">
               <div className="aspect-square bg-muted rounded-md mb-4 overflow-hidden">
@@ -175,6 +197,36 @@ export default function Equipment() {
           </Card>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4">
+          <p className="text-sm text-muted-foreground">
+            Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredItems.length)} of {filteredItems.length} items
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-3 text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
