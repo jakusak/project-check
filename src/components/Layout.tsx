@@ -1,13 +1,16 @@
-import { Link, useLocation, Outlet, Navigate } from "react-router-dom";
+import { Link, useLocation, Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import backroadsLogo from "@/assets/backroads-logo.png";
+import { useRegion, REGION_LABELS, Region } from "@/contexts/RegionContext";
 
 export default function Layout() {
   const { user, isAdmin, signOut, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { setSelectedRegion } = useRegion();
 
   if (loading) {
     return (
@@ -24,16 +27,22 @@ export default function Layout() {
     return <Navigate to="/auth" />;
   }
 
+  const handleRegionSelect = (region: Region) => {
+    setSelectedRegion(region);
+    navigate("/equipment");
+  };
+
+  const regions: { key: Region; label: string }[] = [
+    { key: "usa_lappa", label: "USA & Lappa" },
+    { key: "canada", label: "Canada" },
+    { key: "europe", label: "Europe" },
+  ];
+
   const navItems = [
     { to: "/", label: "Dashboard" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
-  ];
-
-  const equipmentNavItems = [
-    { to: "/equipment", label: "Equipment Catalog" },
-    { to: "/my-requests", label: "Equipment Request History/Status" },
   ];
 
   const adminNavItems = [
@@ -79,7 +88,7 @@ export default function Layout() {
               <button
                 className={cn(
                   "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                  location.pathname === "/equipment" || location.pathname === "/my-requests"
+                  location.pathname === "/equipment" || location.pathname === "/my-requests" || location.pathname === "/cart"
                     ? "bg-sidebar-accent text-primary-foreground"
                     : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
                 )}
@@ -88,20 +97,35 @@ export default function Layout() {
                 <ChevronDown className="h-3 w-3" />
               </button>
               <div className="absolute left-0 top-full mt-1 w-64 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                {equipmentNavItems.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      "flex items-center px-4 py-2.5 text-sm transition-colors",
-                      location.pathname === item.to
-                        ? "bg-accent text-accent-foreground"
-                        : "text-foreground hover:bg-muted"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {/* Region Selection Submenu */}
+                <div className="relative group/submenu">
+                  <button className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted">
+                    <span>Equipment Catalog</span>
+                    <ChevronRight className="h-3 w-3" />
+                  </button>
+                  <div className="absolute left-full top-0 ml-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all z-50">
+                    {regions.map((region) => (
+                      <button
+                        key={region.key}
+                        onClick={() => handleRegionSelect(region.key)}
+                        className="flex items-center w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted text-left"
+                      >
+                        {region.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Link
+                  to="/my-requests"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/my-requests"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  Equipment Request History/Status
+                </Link>
               </div>
             </div>
             

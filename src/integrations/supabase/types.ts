@@ -22,6 +22,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          regions: string[] | null
           sku: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          regions?: string[] | null
           sku: string
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          regions?: string[] | null
           sku?: string
         }
         Relationships: []
@@ -188,18 +191,21 @@ export type Database = {
           hub: string
           id: string
           ops_area: string
+          region: string | null
         }
         Insert: {
           created_at?: string | null
           hub: string
           id?: string
           ops_area: string
+          region?: string | null
         }
         Update: {
           created_at?: string | null
           hub?: string
           id?: string
           ops_area?: string
+          region?: string | null
         }
         Relationships: []
       }
