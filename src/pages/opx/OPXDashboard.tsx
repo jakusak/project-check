@@ -148,15 +148,15 @@ export default function OPXDashboard() {
 
       if (error) throw error;
 
-      // Create notification for requester
-      await supabase.from("notifications").insert({
-        user_id: selectedRequest?.user_id,
-        title: action === 'approve' ? 'Request Approved by OPX' : 'Request Rejected by OPX',
-        message: action === 'approve' 
+      // Create notification for requester using secure RPC function
+      await supabase.rpc('create_notification', {
+        _user_id: selectedRequest?.user_id,
+        _title: action === 'approve' ? 'Request Approved by OPX' : 'Request Rejected by OPX',
+        _message: action === 'approve' 
           ? `Your equipment request for ${selectedRequest?.ops_area} has been approved and forwarded to the Hub.`
           : `Your equipment request for ${selectedRequest?.ops_area} was rejected. ${notes ? `Reason: ${notes}` : ''}`,
-        type: action === 'approve' ? 'success' : 'error',
-        link: '/my-requests',
+        _type: action === 'approve' ? 'success' : 'error',
+        _link: '/my-requests',
       });
     },
     onSuccess: (_, { action }) => {
