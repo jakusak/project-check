@@ -140,15 +140,15 @@ export default function HubDashboard() {
         })
         .eq("request_id", requestId);
 
-      // Create notification for requester
-      await supabase.from("notifications").insert({
-        user_id: selectedRequest?.user_id,
-        title: action === 'fulfill' ? 'Request Fulfilled' : 'Request Declined by Hub',
-        message: action === 'fulfill' 
+      // Create notification for requester using secure RPC function
+      await supabase.rpc('create_notification', {
+        _user_id: selectedRequest?.user_id,
+        _title: action === 'fulfill' ? 'Request Fulfilled' : 'Request Declined by Hub',
+        _message: action === 'fulfill' 
           ? `Your equipment request for ${selectedRequest?.ops_area} has been fulfilled and is being prepared.`
           : `Your equipment request for ${selectedRequest?.ops_area} was declined by the Hub. ${reason ? `Reason: ${reason}` : ''}`,
-        type: action === 'fulfill' ? 'success' : 'error',
-        link: '/my-requests',
+        _type: action === 'fulfill' ? 'success' : 'error',
+        _link: '/my-requests',
       });
     },
     onSuccess: (_, { action }) => {
