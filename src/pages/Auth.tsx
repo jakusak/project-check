@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,13 @@ export default function Auth() {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/");
+    }
+  }, [user, authLoading, navigate]);
+
   // Show loading while auth state is being determined
   if (authLoading) {
     return (
@@ -27,10 +34,16 @@ export default function Auth() {
     );
   }
 
-  // Redirect if already logged in
+  // Don't render form if user is logged in (redirect will happen via useEffect)
   if (user) {
-    navigate("/");
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>Redirecting...</span>
+        </div>
+      </div>
+    );
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
