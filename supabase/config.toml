@@ -1,1 +1,4 @@
 project_id = "jkndmvvuekoqtqrkrpio"
+
+[functions.bulk-invite-opx]
+verify_jwt = false

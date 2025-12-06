@@ -51,6 +51,7 @@ export default function Layout() {
     { to: "/admin/equipment", label: "Manage Equipment" },
     { to: "/admin/users", label: "Manage Users" },
     { to: "/admin/assignments", label: "Manage Assignments" },
+    { to: "/admin/bulk-opx", label: "Bulk OPX Onboarding" },
   ];
 
   return (

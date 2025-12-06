@@ -19,6 +19,7 @@ import RequestDetail from "./pages/admin/RequestDetail";
 import ManageEquipment from "./pages/admin/ManageEquipment";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManageAssignments from "./pages/admin/ManageAssignments";
+import BulkOPXOnboarding from "./pages/admin/BulkOPXOnboarding";
 import OPXDashboard from "./pages/opx/OPXDashboard";
 import HubDashboard from "./pages/hub/HubDashboard";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/admin/equipment" element={<ManageEquipment />} />
               <Route path="/admin/users" element={<ManageUsers />} />
               <Route path="/admin/assignments" element={<ManageAssignments />} />
+              <Route path="/admin/bulk-opx" element={<BulkOPXOnboarding />} />
               <Route path="/opx/dashboard" element={<OPXDashboard />} />
               <Route path="/hub/dashboard" element={<HubDashboard />} />
             </Route>
