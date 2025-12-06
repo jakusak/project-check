@@ -1,39 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, FileSpreadsheet, Loader2, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/integrations/supabase/auth";
+import { toast } from "sonner";
 
-// Hub to OPS Areas mapping
-const HUB_OPS_AREAS: Record<string, string[]> = {
-  "Pernes": [
-    "Croatia: Dubrovnik", "Croatia: Split", "Cyprus: Larnaca", "England: Cornwall", 
-    "England: Cotswolds", "Finland: Levi", "France: Aube", "France: Bordeaux", 
-    "France: Chamonix", "France: Corsica", "France: Hendaye", "France: Occitanie", 
-    "France: Provence", "France: Riviera", "France: Saint-Malo", "France: Savoie",
-    "France: Tours", "Germany: Berlin", "Germany: Rosenheim", "Greece: Crete",
-    "Greece: Peloponnese", "Iceland: Reykjavik", "Ireland: Dublin", "Ireland: Galway",
-    "Ireland: Kenmare", "Latvia: Riga", "Netherlands: The Hague", "Norway: Alesund",
-    "Norway: Alta", "Norway: Lofoten", "Norway: Oslo", "Norway: Voss", "Poland: Krakow",
-    "Portugal: Azores", "Portugal: Lisbon", "Portugal: Madeira", "Portugal: Porto",
-    "Scotland: Aviemore", "Scotland: Stirling", "Slovenia: Jesenice", "Spain: Cantabria",
-    "Spain: Cuenca", "Spain: Huesca", "Spain: Mallorca", "Spain: Puigcerda", "Spain: Ronda",
-    "Spain: Salamanca", "Spain: Tenerife", "Sweden: Malmo", "Switzerland: Bern",
-    "Switzerland: Davos", "Wales: Cardiff"
-  ],
-  "Czechia": [
-    "Czechia: Cesky Krumlov", "Germany: Bavaria", "Austria: Salzburg", "Poland: Warsaw"
-  ],
-  "Tuscany": [
-    "Italy: Asti", "Italy: Milan", "Italy: Naples", "Italy: Puglia", "Italy: Sardinia",
-    "Italy: Sicily", "Italy: Trentino", "Italy: Tuscany", "Italy: Val Gardena"
-  ]
+// Hub mapping for display names
+const HUB_DISPLAY_NAMES: Record<string, string> = {
+  "Pernes": "HUB France: Pernes Les Fontaines",
+  "Czechia": "HUB Czech: Cesky Krumlov",
+  "Tuscany": "HUB Italy: San Giovanni Valdarno"
 };
 
 // Unit types for summary table
 const UNIT_TYPES = ["B", "M", "M Ship", "Ship", "W"];
+
+interface UnitLoad {
+  id: string;
+  hub: string;
+  ops_area: string;
+  opx_flo: string | null;
+  unit: string;
+  load_date: string | null;
+  loader: string | null;
+  unit_type: string | null;
+  main: number;
+  support: number;
+  extra: number;
+  no_van: number;
+  van_number: string | null;
+  trailer_number: string | null;
+  family: string | null;
+  comment: string | null;
+}
 
 interface UnitSummary {
   opsArea: string;
@@ -42,94 +47,206 @@ interface UnitSummary {
   grandTotal: number;
 }
 
-interface UnitDetail {
-  hub: string;
-  opsArea: string;
-  opxFlo: string;
-  unit: string;
-  loadDate: string;
-  loader: string;
-  unitType: string;
-  main: number;
-  support: number;
-  extra: number;
-  noVan: number;
-  vanNumber: string;
-  trailerNumber: string;
-  family: string;
-  comment: string;
-}
-
-// Generate mock summary data for a hub
-const generateSummaryData = (hub: string): UnitSummary[] => {
-  const opsAreas = HUB_OPS_AREAS[hub] || [];
-  return opsAreas.map(opsArea => {
-    const counts: Record<string, number> = {};
-    let grandTotal = 0;
-    UNIT_TYPES.forEach(type => {
-      const count = Math.random() > 0.5 ? Math.floor(Math.random() * 15) : 0;
-      counts[type] = count;
-      grandTotal += count;
-    });
-    return {
-      opsArea,
-      hub: `HUB ${hub === "Pernes" ? "France: Pernes Les Fontaines" : hub === "Czechia" ? "Czech: Cesky Krumlov" : "Italy: San Giovanni Valdarno"}`,
-      counts,
-      grandTotal
-    };
-  });
-};
-
-// Generate mock detail data for an OPS Area
-const generateDetailData = (hub: string, opsArea: string): UnitDetail[] => {
-  const hubFullName = hub === "Pernes" ? "HUB France: Pernes Les Fontaines" 
-    : hub === "Czechia" ? "HUB Czech: Cesky Krumlov" 
-    : "HUB Italy: San Giovanni Valdarno";
-  
-  const unitCount = Math.floor(Math.random() * 5) + 1;
-  return Array.from({ length: unitCount }, (_, i) => ({
-    hub: hubFullName,
-    opsArea,
-    opxFlo: "",
-    unit: `${opsArea.replace(/[:\s]/g, "_")}_U00${i + 1}_`,
-    loadDate: `${Math.floor(Math.random() * 12) + 1}/${Math.floor(Math.random() * 28) + 1}/2026`,
-    loader: "",
-    unitType: ["M", "B", "W", "Ship"][Math.floor(Math.random() * 4)],
-    main: Math.floor(Math.random() * 2),
-    support: Math.floor(Math.random() * 2),
-    extra: 0,
-    noVan: 0,
-    vanNumber: "",
-    trailerNumber: "",
-    family: "",
-    comment: ""
-  }));
-};
-
 export default function UnitLoads() {
+  const { isAdmin } = useAuth();
   const [selectedHub, setSelectedHub] = useState<string>("Pernes");
   const [selectedOpsArea, setSelectedOpsArea] = useState<string>("");
-  const [summaryData, setSummaryData] = useState<UnitSummary[]>(() => generateSummaryData("Pernes"));
-  const [detailData, setDetailData] = useState<UnitDetail[]>([]);
+  const [unitLoads, setUnitLoads] = useState<UnitLoad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch unit loads from database
+  const fetchUnitLoads = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('unit_loads')
+        .select('*')
+        .order('ops_area', { ascending: true });
+      
+      if (error) throw error;
+      setUnitLoads(data || []);
+    } catch (error) {
+      console.error('Error fetching unit loads:', error);
+      toast.error('Failed to load unit loads data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnitLoads();
+  }, []);
+
+  // Get unique OPS areas for current hub
+  const currentOpsAreas = [...new Set(
+    unitLoads
+      .filter(u => u.hub === selectedHub || u.hub.includes(selectedHub))
+      .map(u => u.ops_area)
+  )].sort();
+
+  // Generate summary data from actual unit loads
+  const generateSummaryData = (): UnitSummary[] => {
+    const hubData = unitLoads.filter(u => 
+      u.hub === selectedHub || u.hub.includes(selectedHub)
+    );
+    
+    const opsAreaMap = new Map<string, UnitSummary>();
+    
+    hubData.forEach(unit => {
+      if (!opsAreaMap.has(unit.ops_area)) {
+        opsAreaMap.set(unit.ops_area, {
+          opsArea: unit.ops_area,
+          hub: HUB_DISPLAY_NAMES[selectedHub] || unit.hub,
+          counts: {},
+          grandTotal: 0
+        });
+      }
+      
+      const summary = opsAreaMap.get(unit.ops_area)!;
+      const unitType = unit.unit_type || 'Other';
+      summary.counts[unitType] = (summary.counts[unitType] || 0) + 1;
+      summary.grandTotal += 1;
+    });
+    
+    return Array.from(opsAreaMap.values()).sort((a, b) => 
+      a.opsArea.localeCompare(b.opsArea)
+    );
+  };
+
+  // Get detail data for selected OPS area
+  const getDetailData = (): UnitLoad[] => {
+    return unitLoads.filter(u => 
+      (u.hub === selectedHub || u.hub.includes(selectedHub)) &&
+      u.ops_area === selectedOpsArea
+    );
+  };
 
   const handleHubChange = (hub: string) => {
     setSelectedHub(hub);
     setSelectedOpsArea("");
-    setDetailData([]);
-    setSummaryData(generateSummaryData(hub));
   };
 
-              const handleOpsAreaChange = (opsArea: string) => {
+  const handleOpsAreaChange = (opsArea: string) => {
     const actualArea = opsArea === "all" ? "" : opsArea;
     setSelectedOpsArea(actualArea);
-    if (actualArea) {
-      setDetailData(generateDetailData(selectedHub, actualArea));
-    } else {
-      setDetailData([]);
+  };
+
+  // Parse CSV file
+  const parseCSV = (text: string): Record<string, string>[] => {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+    const rows: Record<string, string>[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim());
+      const row: Record<string, string> = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      rows.push(row);
+    }
+    
+    return rows;
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Please upload a CSV file');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const text = await file.text();
+      const rows = parseCSV(text);
+
+      if (rows.length === 0) {
+        toast.error('No data found in CSV file');
+        return;
+      }
+
+      // Map CSV columns to database columns
+      const mappedData = rows.map(row => ({
+        hub: row.hub || selectedHub,
+        ops_area: row.ops_area || row.opsarea || row['ops area'] || '',
+        opx_flo: row.opx_flo || row.opxflo || row['opx/flo'] || null,
+        unit: row.unit || '',
+        load_date: row.load_date || row.loaddate || row['load date'] || null,
+        loader: row.loader || null,
+        unit_type: row.unit_type || row.unittype || row['unit type'] || null,
+        main: parseInt(row.main) || 0,
+        support: parseInt(row.support) || 0,
+        extra: parseInt(row.extra) || 0,
+        no_van: parseInt(row.no_van) || parseInt(row.novan) || 0,
+        van_number: row.van_number || row.vannumber || row['van #'] || row['van_#'] || null,
+        trailer_number: row.trailer_number || row.trailernumber || row['trailer #'] || row['trailer_#'] || null,
+        family: row.family || null,
+        comment: row.comment || row.comments || null
+      })).filter(row => row.ops_area && row.unit);
+
+      if (mappedData.length === 0) {
+        toast.error('No valid data found. Ensure CSV has "ops_area" and "unit" columns.');
+        return;
+      }
+
+      // Delete existing data for this hub and insert new
+      const { error: deleteError } = await supabase
+        .from('unit_loads')
+        .delete()
+        .eq('hub', selectedHub);
+
+      if (deleteError) throw deleteError;
+
+      const { error: insertError } = await supabase
+        .from('unit_loads')
+        .insert(mappedData);
+
+      if (insertError) throw insertError;
+
+      toast.success(`Uploaded ${mappedData.length} records successfully`);
+      fetchUnitLoads();
+    } catch (error) {
+      console.error('Error uploading CSV:', error);
+      toast.error('Failed to upload CSV data');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
-  const currentOpsAreas = HUB_OPS_AREAS[selectedHub] || [];
+  // Clear all data for current hub
+  const handleClearData = async () => {
+    if (!confirm(`Are you sure you want to clear all Unit Loads data for ${selectedHub}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('unit_loads')
+        .delete()
+        .eq('hub', selectedHub);
+
+      if (error) throw error;
+      toast.success('Data cleared successfully');
+      fetchUnitLoads();
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      toast.error('Failed to clear data');
+    }
+  };
+
+  const summaryData = generateSummaryData();
+  const detailData = getDetailData();
 
   return (
     <div className="p-6 space-y-6">
@@ -138,7 +255,43 @@ export default function UnitLoads() {
           <h1 className="text-3xl font-bold">Unit Loads</h1>
           <p className="text-muted-foreground">Live unit load assignment and logistics overview by Hub</p>
         </div>
-        <Badge variant="outline">Live Data</Badge>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
+                Upload CSV
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleClearData}
+                disabled={uploading}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Hub Data
+              </Button>
+            </>
+          )}
+          <Badge variant="outline">
+            {unitLoads.length > 0 ? `${unitLoads.length} Units` : 'No Data'}
+          </Badge>
+        </div>
       </div>
 
       {/* Hub Tabs */}
@@ -186,8 +339,30 @@ export default function UnitLoads() {
               </CardContent>
             </Card>
 
-            {/* Summary Table (when no OPS Area selected) */}
-            {!selectedOpsArea && (
+            {loading ? (
+              <Card>
+                <CardContent className="py-12 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </CardContent>
+              </Card>
+            ) : unitLoads.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <FileSpreadsheet className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Unit Loads Data</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Upload a CSV file to populate the unit loads table.
+                  </p>
+                  {isAdmin && (
+                    <Button onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload CSV
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : !selectedOpsArea ? (
+              /* Summary Table */
               <Card>
                 <CardContent className="p-0">
                   <ScrollArea className="w-full">
@@ -204,28 +379,34 @@ export default function UnitLoads() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {summaryData.map((row, index) => (
-                            <TableRow key={index} className="hover:bg-muted/50">
-                              <TableCell className="font-medium">{row.opsArea}</TableCell>
-                              <TableCell>{row.hub}</TableCell>
-                              {UNIT_TYPES.map(type => (
-                                <TableCell key={type} className="text-center">
-                                  {row.counts[type] || ""}
-                                </TableCell>
-                              ))}
-                              <TableCell className="text-center font-bold">{row.grandTotal}</TableCell>
+                          {summaryData.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={7 + UNIT_TYPES.length} className="text-center py-8 text-muted-foreground">
+                                No units found for this hub
+                              </TableCell>
                             </TableRow>
-                          ))}
+                          ) : (
+                            summaryData.map((row, index) => (
+                              <TableRow key={index} className="hover:bg-muted/50">
+                                <TableCell className="font-medium">{row.opsArea}</TableCell>
+                                <TableCell>{row.hub}</TableCell>
+                                {UNIT_TYPES.map(type => (
+                                  <TableCell key={type} className="text-center">
+                                    {row.counts[type] || ""}
+                                  </TableCell>
+                                ))}
+                                <TableCell className="text-center font-bold">{row.grandTotal}</TableCell>
+                              </TableRow>
+                            ))
+                          )}
                         </TableBody>
                       </Table>
                     </div>
                   </ScrollArea>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Detail Table (when OPS Area selected) */}
-            {selectedOpsArea && (
+            ) : (
+              /* Detail Table */
               <Card>
                 <CardContent className="p-0">
                   <ScrollArea className="w-full">
@@ -258,23 +439,23 @@ export default function UnitLoads() {
                               </TableCell>
                             </TableRow>
                           ) : (
-                            detailData.map((row, index) => (
-                              <TableRow key={index} className="hover:bg-muted/50">
-                                <TableCell>{row.hub}</TableCell>
-                                <TableCell>{row.opsArea}</TableCell>
-                                <TableCell>{row.opxFlo}</TableCell>
+                            detailData.map((row) => (
+                              <TableRow key={row.id} className="hover:bg-muted/50">
+                                <TableCell>{HUB_DISPLAY_NAMES[selectedHub] || row.hub}</TableCell>
+                                <TableCell>{row.ops_area}</TableCell>
+                                <TableCell>{row.opx_flo || ""}</TableCell>
                                 <TableCell className="font-medium">{row.unit}</TableCell>
-                                <TableCell>{row.loadDate}</TableCell>
-                                <TableCell>{row.loader}</TableCell>
-                                <TableCell>{row.unitType}</TableCell>
+                                <TableCell>{row.load_date || ""}</TableCell>
+                                <TableCell>{row.loader || ""}</TableCell>
+                                <TableCell>{row.unit_type || ""}</TableCell>
                                 <TableCell className="text-center">{row.main || ""}</TableCell>
                                 <TableCell className="text-center">{row.support || ""}</TableCell>
                                 <TableCell className="text-center">{row.extra || ""}</TableCell>
-                                <TableCell className="text-center">{row.noVan || ""}</TableCell>
-                                <TableCell>{row.vanNumber}</TableCell>
-                                <TableCell>{row.trailerNumber}</TableCell>
-                                <TableCell>{row.family}</TableCell>
-                                <TableCell>{row.comment}</TableCell>
+                                <TableCell className="text-center">{row.no_van || ""}</TableCell>
+                                <TableCell>{row.van_number || ""}</TableCell>
+                                <TableCell>{row.trailer_number || ""}</TableCell>
+                                <TableCell>{row.family || ""}</TableCell>
+                                <TableCell>{row.comment || ""}</TableCell>
                               </TableRow>
                             ))
                           )}
