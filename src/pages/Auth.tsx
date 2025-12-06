@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import backroadsLogo from "@/assets/backroads-logo.png";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -15,33 +14,24 @@ export default function Auth() {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
       navigate("/");
     }
   }, [user, authLoading, navigate]);
 
-  // Show loading while auth state is being determined
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span>Loading...</span>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+        <p style={{ color: '#333' }}>Loading...</p>
       </div>
     );
   }
 
-  // Don't render form if user is logged in (redirect will happen via useEffect)
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span>Redirecting...</span>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+        <p style={{ color: '#333' }}>Redirecting...</p>
       </div>
     );
   }
@@ -64,11 +54,11 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f5f5' }}>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <img src={backroadsLogo} alt="Backroads" className="h-10 w-auto" />
+            <img src="/backroads-logo.png" alt="Backroads" className="h-10 w-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
             <CardTitle className="text-xl">BACKROADS OPS APP</CardTitle>
           </div>
           <CardDescription>Operations Management System</CardDescription>
