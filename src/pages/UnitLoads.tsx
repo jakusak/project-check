@@ -143,10 +143,25 @@ export default function UnitLoads() {
 
       {/* Hub Tabs */}
       <Tabs value={selectedHub} onValueChange={handleHubChange}>
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="Czechia">HUB Czech: Cesky Krumlov</TabsTrigger>
-          <TabsTrigger value="Pernes">HUB France: Pernes</TabsTrigger>
-          <TabsTrigger value="Tuscany">HUB Italy: San Giovanni</TabsTrigger>
+        <TabsList className="inline-flex h-auto p-1 gap-2 bg-muted/50 rounded-lg">
+          <TabsTrigger 
+            value="Czechia" 
+            className="px-6 py-3 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm whitespace-nowrap"
+          >
+            HUB Czech: Cesky Krumlov
+          </TabsTrigger>
+          <TabsTrigger 
+            value="Pernes"
+            className="px-6 py-3 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm whitespace-nowrap"
+          >
+            HUB France: Pernes
+          </TabsTrigger>
+          <TabsTrigger 
+            value="Tuscany"
+            className="px-6 py-3 text-sm font-medium rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm whitespace-nowrap"
+          >
+            HUB Italy: San Giovanni
+          </TabsTrigger>
         </TabsList>
 
         {["Czechia", "Pernes", "Tuscany"].map(hub => (
