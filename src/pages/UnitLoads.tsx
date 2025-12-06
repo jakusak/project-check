@@ -119,10 +119,11 @@ export default function UnitLoads() {
     setSummaryData(generateSummaryData(hub));
   };
 
-  const handleOpsAreaChange = (opsArea: string) => {
-    setSelectedOpsArea(opsArea);
-    if (opsArea) {
-      setDetailData(generateDetailData(selectedHub, opsArea));
+              const handleOpsAreaChange = (opsArea: string) => {
+    const actualArea = opsArea === "all" ? "" : opsArea;
+    setSelectedOpsArea(actualArea);
+    if (actualArea) {
+      setDetailData(generateDetailData(selectedHub, actualArea));
     } else {
       setDetailData([]);
     }
@@ -155,12 +156,12 @@ export default function UnitLoads() {
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Select OPS Area</label>
-                  <Select value={selectedOpsArea} onValueChange={handleOpsAreaChange}>
+                  <Select value={selectedOpsArea || "all"} onValueChange={handleOpsAreaChange}>
                     <SelectTrigger className="max-w-md">
                       <SelectValue placeholder="All OPS Areas (Summary View)" />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                      <SelectItem value="">All OPS Areas (Summary View)</SelectItem>
+                      <SelectItem value="all">All OPS Areas (Summary View)</SelectItem>
                       {currentOpsAreas.map(area => (
                         <SelectItem key={area} value={area}>{area}</SelectItem>
                       ))}
