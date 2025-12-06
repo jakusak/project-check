@@ -52,14 +52,11 @@ const handler = async (req: Request): Promise<Response> => {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Create regular client to verify requesting user
-    const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-      global: { headers: { Authorization: authHeader } }
-    });
-
-    // Get the requesting user
-    const { data: { user: requestingUser }, error: userError } = await supabaseClient.auth.getUser();
+    // Extract JWT token from header
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Get the requesting user using the admin client with the token
+    const { data: { user: requestingUser }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !requestingUser) {
       console.error("Failed to get requesting user:", userError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
