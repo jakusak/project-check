@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { Button } from "@/components/ui/button";
@@ -11,29 +11,12 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      navigate("/");
-    }
-  }, [user, authLoading, navigate]);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
-        <p style={{ color: '#333' }}>Loading...</p>
-      </div>
-    );
-  }
-
   if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
-        <p style={{ color: '#333' }}>Redirecting...</p>
-      </div>
-    );
+    navigate("/");
+    return null;
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -54,13 +37,10 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f5f5' }}>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <img src="/backroads-logo.png" alt="Backroads" className="h-10 w-auto" onError={(e) => e.currentTarget.style.display = 'none'} />
-            <CardTitle className="text-xl">BACKROADS OPS APP</CardTitle>
-          </div>
+        <CardHeader>
+          <CardTitle>Backroads Ops</CardTitle>
           <CardDescription>Operations Management System</CardDescription>
         </CardHeader>
         <CardContent>
