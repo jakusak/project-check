@@ -42,7 +42,7 @@ export default function Layout() {
   const navItems = [
     { to: "/", label: "Dashboard" },
     { to: "/van-module", label: "Van Module" },
-    { to: "/unit-loads", label: "Unit Schedule" },
+    { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
   ];
 
