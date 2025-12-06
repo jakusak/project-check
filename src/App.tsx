@@ -7,7 +7,7 @@ import { AuthProvider } from "@/integrations/supabase/auth";
 import { RegionProvider } from "@/contexts/RegionContext";
 import Auth from "./pages/Auth";
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
+import UnitSchedule from "./pages/UnitSchedule";
 import VanModule from "./pages/VanModule";
 import UnitLoads from "./pages/UnitLoads";
 import Warehouses from "./pages/Warehouses";
@@ -37,7 +37,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<UnitSchedule />} />
               <Route path="/van-module" element={<VanModule />} />
               <Route path="/unit-loads" element={<UnitLoads />} />
               <Route path="/warehouses" element={<Warehouses />} />
