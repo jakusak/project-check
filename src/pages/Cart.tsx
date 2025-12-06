@@ -46,13 +46,12 @@ export default function Cart() {
   ];
   
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
-  const [filteredOpsAreas, setFilteredOpsAreas] = useState<OpsArea[]>([]);
-  const [submittedBy, setSubmittedBy] = useState("");
+  const [assignedAreas, setAssignedAreas] = useState<OpsArea[]>([]);
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
   const [urgency, setUrgency] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingAreas, setLoadingAreas] = useState(true);
 
   useEffect(() => {
     const storedCart = localStorage.getItem("equipment_cart");
@@ -63,39 +62,70 @@ export default function Cart() {
         reason: item.reason || ""
       })));
     }
-    loadOpsAreas();
-  }, []);
+    loadAssignedAreas();
+  }, [user?.id]);
 
-  // Filter OPS Areas by selected region
-  useEffect(() => {
-    if (selectedRegion && opsAreas.length > 0) {
-      const filtered = opsAreas.filter(area => area.region === selectedRegion);
-      setFilteredOpsAreas(filtered);
-      // Reset selected ops area if it's not in the filtered list
-      if (selectedOpsArea && !filtered.some(a => a.ops_area === selectedOpsArea)) {
+  const loadAssignedAreas = async () => {
+    if (!user?.id) return;
+    
+    setLoadingAreas(true);
+    try {
+      // Get OPX's assigned areas
+      const { data: assignments, error: assignError } = await supabase
+        .from("opx_area_assignments")
+        .select("ops_area")
+        .eq("user_id", user.id);
+      
+      if (assignError) throw assignError;
+      
+      if (!assignments || assignments.length === 0) {
+        setAssignedAreas([]);
+        setLoadingAreas(false);
+        return;
+      }
+      
+      const assignedOpsAreas = assignments.map(a => a.ops_area);
+      
+      // Get hub mappings for assigned areas, filtered by selected region
+      let query = supabase
+        .from("ops_area_to_hub")
+        .select("*")
+        .in("ops_area", assignedOpsAreas)
+        .order("ops_area");
+      
+      if (selectedRegion) {
+        query = query.eq("region", selectedRegion);
+      }
+      
+      const { data: areas, error: areasError } = await query;
+      
+      if (areasError) throw areasError;
+      
+      setAssignedAreas(areas || []);
+      
+      // Auto-select if only one area
+      if (areas && areas.length === 1) {
+        setSelectedOpsArea(areas[0].ops_area);
+      } else if (selectedOpsArea && areas && !areas.some(a => a.ops_area === selectedOpsArea)) {
         setSelectedOpsArea("");
       }
-    } else {
-      setFilteredOpsAreas(opsAreas);
-    }
-  }, [selectedRegion, opsAreas]);
-
-  const loadOpsAreas = async () => {
-    const { data, error } = await supabase
-      .from("ops_area_to_hub")
-      .select("*")
-      .order("ops_area");
-    
-    if (error) {
+    } catch (error: any) {
       toast({
-        title: "Error loading ops areas",
+        title: "Error loading assigned areas",
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      setOpsAreas(data || []);
+    } finally {
+      setLoadingAreas(false);
     }
   };
+
+  // Reload areas when region changes
+  useEffect(() => {
+    if (user?.id) {
+      loadAssignedAreas();
+    }
+  }, [selectedRegion]);
 
   const updateQuantity = (itemId: string, quantity: number) => {
     if (quantity <= 0) {
@@ -134,14 +164,14 @@ export default function Cart() {
     }
     
     // For Europe, get hub from selected OPS Area
-    const selectedArea = filteredOpsAreas.find(area => area.ops_area === selectedOpsArea);
+    const selectedArea = assignedAreas.find(area => area.ops_area === selectedOpsArea);
     return selectedArea?.hub || "";
   };
 
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!submittedBy || !selectedOpsArea || !urgency) {
+    if (!selectedOpsArea || !urgency) {
       toast({
         title: "Missing required fields",
         description: "Please fill in all required fields",
@@ -327,33 +357,26 @@ export default function Cart() {
             <CardContent>
               <form onSubmit={submitRequest} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="submitted-by">Submitted By *</Label>
-                  <Select value={submittedBy} onValueChange={setSubmittedBy} required>
-                    <SelectTrigger id="submitted-by">
-                      <SelectValue placeholder="Select who is submitting" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Submitted by Field Staff">Submitted by Field Staff</SelectItem>
-                      <SelectItem value="Submitted by OPX">Submitted by OPX</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="ops-area">Ops Area *</Label>
-                  <Select value={selectedOpsArea} onValueChange={setSelectedOpsArea} required>
-                    <SelectTrigger id="ops-area">
-                      <SelectValue placeholder="Select Ops Area" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredOpsAreas.map((area) => (
-                        <SelectItem key={area.ops_area} value={area.ops_area}>
-                          {area.ops_area}
-                          {!isAutoHub && ` → ${area.hub}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {loadingAreas ? (
+                    <p className="text-sm text-muted-foreground">Loading your assigned areas...</p>
+                  ) : assignedAreas.length === 0 ? (
+                    <p className="text-sm text-destructive">You are not assigned to any OPS Areas for this region.</p>
+                  ) : (
+                    <Select value={selectedOpsArea} onValueChange={setSelectedOpsArea} required>
+                      <SelectTrigger id="ops-area">
+                        <SelectValue placeholder="Select Ops Area" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {assignedAreas.map((area) => (
+                          <SelectItem key={area.ops_area} value={area.ops_area}>
+                            {area.ops_area}
+                            {!isAutoHub && ` → ${area.hub}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   {isAutoHub && selectedOpsArea && (
                     <p className="text-xs text-muted-foreground">
                       Hub automatically assigned: {REGION_HUBS[selectedRegion!]}
@@ -361,7 +384,7 @@ export default function Cart() {
                   )}
                   {!isAutoHub && selectedOpsArea && (
                     <p className="text-xs text-muted-foreground">
-                      Hub: {filteredOpsAreas.find(a => a.ops_area === selectedOpsArea)?.hub}
+                      Hub: {assignedAreas.find(a => a.ops_area === selectedOpsArea)?.hub}
                     </p>
                   )}
                 </div>
@@ -393,7 +416,7 @@ export default function Cart() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={cart.length === 0 || loading || !selectedRegion}
+                  disabled={cart.length === 0 || loading || !selectedRegion || assignedAreas.length === 0}
                 >
                   {loading ? "Submitting..." : "Submit Request"}
                 </Button>
