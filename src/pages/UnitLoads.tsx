@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
+import { toast } from "sonner";
 
 // Hub to OPS Areas mapping
 const HUB_OPS_AREAS: Record<string, string[]> = {
@@ -111,6 +114,25 @@ export default function UnitLoads() {
   const [selectedOpsArea, setSelectedOpsArea] = useState<string>("");
   const [summaryData, setSummaryData] = useState<UnitSummary[]>(() => generateSummaryData("Pernes"));
   const [detailData, setDetailData] = useState<UnitDetail[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error("Please upload a CSV file");
+      return;
+    }
+
+    // TODO: Parse CSV and update data
+    toast.success(`File "${file.name}" uploaded successfully. Processing...`);
+    
+    // Reset the input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleHubChange = (hub: string) => {
     setSelectedHub(hub);
@@ -135,10 +157,27 @@ export default function UnitLoads() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Unit Loads</h1>
-          <p className="text-muted-foreground">Live unit load assignment and logistics overview by Hub</p>
+          <h1 className="text-3xl font-bold">Unit Schedule</h1>
+          <p className="text-muted-foreground">Live unit schedule and logistics overview by Hub</p>
         </div>
-        <Badge variant="outline">Live Data</Badge>
+        <div className="flex items-center gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".csv"
+            className="hidden"
+          />
+          <Button 
+            onClick={() => fileInputRef.current?.click()}
+            variant="outline"
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Upload CSV
+          </Button>
+          <Badge variant="outline">Live Data</Badge>
+        </div>
       </div>
 
       {/* Hub Tabs */}

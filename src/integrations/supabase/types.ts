@@ -332,6 +332,69 @@ export type Database = {
         }
         Relationships: []
       }
+      unit_loads: {
+        Row: {
+          comment: string | null
+          created_at: string
+          extra: number | null
+          family: string | null
+          hub: string
+          id: string
+          load_date: string | null
+          loader: string | null
+          main: number | null
+          no_van: number | null
+          ops_area: string
+          opx_flo: string | null
+          support: number | null
+          trailer_number: string | null
+          unit: string
+          unit_type: string | null
+          updated_at: string
+          van_number: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          extra?: number | null
+          family?: string | null
+          hub: string
+          id?: string
+          load_date?: string | null
+          loader?: string | null
+          main?: number | null
+          no_van?: number | null
+          ops_area: string
+          opx_flo?: string | null
+          support?: number | null
+          trailer_number?: string | null
+          unit: string
+          unit_type?: string | null
+          updated_at?: string
+          van_number?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          extra?: number | null
+          family?: string | null
+          hub?: string
+          id?: string
+          load_date?: string | null
+          loader?: string | null
+          main?: number | null
+          no_van?: number | null
+          ops_area?: string
+          opx_flo?: string | null
+          support?: number | null
+          trailer_number?: string | null
+          unit?: string
+          unit_type?: string | null
+          updated_at?: string
+          van_number?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
