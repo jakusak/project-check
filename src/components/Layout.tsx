@@ -13,7 +13,10 @@ export default function Layout() {
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
 
+  console.log('[Layout] Render - loading:', loading, 'user:', user?.email);
+
   if (loading) {
+    console.log('[Layout] Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-2 text-muted-foreground">
@@ -25,8 +28,11 @@ export default function Layout() {
   }
 
   if (!user) {
+    console.log('[Layout] No user, redirecting to /auth');
     return <Navigate to="/auth" />;
   }
+  
+  console.log('[Layout] User authenticated, rendering content');
 
   const handleRegionSelect = (region: Region) => {
     setSelectedRegion(region);
