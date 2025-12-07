@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import backroadsLogo from "@/assets/backroads-logo.png";
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,8 +52,11 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Backroads Ops</CardTitle>
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img src={backroadsLogo} alt="Backroads" className="h-10 w-auto" />
+            <CardTitle className="text-xl">Backroads Operations Dashboard</CardTitle>
+          </div>
           <CardDescription>Operations Management System</CardDescription>
         </CardHeader>
         <CardContent>
