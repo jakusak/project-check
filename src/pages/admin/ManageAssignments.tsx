@@ -46,6 +46,12 @@ import {
 import { toast } from "sonner";
 import { UserPlus, Trash2, MapPin, Warehouse, Settings } from "lucide-react";
 
+interface Profile {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+}
+
 interface OPXAssignment {
   id: string;
   user_id: string;
@@ -110,6 +116,23 @@ export default function ManageAssignments() {
     },
     enabled: isAdmin,
   });
+
+  // Fetch all profiles for lookups
+  const { data: profiles } = useQuery({
+    queryKey: ["profiles-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name");
+      if (error) throw error;
+      return data as Profile[];
+    },
+    enabled: isAdmin,
+  });
+
+  // Create a lookup map for profiles
+  const profileMap = new Map<string, Profile>();
+  profiles?.forEach(p => profileMap.set(p.id, p));
 
   // Fetch OPX assignments
   const { data: opxAssignments, isLoading: opxLoading } = useQuery({
@@ -367,7 +390,7 @@ export default function ManageAssignments() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User ID</TableHead>
+                      <TableHead>User</TableHead>
                       <TableHead>OPS Area</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -375,7 +398,12 @@ export default function ManageAssignments() {
                   <TableBody>
                     {opxAssignments.map((assignment) => (
                       <TableRow key={assignment.id}>
-                        <TableCell className="font-mono text-sm">{assignment.user_id}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{profileMap.get(assignment.user_id)?.email || 'Unknown'}</p>
+                            <p className="text-xs text-muted-foreground font-mono">{assignment.user_id.slice(0, 8)}...</p>
+                          </div>
+                        </TableCell>
                         <TableCell>{assignment.ops_area}</TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -476,7 +504,7 @@ export default function ManageAssignments() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User ID</TableHead>
+                      <TableHead>User</TableHead>
                       <TableHead>Hub</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -484,7 +512,12 @@ export default function ManageAssignments() {
                   <TableBody>
                     {hubAssignments.map((assignment) => (
                       <TableRow key={assignment.id}>
-                        <TableCell className="font-mono text-sm">{assignment.user_id}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{profileMap.get(assignment.user_id)?.email || 'Unknown'}</p>
+                            <p className="text-xs text-muted-foreground font-mono">{assignment.user_id.slice(0, 8)}...</p>
+                          </div>
+                        </TableCell>
                         <TableCell>{assignment.hub}</TableCell>
                         <TableCell className="text-right">
                           <Button
