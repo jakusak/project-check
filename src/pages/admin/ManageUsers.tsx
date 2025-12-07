@@ -43,6 +43,12 @@ import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User } from "lucide
 
 type AppRole = 'admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
 
+interface Profile {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+}
+
 interface UserRole {
   id: string;
   user_id: string;
@@ -88,6 +94,23 @@ export default function ManageUsers() {
   const [newUserId, setNewUserId] = useState("");
   const [newRole, setNewRole] = useState<AppRole>("field_staff");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Fetch all profiles for lookups
+  const { data: profiles } = useQuery({
+    queryKey: ["profiles-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name");
+      if (error) throw error;
+      return data as Profile[];
+    },
+    enabled: isAdmin,
+  });
+
+  // Create a lookup map for profiles
+  const profileMap = new Map<string, Profile>();
+  profiles?.forEach(p => profileMap.set(p.id, p));
 
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ["user-roles"],
@@ -302,8 +325,11 @@ export default function ManageUsers() {
               <TableBody>
                 {Object.entries(rolesByUser).map(([userId, roles]) => (
                   <TableRow key={userId}>
-                    <TableCell className="font-mono text-sm">
-                      {userId}
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{profileMap.get(userId)?.email || 'Unknown'}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{userId}</p>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
