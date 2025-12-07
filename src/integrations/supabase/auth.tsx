@@ -34,9 +34,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isFieldStaff = roles.includes('field_staff');
 
   useEffect(() => {
+    console.log('[Auth] Setting up auth listener...');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('[Auth] onAuthStateChange:', event, 'user:', session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -50,18 +53,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Always set loading to false when auth state changes
         setLoading(false);
+        console.log('[Auth] Loading set to false after auth change');
       }
     );
 
     // THEN check for existing session
+    console.log('[Auth] Checking existing session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[Auth] getSession result:', session?.user?.email ?? 'no session');
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         checkUserRoles(session.user.id);
       }
       setLoading(false);
-    }).catch(() => {
+      console.log('[Auth] Loading set to false after getSession');
+    }).catch((err) => {
+      console.error('[Auth] getSession error:', err);
       // Handle error case - still set loading to false
       setLoading(false);
     });
