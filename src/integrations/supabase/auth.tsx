@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isFieldStaff = roles.includes('field_staff');
 
   useEffect(() => {
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -46,15 +47,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setRoles([]);
         }
+        
+        // Always set loading to false when auth state changes
+        setLoading(false);
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         checkUserRoles(session.user.id);
       }
+      setLoading(false);
+    }).catch(() => {
+      // Handle error case - still set loading to false
       setLoading(false);
     });
 
