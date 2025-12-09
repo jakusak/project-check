@@ -356,6 +356,39 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          name: string
+          photo_url: string | null
+          team: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name: string
+          photo_url?: string | null
+          team: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name?: string
+          photo_url?: string | null
+          team?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       unit_loads: {
         Row: {
           comment: string | null

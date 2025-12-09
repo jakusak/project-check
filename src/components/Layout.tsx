@@ -167,6 +167,87 @@ export default function Layout() {
                 Hub Fulfillment
               </Link>
             )}
+
+            {/* Fulfillment Team Dropdown */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  location.pathname.startsWith("/team")
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Fulfillment Team
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="absolute left-0 top-full mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                {/* Team Europe Submenu */}
+                <div className="relative group/europe">
+                  <button className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted">
+                    <span>Team Europe</span>
+                    <ChevronRight className="h-3 w-3" />
+                  </button>
+                  <div className="absolute left-full top-0 ml-1 w-40 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover/europe:opacity-100 group-hover/europe:visible transition-all z-50">
+                    <Link
+                      to="/team/pernes"
+                      className={cn(
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
+                        location.pathname === "/team/pernes"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      Team Pernes
+                    </Link>
+                    <Link
+                      to="/team/tuscany"
+                      className={cn(
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
+                        location.pathname === "/team/tuscany"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      Team Tuscany
+                    </Link>
+                    <Link
+                      to="/team/czech"
+                      className={cn(
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
+                        location.pathname === "/team/czech"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      Team Czech
+                    </Link>
+                  </div>
+                </div>
+                <Link
+                  to="/team/usa"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/team/usa"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  USA
+                </Link>
+                <Link
+                  to="/team/canada"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/team/canada"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  CAN
+                </Link>
+              </div>
+            </div>
             
             {/* Admin Dropdown */}
             {isAdmin && (

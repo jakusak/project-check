@@ -22,6 +22,7 @@ import ManageAssignments from "./pages/admin/ManageAssignments";
 import BulkOPXOnboarding from "./pages/admin/BulkOPXOnboarding";
 import OPXDashboard from "./pages/opx/OPXDashboard";
 import HubDashboard from "./pages/hub/HubDashboard";
+import TeamPage from "./pages/team/TeamPage";
 import PRDViewer from "./pages/PRDViewer";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/admin/bulk-opx" element={<BulkOPXOnboarding />} />
               <Route path="/opx/dashboard" element={<OPXDashboard />} />
               <Route path="/hub/dashboard" element={<HubDashboard />} />
+              <Route path="/team/:teamId" element={<TeamPage />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
