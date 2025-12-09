@@ -55,6 +55,7 @@ interface UserRole {
   role: AppRole;
 }
 
+// Role configuration with Super Admin as the highest-level role
 const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ReactNode; color: string; description: string }> = {
   super_admin: {
     label: "Super Admin",
