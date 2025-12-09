@@ -3,12 +3,13 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { useToast } from "@/hooks/use-toast";
 
-type AppRole = 'admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
+type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isOPX: boolean;
   isHubAdmin: boolean;
   isFieldStaff: boolean;
@@ -28,9 +29,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const isAdmin = roles.includes('admin');
-  const isOPX = roles.includes('opx');
-  const isHubAdmin = roles.includes('hub_admin');
+  const isSuperAdmin = roles.includes('super_admin');
+  const isAdmin = roles.includes('admin') || isSuperAdmin;
+  const isOPX = roles.includes('opx') || isSuperAdmin;
+  const isHubAdmin = roles.includes('hub_admin') || isSuperAdmin;
   const isFieldStaff = roles.includes('field_staff');
 
   useEffect(() => {
@@ -143,7 +145,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider value={{ 
       user, 
       session, 
-      isAdmin, 
+      isAdmin,
+      isSuperAdmin,
       isOPX, 
       isHubAdmin, 
       isFieldStaff,

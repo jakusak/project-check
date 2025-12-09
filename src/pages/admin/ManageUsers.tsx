@@ -39,9 +39,9 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User } from "lucide-react";
+import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User, Crown } from "lucide-react";
 
-type AppRole = 'admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
+type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
 
 interface Profile {
   id: string;
@@ -56,6 +56,12 @@ interface UserRole {
 }
 
 const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ReactNode; color: string; description: string }> = {
+  super_admin: {
+    label: "Super Admin",
+    icon: <Crown className="h-3 w-3" />,
+    color: "bg-amber-100 text-amber-800 border-amber-200",
+    description: "Master admin with access to ALL OPS Areas and Hubs"
+  },
   admin: {
     label: "Admin",
     icon: <Shield className="h-3 w-3" />,
