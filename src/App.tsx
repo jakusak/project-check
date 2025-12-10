@@ -44,6 +44,9 @@ import BikeHistory from "./pages/tps/BikeHistory";
 import InventoryMovesList from "./pages/inventory/InventoryMovesList";
 import NewInventoryMove from "./pages/inventory/NewInventoryMove";
 import InventoryMoveDetail from "./pages/inventory/InventoryMoveDetail";
+import MobileLayout from "./components/MobileLayout";
+import MobileHome from "./pages/mobile/MobileHome";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -93,6 +96,15 @@ const App = () => (
               <Route path="/inventory/moves/new" element={<NewInventoryMove />} />
               <Route path="/inventory/moves/:id" element={<InventoryMoveDetail />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
+            </Route>
+            {/* Mobile Field App Routes */}
+            <Route path="/m" element={<MobileLayout />}>
+              <Route path="home" element={<MobileHome />} />
+              <Route path="van-incidents/new" element={<NewIncident />} />
+              <Route path="requests/new" element={<Cart />} />
+              <Route path="cycle-counts/new" element={<NewCycleCount />} />
+              <Route path="broken-items/new" element={<ReportBrokenItem />} />
+              <Route path="tps/assign-bikes" element={<AssignBikes />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
