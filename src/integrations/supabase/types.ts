@@ -38,6 +38,134 @@ export type Database = {
         }
         Relationships: []
       }
+      cycle_count_events: {
+        Row: {
+          actor_user_id: string
+          created_at: string
+          cycle_count_id: string
+          event_notes: string | null
+          event_type: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+        }
+        Insert: {
+          actor_user_id: string
+          created_at?: string
+          cycle_count_id: string
+          event_notes?: string | null
+          event_type: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Update: {
+          actor_user_id?: string
+          created_at?: string
+          cycle_count_id?: string
+          event_notes?: string | null
+          event_type?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycle_count_events_cycle_count_id_fkey"
+            columns: ["cycle_count_id"]
+            isOneToOne: false
+            referencedRelation: "cycle_counts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cycle_count_lines: {
+        Row: {
+          created_at: string
+          cycle_count_id: string
+          equipment_item_id: string | null
+          id: string
+          notes: string | null
+          photo_path: string | null
+          recorded_qty: number
+          sku: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_count_id: string
+          equipment_item_id?: string | null
+          id?: string
+          notes?: string | null
+          photo_path?: string | null
+          recorded_qty: number
+          sku: string
+        }
+        Update: {
+          created_at?: string
+          cycle_count_id?: string
+          equipment_item_id?: string | null
+          id?: string
+          notes?: string | null
+          photo_path?: string | null
+          recorded_qty?: number
+          sku?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycle_count_lines_cycle_count_id_fkey"
+            columns: ["cycle_count_id"]
+            isOneToOne: false
+            referencedRelation: "cycle_counts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cycle_count_lines_equipment_item_id_fkey"
+            columns: ["equipment_item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cycle_counts: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          id: string
+          location_name: string
+          ops_area: string
+          rejection_note: string | null
+          status: Database["public"]["Enums"]["cycle_count_status"]
+          updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          location_name: string
+          ops_area: string
+          rejection_note?: string | null
+          status?: Database["public"]["Enums"]["cycle_count_status"]
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          location_name?: string
+          ops_area?: string
+          rejection_note?: string | null
+          status?: Database["public"]["Enums"]["cycle_count_status"]
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: []
+      }
       equipment_items: {
         Row: {
           availability: boolean
@@ -655,6 +783,7 @@ export type Database = {
         | "opx"
         | "hub_admin"
         | "super_admin"
+      cycle_count_status: "submitted" | "validated" | "rejected"
       incident_status: "submitted" | "in_review" | "closed"
     }
     CompositeTypes: {
@@ -791,6 +920,7 @@ export const Constants = {
         "hub_admin",
         "super_admin",
       ],
+      cycle_count_status: ["submitted", "validated", "rejected"],
       incident_status: ["submitted", "in_review", "closed"],
     },
   },
