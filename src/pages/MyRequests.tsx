@@ -6,7 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, History } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useRequestEvents } from "@/hooks/useRequestEvents";
+import { RequestEventTimeline } from "@/components/RequestEventTimeline";
 
 interface LineItem {
   id: string;
@@ -25,11 +28,20 @@ interface LineItem {
 interface Request {
   id: string;
   status: string;
+  opx_status: string;
   ops_area: string;
   hub: string;
   required_by_date: string;
   created_at: string;
+  rationale: string | null;
+  notes: string | null;
   line_items: LineItem[];
+}
+
+// Component for history panel with its own event fetching
+function RequestHistoryPanel({ requestId }: { requestId: string }) {
+  const { data: events, isLoading } = useRequestEvents(requestId);
+  return <RequestEventTimeline events={events || []} isLoading={isLoading} />;
 }
 
 export default function MyRequests() {
@@ -37,6 +49,7 @@ export default function MyRequests() {
   const { toast } = useToast();
   const [requests, setRequests] = useState<Request[]>([]);
   const [expandedRequests, setExpandedRequests] = useState<Set<string>>(new Set());
+  const [historyOpen, setHistoryOpen] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadRequests();
@@ -74,10 +87,13 @@ export default function MyRequests() {
       const formatted = data?.map((req: any) => ({
         id: req.id,
         status: req.status,
+        opx_status: req.opx_status,
         ops_area: req.ops_area || req.delivery_region || "N/A",
         hub: req.hub || "N/A",
         required_by_date: req.required_by_date,
         created_at: req.created_at,
+        rationale: req.rationale,
+        notes: req.notes,
         line_items: req.equipment_request_line_items || [],
       }));
       setRequests(formatted || []);
@@ -94,17 +110,43 @@ export default function MyRequests() {
     setExpandedRequests(newExpanded);
   };
 
+  const toggleHistory = (requestId: string) => {
+    const newHistoryOpen = new Set(historyOpen);
+    if (newHistoryOpen.has(requestId)) {
+      newHistoryOpen.delete(requestId);
+    } else {
+      newHistoryOpen.add(requestId);
+    }
+    setHistoryOpen(newHistoryOpen);
+  };
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "pending":
+      case "pending_opx":
         return "secondary";
       case "approved":
+      case "opx_approved":
         return "default";
-      case "declined":
+      case "rejected":
+      case "opx_rejected":
+        return "destructive";
+      case "fulfilled":
+        return "outline";
+      case "in_transit":
+        return "secondary";
+      case "cancelled":
         return "destructive";
       default:
         return "outline";
     }
+  };
+
+  const getDisplayStatus = (request: Request) => {
+    if (request.opx_status === "pending_opx") return "Pending OPX Review";
+    if (request.opx_status === "opx_approved") return "Approved by OPX";
+    if (request.opx_status === "opx_rejected") return "Rejected by OPX";
+    return request.status;
   };
 
   return (
@@ -145,8 +187,8 @@ export default function MyRequests() {
                           <h3 className="font-semibold font-mono">
                             #{request.id.slice(0, 8)}
                           </h3>
-                          <Badge variant={getStatusVariant(request.status)}>
-                            {request.status}
+                          <Badge variant={getStatusVariant(request.opx_status || request.status)}>
+                            {getDisplayStatus(request)}
                           </Badge>
                         </div>
                         <div className="ml-10 text-sm text-muted-foreground space-y-1">
@@ -155,9 +197,14 @@ export default function MyRequests() {
                             Submitted: {new Date(request.created_at).toLocaleDateString()}
                           </p>
                           <p>
-                            Required By: {new Date(request.required_by_date).toLocaleDateString()}
+                            Required By: {request.required_by_date}
                           </p>
                           <p>Items: {request.line_items.length}</p>
+                          {request.rationale && (
+                            <p className="mt-2">
+                              <span className="font-medium">Rationale:</span> {request.rationale}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -205,6 +252,23 @@ export default function MyRequests() {
                             ))}
                           </TableBody>
                         </Table>
+
+                        {/* History Timeline Collapsible */}
+                        <Collapsible
+                          open={historyOpen.has(request.id)}
+                          onOpenChange={() => toggleHistory(request.id)}
+                          className="mt-4"
+                        >
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="gap-2">
+                              <History className="h-4 w-4" />
+                              {historyOpen.has(request.id) ? "Hide History" : "Show History"}
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-4 p-4 bg-muted/50 rounded-lg">
+                            <RequestHistoryPanel requestId={request.id} />
+                          </CollapsibleContent>
+                        </Collapsible>
                       </div>
                     )}
                   </div>

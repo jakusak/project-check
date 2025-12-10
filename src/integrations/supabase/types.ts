@@ -71,6 +71,47 @@ export type Database = {
         }
         Relationships: []
       }
+      equipment_request_events: {
+        Row: {
+          actor_user_id: string
+          created_at: string
+          event_notes: string | null
+          event_type: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          request_id: string
+        }
+        Insert: {
+          actor_user_id: string
+          created_at?: string
+          event_notes?: string | null
+          event_type: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          request_id: string
+        }
+        Update: {
+          actor_user_id?: string
+          created_at?: string
+          event_notes?: string | null
+          event_type?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_request_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_request_line_items: {
         Row: {
           approval_status: string | null
@@ -140,6 +181,7 @@ export type Database = {
           opx_reviewed_at: string | null
           opx_reviewed_by: string | null
           opx_status: string | null
+          rationale: string | null
           required_by_date: string
           status: string
           user_id: string
@@ -155,6 +197,7 @@ export type Database = {
           opx_reviewed_at?: string | null
           opx_reviewed_by?: string | null
           opx_status?: string | null
+          rationale?: string | null
           required_by_date: string
           status?: string
           user_id: string
@@ -170,6 +213,7 @@ export type Database = {
           opx_reviewed_at?: string | null
           opx_reviewed_by?: string | null
           opx_status?: string | null
+          rationale?: string | null
           required_by_date?: string
           status?: string
           user_id?: string

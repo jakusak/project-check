@@ -11,6 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useRegion, REGION_LABELS, REGION_HUBS, Region } from "@/contexts/RegionContext";
+import { useCreateRequestEvent } from "@/hooks/useRequestEvents";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CartItem {
   item: {
@@ -50,8 +56,11 @@ export default function Cart() {
   const [selectedOpsArea, setSelectedOpsArea] = useState("");
   const [urgency, setUrgency] = useState("");
   const [notes, setNotes] = useState("");
+  const [rationale, setRationale] = useState("");
+  const [requiredByDate, setRequiredByDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [loadingAreas, setLoadingAreas] = useState(true);
+  const createEvent = useCreateRequestEvent();
 
   useEffect(() => {
     const storedCart = localStorage.getItem("equipment_cart");
@@ -171,10 +180,10 @@ export default function Cart() {
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedOpsArea || !urgency) {
+    if (!selectedOpsArea || !urgency || !rationale.trim() || !requiredByDate) {
       toast({
         title: "Missing required fields",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including rationale and required-by date",
         variant: "destructive",
       });
       return;
@@ -203,8 +212,9 @@ export default function Cart() {
           ops_area: selectedOpsArea,
           hub: hub,
           delivery_region: selectedRegion || selectedOpsArea,
-          required_by_date: urgency,
+          required_by_date: format(requiredByDate, "yyyy-MM-dd"),
           notes,
+          rationale,
         })
         .select()
         .single();
@@ -224,6 +234,18 @@ export default function Cart() {
         .insert(lineItems);
 
       if (lineItemsError) throw lineItemsError;
+
+      // Create the initial "created" event
+      await createEvent.mutateAsync({
+        requestId: request.id,
+        eventType: "created",
+        eventNotes: `Request submitted with ${cart.length} items. Rationale: ${rationale}`,
+        newValues: {
+          items: cart.map(c => ({ name: c.item.name, quantity: c.quantity })),
+          urgency,
+          requiredByDate: format(requiredByDate, "yyyy-MM-dd"),
+        },
+      });
 
       localStorage.removeItem("equipment_cart");
       clearRegion();
@@ -390,6 +412,45 @@ export default function Cart() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="rationale">Rationale *</Label>
+                  <Textarea
+                    id="rationale"
+                    value={rationale}
+                    onChange={(e) => setRationale(e.target.value)}
+                    placeholder="Explain why this equipment is needed..."
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Required By Date *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !requiredByDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {requiredByDate ? format(requiredByDate, "PPP") : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={requiredByDate}
+                        onSelect={setRequiredByDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="urgency">Urgency *</Label>
                   <Select value={urgency} onValueChange={setUrgency} required>
                     <SelectTrigger id="urgency">
@@ -409,14 +470,14 @@ export default function Cart() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Any special instructions..."
-                    rows={4}
+                    rows={3}
                   />
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={cart.length === 0 || loading || !selectedRegion || assignedAreas.length === 0}
+                  disabled={cart.length === 0 || loading || !selectedRegion || assignedAreas.length === 0 || !rationale.trim() || !requiredByDate}
                 >
                   {loading ? "Submitting..." : "Submit Request"}
                 </Button>
