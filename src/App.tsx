@@ -46,6 +46,7 @@ import NewInventoryMove from "./pages/inventory/NewInventoryMove";
 import InventoryMoveDetail from "./pages/inventory/InventoryMoveDetail";
 import MobileLayout from "./components/MobileLayout";
 import MobileHome from "./pages/mobile/MobileHome";
+import MobileNewIncident from "./pages/mobile/MobileNewIncident";
 
 const queryClient = new QueryClient();
 
@@ -100,7 +101,7 @@ const App = () => (
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>
               <Route path="home" element={<MobileHome />} />
-              <Route path="van-incidents/new" element={<NewIncident />} />
+              <Route path="van-incidents/new" element={<MobileNewIncident />} />
               <Route path="requests/new" element={<Cart />} />
               <Route path="cycle-counts/new" element={<NewCycleCount />} />
               <Route path="broken-items/new" element={<ReportBrokenItem />} />
