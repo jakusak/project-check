@@ -47,6 +47,7 @@ export default function Layout() {
 
   const navItems = [
     { to: "/", label: "Unit Schedule" },
+    { to: "/analytics/ops", label: "Analytics", roles: ["opx", "admin", "super_admin"] },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
@@ -78,20 +79,31 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === item.to
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              // Check role restrictions if present
+              if (item.roles) {
+                const hasAccess = item.roles.some(role => 
+                  (role === "opx" && isOPX) || 
+                  (role === "admin" && isAdmin) || 
+                  (role === "super_admin" && isSuperAdmin)
+                );
+                if (!hasAccess) return null;
+              }
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    location.pathname === item.to
+                      ? "bg-sidebar-accent text-primary-foreground"
+                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             {/* Equipment Request Dropdown */}
             <div className="relative group">
@@ -154,20 +166,6 @@ export default function Layout() {
               </Link>
             )}
 
-            {/* Analytics Link - OPX and Admin only */}
-            {(isOPX || isAdmin || isSuperAdmin) && (
-              <Link
-                to="/analytics/ops"
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === "/analytics/ops"
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                Analytics
-              </Link>
-            )}
 
             {/* Hub Fulfillment Dropdown */}
             {(isHubAdmin || isAdmin) && (
