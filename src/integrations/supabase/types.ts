@@ -896,6 +896,7 @@ export type Database = {
         | "opx"
         | "hub_admin"
         | "super_admin"
+        | "tps"
       broken_item_severity: "low" | "medium" | "high"
       broken_item_status: "open" | "in_maintenance" | "resolved"
       cycle_count_status: "submitted" | "validated" | "rejected"
@@ -1035,6 +1036,7 @@ export const Constants = {
         "opx",
         "hub_admin",
         "super_admin",
+        "tps",
       ],
       broken_item_severity: ["low", "medium", "high"],
       broken_item_status: ["open", "in_maintenance", "resolved"],
