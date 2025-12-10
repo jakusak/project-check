@@ -36,7 +36,7 @@ export default function OpsAnalytics() {
   
   const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 30));
   const [endDate, setEndDate] = useState<Date>(new Date());
-  const [opsArea, setOpsArea] = useState<string>("");
+  const [opsArea, setOpsArea] = useState<string>("__all__");
 
   // RBAC check
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function OpsAnalytics() {
   const filters: AnalyticsFilters = {
     startDate,
     endDate,
-    opsArea: opsArea || undefined,
+    opsArea: opsArea === "__all__" ? undefined : opsArea || undefined,
   };
 
   const { data: opsAreas, isLoading: opsAreasLoading } = useOpsAreas();
@@ -75,6 +75,7 @@ export default function OpsAnalytics() {
   const resetFilters = () => {
     setStartDate(subDays(new Date(), 30));
     setEndDate(new Date());
+    setOpsArea("__all__");
     setOpsArea("");
   };
 
@@ -153,10 +154,10 @@ export default function OpsAnalytics() {
               <label className="text-sm font-medium">Ops Area</label>
               <Select value={opsArea} onValueChange={setOpsArea}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All areas" />
+                  <SelectValue placeholder="Select area" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All areas</SelectItem>
+                  <SelectItem value="__all__">All areas</SelectItem>
                   {opsAreas?.map((area) => (
                     <SelectItem key={area} value={area}>
                       {area}
