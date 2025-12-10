@@ -28,6 +28,10 @@ import NotFound from "./pages/NotFound";
 import IncidentList from "./pages/van-incidents/IncidentList";
 import NewIncident from "./pages/van-incidents/NewIncident";
 import OpsAnalytics from "./pages/analytics/OpsAnalytics";
+import NewCycleCount from "./pages/cycle-counts/NewCycleCount";
+import MyCycleCounts from "./pages/cycle-counts/MyCycleCounts";
+import CycleCountReview from "./pages/cycle-counts/CycleCountReview";
+import CycleCountDetail from "./pages/cycle-counts/CycleCountDetail";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +65,10 @@ const App = () => (
               <Route path="/van-incidents" element={<IncidentList />} />
               <Route path="/van-incidents/new" element={<NewIncident />} />
               <Route path="/analytics/ops" element={<OpsAnalytics />} />
+              <Route path="/cycle-counts/new" element={<NewCycleCount />} />
+              <Route path="/cycle-counts/my" element={<MyCycleCounts />} />
+              <Route path="/cycle-counts/review" element={<CycleCountReview />} />
+              <Route path="/cycle-counts/review/:id" element={<CycleCountDetail />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
