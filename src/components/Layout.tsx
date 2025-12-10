@@ -50,6 +50,7 @@ export default function Layout() {
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
+    { to: "/van-incidents", label: "Van Incidents" },
   ];
 
   const adminNavItems = [

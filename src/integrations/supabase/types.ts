@@ -514,6 +514,116 @@ export type Database = {
         }
         Relationships: []
       }
+      van_incident_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          incident_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          incident_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          incident_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "van_incident_files_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "van_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      van_incidents: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          description: string
+          id: string
+          incident_date: string
+          incident_time: string
+          internal_notes: string | null
+          license_plate: string
+          location_text: string
+          ops_admin_user_id: string | null
+          ops_area: string
+          status: Database["public"]["Enums"]["incident_status"]
+          trip_id: string | null
+          updated_at: string
+          van_id: string
+          vin: string
+          weather: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          description: string
+          id?: string
+          incident_date: string
+          incident_time: string
+          internal_notes?: string | null
+          license_plate: string
+          location_text: string
+          ops_admin_user_id?: string | null
+          ops_area: string
+          status?: Database["public"]["Enums"]["incident_status"]
+          trip_id?: string | null
+          updated_at?: string
+          van_id: string
+          vin: string
+          weather: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_time?: string
+          internal_notes?: string | null
+          license_plate?: string
+          location_text?: string
+          ops_admin_user_id?: string | null
+          ops_area?: string
+          status?: Database["public"]["Enums"]["incident_status"]
+          trip_id?: string | null
+          updated_at?: string
+          van_id?: string
+          vin?: string
+          weather?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "van_incidents_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "van_incidents_ops_admin_user_id_fkey"
+            columns: ["ops_admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -545,6 +655,7 @@ export type Database = {
         | "opx"
         | "hub_admin"
         | "super_admin"
+      incident_status: "submitted" | "in_review" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -680,6 +791,7 @@ export const Constants = {
         "hub_admin",
         "super_admin",
       ],
+      incident_status: ["submitted", "in_review", "closed"],
     },
   },
 } as const
