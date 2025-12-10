@@ -1,7 +1,8 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { Home, AlertTriangle, Package, ClipboardList, Wrench, Bike } from "lucide-react";
+import { Outlet, useNavigate, Navigate } from "react-router-dom";
+import { Home, AlertTriangle, Package, ClipboardList, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/m/home" },
@@ -14,11 +15,29 @@ const navItems = [
 export default function MobileLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading } = useAuth();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-navy text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <header className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-lg">Backroads Field</span>
         </div>
