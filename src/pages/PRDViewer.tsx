@@ -73,7 +73,7 @@ export default function PRDViewer() {
               <span className="font-medium">Version:</span> 2.0
             </div>
             <div>
-              <span className="font-medium">Date:</span> December 2024
+              <span className="font-medium">Date:</span> December 2025
             </div>
             <div>
               <span className="font-medium">Status:</span>{" "}
@@ -751,7 +751,7 @@ export default function PRDViewer() {
         {/* Footer */}
         <footer className="pt-8 mt-12 border-t border-border text-center text-sm text-muted-foreground">
           <p>Backroads Ops Dashboard — Product Requirements Document v2.0</p>
-          <p className="mt-1">December 2024 • Platform: Lovable Cloud • Phase 2 Complete</p>
+          <p className="mt-1">December 2025 • Platform: Lovable Cloud • Phase 2 Complete</p>
         </footer>
       </div>
     </>
