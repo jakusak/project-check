@@ -19,7 +19,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/analytics/ops");
     }
   }, [user, navigate]);
 
@@ -44,7 +44,7 @@ export default function Auth() {
     const { error } = await signIn(email, password);
     setLoading(false);
     if (!error) {
-      navigate("/");
+      navigate("/analytics/ops");
     }
   };
 

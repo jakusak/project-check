@@ -65,7 +65,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<UnitSchedule />} />
+              <Route path="/" element={<OpsAnalytics />} />
               <Route path="/van-module" element={<VanModule />} />
               <Route path="/unit-loads" element={<UnitLoads />} />
               <Route path="/warehouses" element={<Warehouses />} />
