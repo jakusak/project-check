@@ -50,7 +50,7 @@ export default function Layout() {
   ];
 
   const futureProjectItems = [
-    { to: "/", label: "Unit Schedule" },
+    { to: "/unit-schedule", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
