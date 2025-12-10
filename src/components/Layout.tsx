@@ -46,11 +46,11 @@ export default function Layout() {
   ];
 
   const navItems = [
+    { to: "/analytics/ops", label: "Analytics", roles: ["opx", "admin", "super_admin"] },
     { to: "/van-incidents", label: "Van Incidents" },
   ];
 
   const futureProjectItems = [
-    { to: "/analytics/ops", label: "Analytics" },
     { to: "/", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
@@ -82,20 +82,30 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === item.to
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              if (item.roles) {
+                const hasAccess = item.roles.some(role => 
+                  (role === "opx" && isOPX) || 
+                  (role === "admin" && isAdmin) || 
+                  (role === "super_admin" && isSuperAdmin)
+                );
+                if (!hasAccess) return null;
+              }
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    location.pathname === item.to
+                      ? "bg-sidebar-accent text-primary-foreground"
+                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             {/* Equipment Request Dropdown */}
             <div className="relative group">
