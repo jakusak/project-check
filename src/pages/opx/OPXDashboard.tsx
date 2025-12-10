@@ -31,8 +31,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ClipboardList, CheckCircle, XCircle, Edit, Clock } from "lucide-react";
+import { ClipboardList, CheckCircle, XCircle, Edit, Clock, History } from "lucide-react";
 import { format } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useRequestEvents, useCreateRequestEvent, syncInventoryRequestToExternalSystem } from "@/hooks/useRequestEvents";
+import { RequestEventTimeline } from "@/components/RequestEventTimeline";
 
 interface LineItem {
   id: string;
@@ -56,6 +59,7 @@ interface Request {
   ops_area: string;
   hub: string;
   notes: string | null;
+  rationale: string | null;
   required_by_date: string;
   delivery_region: string;
   user_id: string;
@@ -68,6 +72,9 @@ export default function OPXDashboard() {
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [editingQuantities, setEditingQuantities] = useState<Record<string, number>>({});
   const [opxNotes, setOpxNotes] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const createEvent = useCreateRequestEvent();
+  const { data: events, isLoading: eventsLoading } = useRequestEvents(selectedRequest?.id);
 
   // Fetch assigned OPS Areas for this OPX user
   const { data: assignedAreas } = useQuery({
@@ -120,18 +127,27 @@ export default function OPXDashboard() {
       quantities: Record<string, number>;
       notes: string;
     }) => {
+      const oldQuantities: Record<string, number> = {};
+      const newQuantities: Record<string, number> = {};
+      let hasModifications = false;
+
       // Update line item quantities if modified
       for (const [itemId, newQty] of Object.entries(quantities)) {
         const originalItem = selectedRequest?.line_items.find(li => li.id === itemId);
-        if (originalItem && originalItem.quantity !== newQty) {
-          await supabase
-            .from("equipment_request_line_items")
-            .update({ 
-              quantity: newQty,
-              original_quantity: originalItem.original_quantity || originalItem.quantity,
-              modified_by_opx: user?.id
-            })
-            .eq("id", itemId);
+        if (originalItem) {
+          oldQuantities[itemId] = originalItem.quantity;
+          newQuantities[itemId] = newQty;
+          if (originalItem.quantity !== newQty) {
+            hasModifications = true;
+            await supabase
+              .from("equipment_request_line_items")
+              .update({ 
+                quantity: newQty,
+                original_quantity: originalItem.original_quantity || originalItem.quantity,
+                modified_by_opx: user?.id
+              })
+              .eq("id", itemId);
+          }
         }
       }
 
@@ -147,6 +163,30 @@ export default function OPXDashboard() {
         .eq("id", requestId);
 
       if (error) throw error;
+
+      // Log modification event if quantities changed
+      if (hasModifications) {
+        await createEvent.mutateAsync({
+          requestId,
+          eventType: "modified",
+          eventNotes: "Quantities modified by OPX before approval",
+          oldValues: { quantities: oldQuantities },
+          newValues: { quantities: newQuantities },
+        });
+      }
+
+      // Log approve/reject event
+      await createEvent.mutateAsync({
+        requestId,
+        eventType: action === 'approve' ? "approved" : "rejected",
+        eventNotes: notes || undefined,
+        newValues: { action, reviewedBy: user?.email },
+      });
+
+      // If approved, call the placeholder sync function
+      if (action === 'approve') {
+        await syncInventoryRequestToExternalSystem(requestId);
+      }
 
       // Create notification for requester using secure RPC function
       await supabase.rpc('create_notification', {
@@ -165,6 +205,7 @@ export default function OPXDashboard() {
       setSelectedRequest(null);
       setEditingQuantities({});
       setOpxNotes("");
+      setHistoryOpen(false);
     },
     onError: (error: Error) => {
       toast.error(`Failed to process request: ${error.message}`);
@@ -179,6 +220,7 @@ export default function OPXDashboard() {
     });
     setEditingQuantities(quantities);
     setOpxNotes("");
+    setHistoryOpen(false);
   };
 
   const handleQuantityChange = (itemId: string, value: number) => {
@@ -309,6 +351,26 @@ export default function OPXDashboard() {
                   <p className="text-sm mt-1">{selectedRequest.notes}</p>
                 </div>
               )}
+
+              {selectedRequest.rationale && (
+                <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+                  <span className="text-sm font-medium">Rationale:</span>
+                  <p className="text-sm mt-1">{selectedRequest.rationale}</p>
+                </div>
+              )}
+
+              {/* History Timeline */}
+              <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <History className="h-4 w-4" />
+                    {historyOpen ? "Hide History" : "Show History"}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 p-4 bg-muted/50 rounded-lg">
+                  <RequestEventTimeline events={events || []} isLoading={eventsLoading} />
+                </CollapsibleContent>
+              </Collapsible>
 
               <Table>
                 <TableHeader>
