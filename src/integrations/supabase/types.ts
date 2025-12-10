@@ -38,6 +38,73 @@ export type Database = {
         }
         Relationships: []
       }
+      bike_assignments: {
+        Row: {
+          assigned_by_user_id: string
+          bike_sku: string
+          bike_unique_id: string
+          created_at: string
+          equipment_item_id: string | null
+          guest_reservation_id: string
+          id: string
+          notes: string | null
+          returned_at: string | null
+          status: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by_user_id: string
+          bike_sku: string
+          bike_unique_id: string
+          created_at?: string
+          equipment_item_id?: string | null
+          guest_reservation_id: string
+          id?: string
+          notes?: string | null
+          returned_at?: string | null
+          status?: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by_user_id?: string
+          bike_sku?: string
+          bike_unique_id?: string
+          created_at?: string
+          equipment_item_id?: string | null
+          guest_reservation_id?: string
+          id?: string
+          notes?: string | null
+          returned_at?: string | null
+          status?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bike_assignments_equipment_item_id_fkey"
+            columns: ["equipment_item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bike_assignments_guest_reservation_id_fkey"
+            columns: ["guest_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "guest_reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bike_assignments_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broken_item_reports: {
         Row: {
           created_at: string
@@ -401,6 +468,47 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_reservations: {
+        Row: {
+          bike_size: string | null
+          created_at: string
+          guest_name: string
+          id: string
+          notes: string | null
+          reservation_code: string | null
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          bike_size?: string | null
+          created_at?: string
+          guest_name: string
+          id?: string
+          notes?: string | null
+          reservation_code?: string | null
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          bike_size?: string | null
+          created_at?: string
+          guest_name?: string
+          id?: string
+          notes?: string | null
+          reservation_code?: string | null
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_reservations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hub_admin_assignments: {
         Row: {
           assigned_by: string | null
@@ -670,6 +778,39 @@ export type Database = {
           photo_url?: string | null
           team?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          ops_area: string | null
+          start_date: string
+          trip_code: string
+          trip_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          ops_area?: string | null
+          start_date: string
+          trip_code: string
+          trip_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          ops_area?: string | null
+          start_date?: string
+          trip_code?: string
+          trip_name?: string
           updated_at?: string
         }
         Relationships: []

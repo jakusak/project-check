@@ -8,7 +8,7 @@ import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
 
 export default function Layout() {
-  const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, isTPS, signOut, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
@@ -62,6 +62,11 @@ export default function Layout() {
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
+  ];
+
+  const tpsItems = [
+    { to: "/tps/assign-bikes", label: "Assign Bikes" },
+    { to: "/tps/bike-history", label: "Bike History Search" },
   ];
 
   const adminNavItems = [

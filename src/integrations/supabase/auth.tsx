@@ -3,7 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { useToast } from "@/hooks/use-toast";
 
-type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
+type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user' | 'tps';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +13,7 @@ interface AuthContextType {
   isOPX: boolean;
   isHubAdmin: boolean;
   isFieldStaff: boolean;
+  isTPS: boolean;
   roles: AppRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isOPX = roles.includes('opx') || isSuperAdmin;
   const isHubAdmin = roles.includes('hub_admin') || isSuperAdmin;
   const isFieldStaff = roles.includes('field_staff');
+  const isTPS = roles.includes('tps') || isSuperAdmin || isAdmin;
 
   useEffect(() => {
     console.log('[Auth] Setting up auth listener...');
@@ -150,6 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isOPX, 
       isHubAdmin, 
       isFieldStaff,
+      isTPS,
       roles,
       loading, 
       signIn, 

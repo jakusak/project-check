@@ -38,7 +38,9 @@ import ReportBrokenItem from "./pages/equipment-health/ReportBrokenItem";
 import MaintenanceList from "./pages/equipment-health/MaintenanceList";
 import MaintenanceDetail from "./pages/equipment-health/MaintenanceDetail";
 import NewMaintenanceRecord from "./pages/equipment-health/NewMaintenanceRecord";
-
+import AssignBikes from "./pages/tps/AssignBikes";
+import BikeHistorySearch from "./pages/tps/BikeHistorySearch";
+import BikeHistory from "./pages/tps/BikeHistory";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -81,6 +83,9 @@ const App = () => (
               <Route path="/maintenance" element={<MaintenanceList />} />
               <Route path="/maintenance/new" element={<NewMaintenanceRecord />} />
               <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
+              <Route path="/tps/assign-bikes" element={<AssignBikes />} />
+              <Route path="/tps/bike-history" element={<BikeHistorySearch />} />
+              <Route path="/tps/bikes/:bikeId/history" element={<BikeHistory />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
