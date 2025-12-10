@@ -46,12 +46,15 @@ export default function Layout() {
   ];
 
   const navItems = [
-    { to: "/analytics/ops", label: "Analytics", roles: ["opx", "admin", "super_admin"] },
+    { to: "/van-incidents", label: "Van Incidents" },
+  ];
+
+  const futureProjectItems = [
+    { to: "/analytics/ops", label: "Analytics" },
     { to: "/", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
-    { to: "/van-incidents", label: "Van Incidents" },
   ];
 
   const adminNavItems = [
@@ -79,31 +82,20 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1">
-            {navItems.map((item) => {
-              // Check role restrictions if present
-              if (item.roles) {
-                const hasAccess = item.roles.some(role => 
-                  (role === "opx" && isOPX) || 
-                  (role === "admin" && isAdmin) || 
-                  (role === "super_admin" && isSuperAdmin)
-                );
-                if (!hasAccess) return null;
-              }
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    location.pathname === item.to
-                      ? "bg-sidebar-accent text-primary-foreground"
-                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === item.to
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
 
             {/* Equipment Request Dropdown */}
             <div className="relative group">
@@ -345,6 +337,37 @@ export default function Layout() {
                 </div>
               </div>
             )}
+
+            {/* Future Projects Dropdown */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  futureProjectItems.some(item => location.pathname === item.to)
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Future Projects
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="absolute left-0 top-full mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                {futureProjectItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === item.to
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* User Actions */}
