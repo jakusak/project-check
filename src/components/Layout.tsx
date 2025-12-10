@@ -45,23 +45,6 @@ export default function Layout() {
     { key: "europe", label: "Europe" },
   ];
 
-  const navItems = [
-    { to: "/analytics/ops", label: "Analytics", roles: ["opx", "admin", "super_admin"] },
-    { to: "/van-incidents", label: "Van Incidents" },
-  ];
-
-  const equipmentHealthItems = [
-    { to: "/broken-items", label: "Broken Item Reports" },
-    { to: "/broken-items/new", label: "Report Broken Item" },
-    { to: "/maintenance", label: "Maintenance Records" },
-    { to: "/maintenance/new", label: "New Maintenance Record" },
-  ];
-
-  const inventoryItems = [
-    { to: "/inventory/moves", label: "All Inventory Moves" },
-    { to: "/inventory/moves/new", label: "New Inventory Move" },
-  ];
-
   const futureProjectItems = [
     { to: "/", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
@@ -82,6 +65,16 @@ export default function Layout() {
     { to: "/admin/bulk-opx", label: "Bulk OPX Onboarding" },
   ];
 
+  // Check if current path is in Equipment & Inventory section
+  const isEquipmentInventoryActive = 
+    location.pathname === "/equipment" || 
+    location.pathname === "/my-requests" || 
+    location.pathname === "/cart" ||
+    location.pathname.startsWith("/cycle-counts") ||
+    location.pathname.startsWith("/broken-items") ||
+    location.pathname.startsWith("/maintenance") ||
+    location.pathname.startsWith("/inventory");
+
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
       {/* Top Navigation Header - Backroads Style */}
@@ -99,46 +92,52 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1">
-            {navItems.map((item) => {
-              if (item.roles) {
-                const hasAccess = item.roles.some(role => 
-                  (role === "opx" && isOPX) || 
-                  (role === "admin" && isAdmin) || 
-                  (role === "super_admin" && isSuperAdmin)
-                );
-                if (!hasAccess) return null;
-              }
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    location.pathname === item.to
-                      ? "bg-sidebar-accent text-primary-foreground"
-                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-
-            {/* Equipment Request Dropdown */}
-            <div className="relative group">
-              <button
+            {/* Analytics - OPX/Admin only */}
+            {(isOPX || isAdmin || isSuperAdmin) && (
+              <Link
+                to="/analytics/ops"
                 className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                  location.pathname === "/equipment" || location.pathname === "/my-requests" || location.pathname === "/cart"
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === "/analytics/ops"
                     ? "bg-sidebar-accent text-primary-foreground"
                     : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
                 )}
               >
-                Equipment Request
+                Analytics
+              </Link>
+            )}
+
+            {/* Van Incidents */}
+            <Link
+              to="/van-incidents"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname.startsWith("/van-incidents")
+                  ? "bg-sidebar-accent text-primary-foreground"
+                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+              )}
+            >
+              Van Incidents
+            </Link>
+
+            {/* Equipment & Inventory Mega-Dropdown */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  isEquipmentInventoryActive
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Equipment & Inventory
                 <ChevronDown className="h-3 w-3" />
               </button>
-              <div className="absolute left-0 top-full mt-1 w-64 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                {/* Region Selection Submenu */}
+              <div className="absolute left-0 top-full mt-1 w-72 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                {/* Equipment Requests Section */}
+                <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  Equipment Requests
+                </div>
                 <div className="relative group/submenu">
                   <button className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted">
                     <span>Equipment Catalog</span>
@@ -165,25 +164,26 @@ export default function Layout() {
                       : "text-foreground hover:bg-muted"
                   )}
                 >
-                  Equipment Request History/Status
+                  My Request History
                 </Link>
-              </div>
-            </div>
-
-            {/* Cycle Counts Dropdown */}
-            <div className="relative group">
-              <button
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                  location.pathname.startsWith("/cycle-counts")
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                {(isOPX || isAdmin) && (
+                  <Link
+                    to="/opx/dashboard"
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === "/opx/dashboard"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    OPX Review Queue
+                  </Link>
                 )}
-              >
-                Cycle Counts
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              <div className="absolute left-0 top-full mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+
+                {/* Cycle Counts Section */}
+                <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t border-b border-border mt-1">
+                  Cycle Counts
+                </div>
                 <Link
                   to="/cycle-counts/new"
                   className={cn(
@@ -219,88 +219,88 @@ export default function Layout() {
                     Review Cycle Counts
                   </Link>
                 )}
-              </div>
-            </div>
 
-            {/* Equipment Health Dropdown */}
-            <div className="relative group">
-              <button
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                  location.pathname.startsWith("/broken-items") || location.pathname.startsWith("/maintenance")
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                Equipment Health
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              <div className="absolute left-0 top-full mt-1 w-56 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                {equipmentHealthItems.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      "flex items-center px-4 py-2.5 text-sm transition-colors",
-                      location.pathname === item.to
-                        ? "bg-accent text-accent-foreground"
-                        : "text-foreground hover:bg-muted"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* OPX Dashboard Link */}
-            {(isOPX || isAdmin) && (
-              <Link
-                to="/opx/dashboard"
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === "/opx/dashboard"
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                OPX Review
-              </Link>
-            )}
-
-            {/* Inventory Moves Dropdown - OPX/Admin only */}
-            {(isOPX || isAdmin) && (
-              <div className="relative group">
-                <button
+                {/* Equipment Health Section */}
+                <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t border-b border-border mt-1">
+                  Equipment Health
+                </div>
+                <Link
+                  to="/broken-items"
                   className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                    location.pathname.startsWith("/inventory")
-                      ? "bg-sidebar-accent text-primary-foreground"
-                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/broken-items"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
                   )}
                 >
-                  Inventory Moves
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-                <div className="absolute left-0 top-full mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                  {inventoryItems.map((item) => (
+                  Broken Item Reports
+                </Link>
+                <Link
+                  to="/broken-items/new"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/broken-items/new"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  Report Broken Item
+                </Link>
+                <Link
+                  to="/maintenance"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/maintenance"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  Maintenance Records
+                </Link>
+                <Link
+                  to="/maintenance/new"
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm transition-colors",
+                    location.pathname === "/maintenance/new"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  New Maintenance Record
+                </Link>
+
+                {/* Inventory Moves Section - OPX/Admin only */}
+                {(isOPX || isAdmin) && (
+                  <>
+                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t border-b border-border mt-1">
+                      Inventory Moves
+                    </div>
                     <Link
-                      key={item.to}
-                      to={item.to}
+                      to="/inventory/moves"
                       className={cn(
                         "flex items-center px-4 py-2.5 text-sm transition-colors",
-                        location.pathname === item.to
+                        location.pathname === "/inventory/moves"
                           ? "bg-accent text-accent-foreground"
                           : "text-foreground hover:bg-muted"
                       )}
                     >
-                      {item.label}
+                      All Inventory Moves
                     </Link>
-                  ))}
-                </div>
+                    <Link
+                      to="/inventory/moves/new"
+                      className={cn(
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
+                        location.pathname === "/inventory/moves/new"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      New Inventory Move
+                    </Link>
+                  </>
+                )}
               </div>
-            )}
-
+            </div>
 
             {/* Hub Fulfillment Dropdown */}
             {(isHubAdmin || isAdmin) && (
@@ -392,6 +392,39 @@ export default function Layout() {
                   >
                     CAN
                   </Link>
+                </div>
+              </div>
+            )}
+
+            {/* TPS Tools Dropdown */}
+            {(isTPS || isAdmin) && (
+              <div className="relative group">
+                <button
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                    location.pathname.startsWith("/tps")
+                      ? "bg-sidebar-accent text-primary-foreground"
+                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                  )}
+                >
+                  TPS Tools
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                <div className="absolute left-0 top-full mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  {tpsItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={cn(
+                        "flex items-center px-4 py-2.5 text-sm transition-colors",
+                        location.pathname === item.to
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
