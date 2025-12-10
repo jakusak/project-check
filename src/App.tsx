@@ -25,6 +25,8 @@ import HubDashboard from "./pages/hub/HubDashboard";
 import TeamPage from "./pages/team/TeamPage";
 import PRDViewer from "./pages/PRDViewer";
 import NotFound from "./pages/NotFound";
+import IncidentList from "./pages/van-incidents/IncidentList";
+import NewIncident from "./pages/van-incidents/NewIncident";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const App = () => (
               <Route path="/opx/dashboard" element={<OPXDashboard />} />
               <Route path="/hub/dashboard" element={<HubDashboard />} />
               <Route path="/team/:teamId" element={<TeamPage />} />
+              <Route path="/van-incidents" element={<IncidentList />} />
+              <Route path="/van-incidents/new" element={<NewIncident />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
