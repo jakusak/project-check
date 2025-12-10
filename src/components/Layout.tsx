@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet, Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@/integrations/supabase/auth";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
