@@ -27,6 +27,7 @@ import PRDViewer from "./pages/PRDViewer";
 import NotFound from "./pages/NotFound";
 import IncidentList from "./pages/van-incidents/IncidentList";
 import NewIncident from "./pages/van-incidents/NewIncident";
+import OpsAnalytics from "./pages/analytics/OpsAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/team/:teamId" element={<TeamPage />} />
               <Route path="/van-incidents" element={<IncidentList />} />
               <Route path="/van-incidents/new" element={<NewIncident />} />
+              <Route path="/analytics/ops" element={<OpsAnalytics />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
