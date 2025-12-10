@@ -41,6 +41,9 @@ import NewMaintenanceRecord from "./pages/equipment-health/NewMaintenanceRecord"
 import AssignBikes from "./pages/tps/AssignBikes";
 import BikeHistorySearch from "./pages/tps/BikeHistorySearch";
 import BikeHistory from "./pages/tps/BikeHistory";
+import InventoryMovesList from "./pages/inventory/InventoryMovesList";
+import NewInventoryMove from "./pages/inventory/NewInventoryMove";
+import InventoryMoveDetail from "./pages/inventory/InventoryMoveDetail";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -86,6 +89,9 @@ const App = () => (
               <Route path="/tps/assign-bikes" element={<AssignBikes />} />
               <Route path="/tps/bike-history" element={<BikeHistorySearch />} />
               <Route path="/tps/bikes/:bikeId/history" element={<BikeHistory />} />
+              <Route path="/inventory/moves" element={<InventoryMovesList />} />
+              <Route path="/inventory/moves/new" element={<NewInventoryMove />} />
+              <Route path="/inventory/moves/:id" element={<InventoryMoveDetail />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />

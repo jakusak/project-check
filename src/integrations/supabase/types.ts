@@ -533,6 +533,96 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_move_lines: {
+        Row: {
+          created_at: string
+          equipment_item_id: string | null
+          id: string
+          move_id: string
+          notes: string | null
+          qty: number
+          sku: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_item_id?: string | null
+          id?: string
+          move_id: string
+          notes?: string | null
+          qty: number
+          sku: string
+        }
+        Update: {
+          created_at?: string
+          equipment_item_id?: string | null
+          id?: string
+          move_id?: string
+          notes?: string | null
+          qty?: number
+          sku?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_move_lines_equipment_item_id_fkey"
+            columns: ["equipment_item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_move_lines_move_id_fkey"
+            columns: ["move_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_moves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_moves: {
+        Row: {
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          created_by_user_id: string
+          id: string
+          notes: string | null
+          source_location_name: string
+          source_ops_area: string
+          status: string
+          target_location_name: string
+          target_ops_area: string
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          notes?: string | null
+          source_location_name: string
+          source_ops_area: string
+          status?: string
+          target_location_name: string
+          target_ops_area: string
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          notes?: string | null
+          source_location_name?: string
+          source_ops_area?: string
+          status?: string
+          target_location_name?: string
+          target_ops_area?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_sync_logs: {
         Row: {
           created_at: string | null
