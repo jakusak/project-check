@@ -49,6 +49,8 @@ import MobileHome from "./pages/mobile/MobileHome";
 import MobileNewIncident from "./pages/mobile/MobileNewIncident";
 import MobileInventoryRequest from "./pages/mobile/MobileInventoryRequest";
 import MobileMyRequests from "./pages/mobile/MobileMyRequests";
+import MobileCycleCount from "./pages/mobile/MobileCycleCount";
+import MobileAssignBike from "./pages/mobile/MobileAssignBike";
 
 const queryClient = new QueryClient();
 
@@ -106,9 +108,9 @@ const App = () => (
               <Route path="van-incidents/new" element={<MobileNewIncident />} />
               <Route path="requests/new" element={<MobileInventoryRequest />} />
               <Route path="requests/my" element={<MobileMyRequests />} />
-              <Route path="cycle-counts/new" element={<NewCycleCount />} />
+              <Route path="cycle-counts/new" element={<MobileCycleCount />} />
               <Route path="broken-items/new" element={<ReportBrokenItem />} />
-              <Route path="tps/assign-bikes" element={<AssignBikes />} />
+              <Route path="tps/assign-bikes" element={<MobileAssignBike />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

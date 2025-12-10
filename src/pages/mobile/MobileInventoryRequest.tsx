@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CheckCircle2, CalendarIcon, Plus, Trash2, Loader2, Search } from "lucide-react";
+import { CheckCircle2, CalendarIcon, Plus, Trash2, Loader2, Search, ScanBarcode } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import MobileBarcodeScanner from "@/components/mobile/MobileBarcodeScanner";
 
 interface EquipmentItem {
   id: string;
@@ -51,6 +52,7 @@ export default function MobileInventoryRequest() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   // Step 1: Ops Area
   const [opsAreas, setOpsAreas] = useState<OpsArea[]>([]);
@@ -62,6 +64,32 @@ export default function MobileInventoryRequest() {
   const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showEquipmentPicker, setShowEquipmentPicker] = useState(false);
+
+  const handleScanResult = (scannedValue: string) => {
+    setShowScanner(false);
+    const equipment = equipmentList.find(
+      e => e.sku.toLowerCase() === scannedValue.toLowerCase()
+    );
+    if (equipment) {
+      addLineItem(equipment);
+      toast({ title: `Found: ${equipment.name}` });
+    } else {
+      toast({ title: `No item found for: ${scannedValue}`, variant: "destructive" });
+      setSearchQuery(scannedValue);
+      setShowEquipmentPicker(true);
+    }
+  };
+
+  // Scanner modal
+  if (showScanner) {
+    return (
+      <MobileBarcodeScanner
+        title="Scan Item"
+        onScanSuccess={handleScanResult}
+        onClose={() => setShowScanner(false)}
+      />
+    );
+  }
 
   // Step 3: Details
   const [rationale, setRationale] = useState("");
@@ -444,15 +472,25 @@ export default function MobileInventoryRequest() {
                 </Card>
               ))}
 
-              {/* Add item button */}
-              <Button
-                variant="outline"
-                className="w-full h-14 text-base border-dashed"
-                onClick={() => setShowEquipmentPicker(true)}
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Add Equipment Item
-              </Button>
+              {/* Add item buttons */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 h-14 text-base border-dashed"
+                  onClick={() => setShowScanner(true)}
+                >
+                  <ScanBarcode className="h-5 w-5 mr-2" />
+                  Scan Item
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-14 text-base border-dashed"
+                  onClick={() => setShowEquipmentPicker(true)}
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Item
+                </Button>
+              </div>
 
               {/* Navigation */}
               <div className="flex gap-3 pt-4">
