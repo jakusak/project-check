@@ -6,12 +6,16 @@ import { cn } from "@/lib/utils";
 import backroadsLogo from "@/assets/backroads-logo.png";
 import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
+import { useMobileRedirect } from "@/hooks/useMobileRedirect";
 
 export default function Layout() {
   const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, isTPS, signOut, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
+
+  // Auto-redirect mobile users to mobile routes
+  useMobileRedirect();
 
   console.log('[Layout] Render - loading:', loading, 'user:', user?.email);
 
