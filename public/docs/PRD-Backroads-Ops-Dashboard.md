@@ -2,7 +2,7 @@
 # Backroads Ops Dashboard
 
 **Version:** 2.0  
-**Date:** December 2024  
+**Date:** December 2025  
 **Status:** In Development (Phase 2)  
 **Platform:** Lovable Cloud (React + Supabase)
 
