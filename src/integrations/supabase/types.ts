@@ -38,6 +38,59 @@ export type Database = {
         }
         Relationships: []
       }
+      broken_item_reports: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          description: string
+          equipment_item_id: string | null
+          id: string
+          location_name: string
+          ops_area: string
+          photo_path: string | null
+          severity: Database["public"]["Enums"]["broken_item_severity"]
+          sku: string
+          status: Database["public"]["Enums"]["broken_item_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          description: string
+          equipment_item_id?: string | null
+          id?: string
+          location_name: string
+          ops_area: string
+          photo_path?: string | null
+          severity?: Database["public"]["Enums"]["broken_item_severity"]
+          sku: string
+          status?: Database["public"]["Enums"]["broken_item_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          description?: string
+          equipment_item_id?: string | null
+          id?: string
+          location_name?: string
+          ops_area?: string
+          photo_path?: string | null
+          severity?: Database["public"]["Enums"]["broken_item_severity"]
+          sku?: string
+          status?: Database["public"]["Enums"]["broken_item_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broken_item_reports_equipment_item_id_fkey"
+            columns: ["equipment_item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cycle_count_events: {
         Row: {
           actor_user_id: string
@@ -423,6 +476,66 @@ export type Database = {
           },
         ]
       }
+      maintenance_records: {
+        Row: {
+          broken_item_report_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by_user_id: string
+          equipment_item_id: string | null
+          id: string
+          maintenance_type: string
+          notes: string | null
+          photo_path: string | null
+          sku: string
+          status: Database["public"]["Enums"]["maintenance_status"]
+          updated_at: string
+        }
+        Insert: {
+          broken_item_report_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by_user_id: string
+          equipment_item_id?: string | null
+          id?: string
+          maintenance_type: string
+          notes?: string | null
+          photo_path?: string | null
+          sku: string
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          updated_at?: string
+        }
+        Update: {
+          broken_item_report_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          equipment_item_id?: string | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          photo_path?: string | null
+          sku?: string
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_records_broken_item_report_id_fkey"
+            columns: ["broken_item_report_id"]
+            isOneToOne: false
+            referencedRelation: "broken_item_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_equipment_item_id_fkey"
+            columns: ["equipment_item_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -783,8 +896,11 @@ export type Database = {
         | "opx"
         | "hub_admin"
         | "super_admin"
+      broken_item_severity: "low" | "medium" | "high"
+      broken_item_status: "open" | "in_maintenance" | "resolved"
       cycle_count_status: "submitted" | "validated" | "rejected"
       incident_status: "submitted" | "in_review" | "closed"
+      maintenance_status: "open" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -920,8 +1036,11 @@ export const Constants = {
         "hub_admin",
         "super_admin",
       ],
+      broken_item_severity: ["low", "medium", "high"],
+      broken_item_status: ["open", "in_maintenance", "resolved"],
       cycle_count_status: ["submitted", "validated", "rejected"],
       incident_status: ["submitted", "in_review", "closed"],
+      maintenance_status: ["open", "completed"],
     },
   },
 } as const
