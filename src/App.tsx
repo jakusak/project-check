@@ -32,6 +32,12 @@ import NewCycleCount from "./pages/cycle-counts/NewCycleCount";
 import MyCycleCounts from "./pages/cycle-counts/MyCycleCounts";
 import CycleCountReview from "./pages/cycle-counts/CycleCountReview";
 import CycleCountDetail from "./pages/cycle-counts/CycleCountDetail";
+import BrokenItemsList from "./pages/equipment-health/BrokenItemsList";
+import BrokenItemDetail from "./pages/equipment-health/BrokenItemDetail";
+import ReportBrokenItem from "./pages/equipment-health/ReportBrokenItem";
+import MaintenanceList from "./pages/equipment-health/MaintenanceList";
+import MaintenanceDetail from "./pages/equipment-health/MaintenanceDetail";
+import NewMaintenanceRecord from "./pages/equipment-health/NewMaintenanceRecord";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +75,12 @@ const App = () => (
               <Route path="/cycle-counts/my" element={<MyCycleCounts />} />
               <Route path="/cycle-counts/review" element={<CycleCountReview />} />
               <Route path="/cycle-counts/review/:id" element={<CycleCountDetail />} />
+              <Route path="/broken-items" element={<BrokenItemsList />} />
+              <Route path="/broken-items/new" element={<ReportBrokenItem />} />
+              <Route path="/broken-items/:id" element={<BrokenItemDetail />} />
+              <Route path="/maintenance" element={<MaintenanceList />} />
+              <Route path="/maintenance/new" element={<NewMaintenanceRecord />} />
+              <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             <Route path="*" element={<NotFound />} />
