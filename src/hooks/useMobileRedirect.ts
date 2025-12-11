@@ -5,7 +5,7 @@ const MOBILE_BREAKPOINT = 768;
 
 // Map of desktop routes to mobile routes
 const MOBILE_ROUTES: Record<string, string> = {
-  "/": "/m/home",
+  "/analytics/ops": "/m/home", // Default landing redirects to mobile home
   "/van-incidents/new": "/m/van-incidents/new",
   "/cart": "/m/requests/new",
   "/cycle-counts/new": "/m/cycle-counts/new",
@@ -23,21 +23,17 @@ const MOBILE_ROUTES: Record<string, string> = {
 export function useMobileRedirect(enabled: boolean = true) {
   const navigate = useNavigate();
   const location = useLocation();
-  const hasRedirected = useRef(false);
-  const lastPathname = useRef<string | null>(null);
+  const hasProcessedRoute = useRef<string | null>(null);
 
   useEffect(() => {
     // Skip if not enabled (e.g., during auth loading)
     if (!enabled) return;
     
-    // Reset redirect flag if pathname changed (allows redirect on new route)
-    if (lastPathname.current !== location.pathname) {
-      hasRedirected.current = false;
-      lastPathname.current = location.pathname;
-    }
+    // Skip if already on a mobile route
+    if (location.pathname.startsWith("/m/")) return;
     
-    // Only redirect once per route
-    if (hasRedirected.current) return;
+    // Skip if we already processed this exact pathname
+    if (hasProcessedRoute.current === location.pathname) return;
     
     // Check mobile status synchronously
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
@@ -45,7 +41,7 @@ export function useMobileRedirect(enabled: boolean = true) {
 
     const mobileRoute = MOBILE_ROUTES[location.pathname];
     if (mobileRoute) {
-      hasRedirected.current = true;
+      hasProcessedRoute.current = location.pathname;
       navigate(mobileRoute, { replace: true });
     }
   }, [enabled, location.pathname, navigate]);
