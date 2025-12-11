@@ -1,17 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
+
+const MOBILE_BREAKPOINT = 768;
 
 /**
  * Redirects mobile users from desktop routes to their mobile equivalents.
  * Only redirects from specific routes that have mobile versions.
+ * Uses a stable check to prevent redirect loops.
  */
 export function useMobileRedirect() {
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
+    // Only check once per mount to prevent loops
+    if (hasRedirected.current) return;
+    
+    // Check mobile status synchronously
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
     if (!isMobile) return;
 
     // Map of desktop routes to mobile routes
@@ -26,7 +33,8 @@ export function useMobileRedirect() {
 
     const mobileRoute = mobileRoutes[location.pathname];
     if (mobileRoute) {
+      hasRedirected.current = true;
       navigate(mobileRoute, { replace: true });
     }
-  }, [isMobile, location.pathname, navigate]);
+  }, [location.pathname, navigate]);
 }
