@@ -30,6 +30,7 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   signInWithSSO: (provider: 'azure' | 'google') => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -133,6 +134,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const handleResetPassword = async (email: string) => {
+    const result = await authService.resetPassword(email);
+    
+    if (result.error) {
+      toast({
+        title: "Password reset failed",
+        description: result.error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for a link to reset your password.",
+      });
+    }
+    
+    return { error: result.error };
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -144,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp: handleSignUp,
       signOut: handleSignOut,
       signInWithSSO: handleSignInWithSSO,
+      resetPassword: handleResetPassword,
     }}>
       {children}
     </AuthContext.Provider>

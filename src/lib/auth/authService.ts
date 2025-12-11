@@ -117,6 +117,23 @@ export async function signOut(): Promise<void> {
 }
 
 /**
+ * Send password reset email
+ */
+export async function resetPassword(email: string): Promise<{ error: Error | null }> {
+  const redirectUrl = `${window.location.origin}/auth`;
+  
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectUrl,
+  });
+  
+  if (error) {
+    return { error: new Error(error.message) };
+  }
+  
+  return { error: null };
+}
+
+/**
  * Sign in with SSO provider (Azure AD, etc.)
  * 
  * STUB: This will be implemented when Azure AD is configured.
