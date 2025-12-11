@@ -57,7 +57,19 @@ export default function NewIncident() {
   async function loadOpsAreas() {
     if (!user) return;
 
-    // Check if user is OPX and get their assigned areas
+    // Load all European ops areas for incident reporting
+    const { data: allAreas } = await supabase
+      .from("ops_area_to_hub")
+      .select("ops_area")
+      .eq("region", "europe")
+      .order("ops_area");
+
+    if (allAreas) {
+      const uniqueAreas = [...new Set(allAreas.map((a) => a.ops_area))];
+      setOpsAreas(uniqueAreas);
+    }
+
+    // Check if user has OPX assignments for auto-selection
     const { data: assignments } = await supabase
       .from("opx_area_assignments")
       .select("ops_area")
@@ -66,19 +78,8 @@ export default function NewIncident() {
     if (assignments && assignments.length > 0) {
       const areas = assignments.map((a) => a.ops_area);
       setAssignedAreas(areas);
-      setOpsAreas(areas);
       if (areas.length === 1) {
         setFormData((prev) => ({ ...prev, ops_area: areas[0] }));
-      }
-    } else {
-      // Load all ops areas for regular users
-      const { data: allAreas } = await supabase
-        .from("ops_area_to_hub")
-        .select("ops_area")
-        .order("ops_area");
-
-      if (allAreas) {
-        setOpsAreas([...new Set(allAreas.map((a) => a.ops_area))]);
       }
     }
   }
