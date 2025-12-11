@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
 import { RegionProvider } from "@/contexts/RegionContext";
 import Auth from "./pages/Auth";
@@ -65,7 +65,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<OpsAnalytics />} />
+              <Route path="/" element={<Navigate to="/analytics/ops" replace />} />
               <Route path="/unit-schedule" element={<UnitSchedule />} />
               <Route path="/van-module" element={<VanModule />} />
               <Route path="/unit-loads" element={<UnitLoads />} />
