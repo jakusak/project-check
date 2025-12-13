@@ -41,7 +41,8 @@ export default function OpsAnalytics() {
   // RBAC check
   useEffect(() => {
     if (!authLoading && !isOPX && !isAdmin && !isSuperAdmin) {
-      navigate("/");
+      // Redirect unauthorized users to a safe landing page instead of root to avoid redirect loops
+      navigate("/van-incidents");
     }
   }, [authLoading, isOPX, isAdmin, isSuperAdmin, navigate]);
 
