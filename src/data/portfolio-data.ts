@@ -1,0 +1,98 @@
+import { Project, JourneyPhase, LearnItem } from "../types/portfolio";
+
+// Sample projects - replace with actual data
+export const projects: Project[] = [
+  {
+    id: "project-1",
+    name: "Operational Analytics Platform",
+    type: "Dashboard / Analytics",
+    role: "Lead",
+    maturity: "Live",
+    scope: "Organization-wide",
+    signalLine: "Real-time metrics for 500+ operations staff",
+    context: "Operations team lacked visibility into daily performance and bottlenecks across 12 warehouses.",
+    constraint: "Built in 6 weeks with existing BI stack and no dedicated engineering support.",
+    action: "Designed SQL data model, built automated dashboards, deployed training program for regional managers.",
+    outcome: "Reduced reporting time from 4 hours to 15 minutes daily. Identified $200K annual cost savings in first month.",
+    artifacts: [],
+    metrics: ["500+ daily active users", "15min reporting time (was 4hrs)", "$200K savings identified"],
+    order: 1,
+  },
+  {
+    id: "project-2",
+    name: "Equipment Request System",
+    type: "Internal Tool",
+    role: "Builder",
+    maturity: "Live",
+    scope: "Organization-wide",
+    signalLine: "Unified workflow for equipment across regions",
+    context: "Equipment requests handled via email and spreadsheets. No visibility, frequent delays, duplicated work.",
+    constraint: "Had to work within existing auth system and maintain backwards compatibility with manual process.",
+    action: "Built request portal with approval workflow, inventory tracking, and automated notifications.",
+    outcome: "Request processing time dropped from 3 days to 4 hours. 95% user adoption within 2 weeks.",
+    artifacts: [],
+    metrics: ["3 days → 4 hours", "95% adoption in 2 weeks"],
+    order: 2,
+  },
+  {
+    id: "project-3",
+    name: "Logistics Micro-Business",
+    type: "Business",
+    role: "Founder",
+    maturity: "Archived",
+    scope: "Personal",
+    signalLine: "Proof-of-concept delivery service for students",
+    context: "Campus students had limited access to grocery delivery during evening hours.",
+    constraint: "Solo operator, $500 budget, 10 hours per week available.",
+    action: "Built simple ordering form, negotiated supplier terms, ran evening delivery routes for 4 months.",
+    outcome: "Served 80 customers, achieved profitability in week 6, validated demand before scaling constraints hit.",
+    artifacts: [],
+    metrics: ["80 customers", "Profitable week 6"],
+    order: 3,
+  },
+];
+
+export const journeyPhases: JourneyPhase[] = [
+  {
+    id: "phase-1",
+    period: "2020–2024",
+    title: "Operations Leadership",
+    description: "Led logistics teams, built internal tools and analytics systems to scale operations.",
+    order: 1,
+  },
+  {
+    id: "phase-2",
+    period: "2018–2020",
+    title: "Early Ventures",
+    description: "Founded small businesses, learned product development and customer acquisition.",
+    order: 2,
+  },
+  {
+    id: "phase-3",
+    period: "2016–2018",
+    title: "Foundation",
+    description: "Built technical foundation through side projects and self-directed learning.",
+    order: 3,
+  },
+];
+
+export const learnItems: LearnItem[] = [
+  {
+    id: "learn-1",
+    title: "Building for clarity over completeness",
+    description: "Why shipping a simple, clear solution beats waiting for the perfect system.",
+    order: 1,
+  },
+  {
+    id: "learn-2",
+    title: "Metrics that matter",
+    description: "How to identify the 2-3 numbers that actually drive operational decisions.",
+    order: 2,
+  },
+  {
+    id: "learn-3",
+    title: "Earned lessons from failed projects",
+    description: "What I learned from products that didn't work and businesses that didn't scale.",
+    order: 3,
+  },
+];
