@@ -1,7 +1,35 @@
 import { Project, JourneyPhase, LearnItem } from "../types/portfolio";
 
-// Sample projects - replace with actual data
+// Portfolio projects
 export const projects: Project[] = [
+  {
+    id: "zizkolarna",
+    name: "Zizkolarna Bike Shop",
+    type: "Business",
+    role: "Founder",
+    maturity: "Live",
+    scope: "Small team",
+    signalLine: "Full-service bike shop and community hub",
+    context: "Local cycling community needed dedicated space for repairs, sales, and gathering.",
+    constraint: "Limited budget, competitive market, needed to establish brand and trust quickly.",
+    action: "Built custom website, established supplier relationships, created welcoming retail space with workshop.",
+    outcome: "Operating bike shop serving local cycling community with repair services and quality equipment.",
+    artifacts: [
+      {
+        type: "link",
+        url: "http://zizkolarna.cz.m172.server4u.cz",
+        caption: "View live website",
+      },
+      {
+        type: "image",
+        url: "/bikeshop-preview.jpg",
+        alt: "Zizkolarna bike shop storefront",
+        caption: "Brick-and-mortar location",
+      },
+    ],
+    metrics: [],
+    order: 0,
+  },
   {
     id: "project-1",
     name: "Operational Analytics Platform",
