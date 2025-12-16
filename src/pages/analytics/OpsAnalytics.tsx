@@ -88,7 +88,7 @@ export default function OpsAnalytics() {
       {/* Logo Overlay - covers right half, slides left on hover */}
       <div 
         className={`fixed top-0 right-0 h-full w-1/2 bg-white z-50 flex items-center justify-center transition-transform duration-500 ease-in-out cursor-pointer ${
-          overlayHovered ? '-translate-x-full' : 'translate-x-0'
+          overlayHovered ? 'translate-x-full' : 'translate-x-0'
         }`}
         onMouseEnter={() => setOverlayHovered(true)}
         style={{ boxShadow: overlayHovered ? 'none' : '-4px 0 20px rgba(0,0,0,0.1)' }}
