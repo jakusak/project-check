@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { subDays, format } from "date-fns";
 import { CalendarIcon, TrendingUp, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import backroadsLogoFull from "@/assets/backroads-logo-full.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -80,10 +81,28 @@ export default function OpsAnalytics() {
     setOpsArea("");
   };
 
+  const [overlayHovered, setOverlayHovered] = useState(false);
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
+    <div className="relative">
+      {/* Logo Overlay - covers right half, slides left on hover */}
+      <div 
+        className={`fixed top-0 right-0 h-full w-1/2 bg-white z-50 flex items-center justify-center transition-transform duration-500 ease-in-out cursor-pointer ${
+          overlayHovered ? '-translate-x-full' : 'translate-x-0'
+        }`}
+        onMouseEnter={() => setOverlayHovered(true)}
+        style={{ boxShadow: overlayHovered ? 'none' : '-4px 0 20px rgba(0,0,0,0.1)' }}
+      >
+        <img 
+          src={backroadsLogoFull} 
+          alt="Backroads" 
+          className="max-w-[80%] max-h-[40%] object-contain"
+        />
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div>
         <h1 className="text-3xl font-bold">Operations Analytics</h1>
         <p className="text-muted-foreground">
           High-level metrics for Inventory Requests and Van Incidents
@@ -404,6 +423,7 @@ export default function OpsAnalytics() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
