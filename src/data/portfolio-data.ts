@@ -22,7 +22,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        url: "/bikeshop-preview.jpg",
+        url: "/placeholder.svg",
         alt: "Zizkolarna bike shop storefront",
         caption: "Brick-and-mortar location",
       },
