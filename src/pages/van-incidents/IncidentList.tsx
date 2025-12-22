@@ -12,9 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Filter, AlertTriangle, Calendar, MapPin, Car, FileText, ExternalLink, Loader2, Mail, MessageSquare, Send, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Filter, AlertTriangle, Calendar, MapPin, Car, FileText, ExternalLink, Loader2, Mail, MessageSquare, Send, CheckCircle, Clock, XCircle, Eye, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { LDReviewPanel } from "@/components/van-incidents/LDReviewPanel";
+import { OPSSendEmailPanel } from "@/components/van-incidents/OPSSendEmailPanel";
 
 const REGION_OPTIONS = [
   { value: "all", label: "All Regions" },
@@ -36,15 +39,16 @@ const STATUS_COLORS: Record<string, string> = {
   closed: "bg-green-100 text-green-800 border-green-200",
 };
 
-const LD_STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; className: string }> = {
-  not_sent: { label: "Not Sent", icon: XCircle, className: "text-muted-foreground" },
-  in_progress: { label: "In Progress", icon: Clock, className: "text-amber-600" },
-  completed: { label: "Completed", icon: CheckCircle, className: "text-green-600" },
+const LD_REVIEW_STATUS: Record<string, { label: string; color: string }> = {
+  pending: { label: "Pending", color: "bg-gray-100 text-gray-800" },
+  approved: { label: "Approved", color: "bg-green-100 text-green-800" },
+  needs_revision: { label: "Needs Revision", color: "bg-amber-100 text-amber-800" },
 };
 
-const FS_STATUS_CONFIG: Record<string, { label: string; icon: typeof Send; className: string }> = {
-  not_sent: { label: "Not Sent", icon: XCircle, className: "text-muted-foreground" },
-  sent: { label: "Sent", icon: CheckCircle, className: "text-green-600" },
+const COST_BUCKET_LABELS: Record<string, { label: string; color: string }> = {
+  under_1500: { label: "< €1.5k", color: "bg-green-100 text-green-800" },
+  "1500_to_3500": { label: "€1.5-3.5k", color: "bg-amber-100 text-amber-800" },
+  over_3500: { label: "> €3.5k", color: "bg-red-100 text-red-800" },
 };
 
 export default function IncidentList() {
@@ -65,8 +69,7 @@ export default function IncidentList() {
   const [selectedIncident, setSelectedIncident] = useState<VanIncident | null>(null);
   const [internalNotes, setInternalNotes] = useState("");
   const [newStatus, setNewStatus] = useState<string>("");
-  const [ldStatus, setLdStatus] = useState<string>("not_sent");
-  const [fsStatus, setFsStatus] = useState<string>("not_sent");
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   const { data: incidents, isLoading } = useVanIncidents({
     dateFrom: filters.dateFrom || undefined,
@@ -134,8 +137,7 @@ export default function IncidentList() {
     setSelectedIncident(incident);
     setInternalNotes(incident.internal_notes || "");
     setNewStatus(incident.status);
-    setLdStatus(incident.ld_communication_status || "not_sent");
-    setFsStatus(incident.fs_communication_status || "not_sent");
+    setActiveTab("details");
   }
 
   async function handleUpdateIncident() {
@@ -146,8 +148,6 @@ export default function IncidentList() {
       status: newStatus as "submitted" | "in_review" | "closed",
       internal_notes: internalNotes,
       ops_admin_user_id: user.id,
-      ld_communication_status: ldStatus as "not_sent" | "in_progress" | "completed",
-      fs_communication_status: fsStatus as "sent" | "not_sent",
     });
 
     setSelectedIncident(null);
@@ -309,19 +309,17 @@ export default function IncidentList() {
                       <TableHead>Date</TableHead>
                       <TableHead>Van</TableHead>
                       <TableHead>Ops Area</TableHead>
+                      <TableHead>Est. Cost</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>LD Review</TableHead>
                       <TableHead>Email Sent</TableHead>
-                      <TableHead>LD Comm.</TableHead>
-                      <TableHead>FS Comm.</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {incidents.map((incident) => {
-                      const ldConfig = LD_STATUS_CONFIG[incident.ld_communication_status || "not_sent"];
-                      const fsConfig = FS_STATUS_CONFIG[incident.fs_communication_status || "not_sent"];
-                      const LdIcon = ldConfig.icon;
-                      const FsIcon = fsConfig.icon;
+                      const costBucket = COST_BUCKET_LABELS[incident.ai_cost_bucket || "1500_to_3500"];
+                      const ldReview = LD_REVIEW_STATUS[incident.ld_review_status || "pending"];
                       
                       return (
                         <TableRow
@@ -343,6 +341,11 @@ export default function IncidentList() {
                           </TableCell>
                           <TableCell>{incident.ops_area}</TableCell>
                           <TableCell>
+                            <Badge variant="outline" className={cn("text-xs", costBucket.color)}>
+                              {costBucket.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
                             <Badge
                               variant="outline"
                               className={cn(STATUS_COLORS[incident.status])}
@@ -351,32 +354,26 @@ export default function IncidentList() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {incident.email_sent_at ? (
+                            <Badge variant="outline" className={cn("text-xs", ldReview.color)}>
+                              {ldReview.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {incident.ops_email_sent_at ? (
                               <div className="flex items-center gap-1 text-green-600">
-                                <Mail className="h-4 w-4" />
+                                <CheckCircle className="h-4 w-4" />
                                 <span className="text-xs">Sent</span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-1 text-muted-foreground">
-                                <Mail className="h-4 w-4" />
+                                <Clock className="h-4 w-4" />
                                 <span className="text-xs">Pending</span>
                               </div>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className={cn("flex items-center gap-1", ldConfig.className)}>
-                              <LdIcon className="h-4 w-4" />
-                              <span className="text-xs">{ldConfig.label}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className={cn("flex items-center gap-1", fsConfig.className)}>
-                              <FsIcon className="h-4 w-4" />
-                              <span className="text-xs">{fsConfig.label}</span>
-                            </div>
-                          </TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
                           </TableCell>
@@ -391,173 +388,117 @@ export default function IncidentList() {
         </Card>
       </div>
 
-      {/* Detail Dialog */}
+      {/* Detail Dialog with Tabs */}
       <Dialog open={!!selectedIncident} onOpenChange={() => setSelectedIncident(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
           {selectedIncident && (
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-destructive" />
-                  Incident Report - {selectedIncident.van_id}
+                  Incident - {selectedIncident.van_id}
                 </DialogTitle>
                 <DialogDescription>
-                  Reported on{" "}
-                  {format(new Date(selectedIncident.created_at), "MMM d, yyyy 'at' h:mm a")}
+                  {format(new Date(selectedIncident.incident_date), "MMM d, yyyy")} • {selectedIncident.ops_area}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4">
-                {/* Status Badge */}
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={cn(STATUS_COLORS[selectedIncident.status])}
-                  >
-                    {selectedIncident.status.replace("_", " ")}
-                  </Badge>
-                </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="ld-review">LD Review</TabsTrigger>
+                  <TabsTrigger value="send-email">Send Email</TabsTrigger>
+                </TabsList>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Operations Area</p>
-                    <p className="font-medium">{selectedIncident.ops_area}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Trip ID</p>
-                    <p className="font-medium">{selectedIncident.trip_id || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Van ID</p>
-                    <p className="font-medium">{selectedIncident.van_id}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">License Plate</p>
-                    <p className="font-medium">{selectedIncident.license_plate}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">VIN</p>
-                    <p className="font-medium">{selectedIncident.vin}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Date & Time</p>
-                    <p className="font-medium">
-                      {format(new Date(selectedIncident.incident_date), "MMM d, yyyy")} at{" "}
-                      {selectedIncident.incident_time}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Location</p>
-                    <p className="font-medium">{selectedIncident.location_text}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Weather</p>
-                    <p className="font-medium">{selectedIncident.weather}</p>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <p className="text-muted-foreground text-sm mb-1">Description</p>
-                  <p className="text-sm bg-muted p-3 rounded-md">
-                    {selectedIncident.description}
-                  </p>
-                </div>
-
-                {/* Files */}
-                {incidentFiles && incidentFiles.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-2">Attached Files</p>
-                    <div className="space-y-2">
-                      {incidentFiles.map((file) => (
-                        <a
-                          key={file.id}
-                          href={getFileUrl(file.file_path)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                        >
-                          <FileText className="h-4 w-4" />
-                          {file.file_name}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      ))}
+                <TabsContent value="details" className="flex-1 overflow-y-auto mt-4">
+                  <div className="space-y-4">
+                    {/* Status Badge */}
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={cn(STATUS_COLORS[selectedIncident.status])}>
+                        {selectedIncident.status.replace("_", " ")}
+                      </Badge>
                     </div>
-                  </div>
-                )}
 
-                {/* Admin/OPX Actions */}
-                {canEdit && (
-                  <div className="border-t pt-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Status</Label>
-                        <Select value={newStatus} onValueChange={setNewStatus}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="submitted">Submitted</SelectItem>
-                            <SelectItem value="in_review">In Review</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Operations Area</p>
+                        <p className="font-medium">{selectedIncident.ops_area}</p>
                       </div>
-                      <div className="space-y-2">
-                        <Label>LD Communication</Label>
-                        <Select value={ldStatus} onValueChange={setLdStatus}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="not_sent">Not Sent</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div>
+                        <p className="text-muted-foreground">Van ID</p>
+                        <p className="font-medium">{selectedIncident.van_id}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">License Plate</p>
+                        <p className="font-medium">{selectedIncident.license_plate}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Date & Time</p>
+                        <p className="font-medium">
+                          {format(new Date(selectedIncident.incident_date), "MMM d, yyyy")} at {selectedIncident.incident_time}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Location</p>
+                        <p className="font-medium">{selectedIncident.location_text}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Weather</p>
+                        <p className="font-medium">{selectedIncident.weather}</p>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Final FS Communication</Label>
-                      <Select value={fsStatus} onValueChange={setFsStatus}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="not_sent">Not Sent</SelectItem>
-                          <SelectItem value="sent">Sent</SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                    {/* Description */}
+                    <div>
+                      <p className="text-muted-foreground text-sm mb-1">Description</p>
+                      <p className="text-sm bg-muted p-3 rounded-md">{selectedIncident.description}</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Internal Notes</Label>
-                      <Textarea
-                        value={internalNotes}
-                        onChange={(e) => setInternalNotes(e.target.value)}
-                        placeholder="Add internal notes (not visible to reporter)"
-                        rows={3}
-                      />
-                    </div>
+                    {/* Admin/OPX Actions */}
+                    {canEdit && (
+                      <div className="border-t pt-4 space-y-4">
+                        <div className="space-y-2">
+                          <Label>Status</Label>
+                          <Select value={newStatus} onValueChange={setNewStatus}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="submitted">Submitted</SelectItem>
+                              <SelectItem value="in_review">In Review</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    <Button
-                      onClick={handleUpdateIncident}
-                      disabled={updateIncident.isPending}
-                      className="w-full"
-                    >
-                      {updateIncident.isPending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Updating...
-                        </>
-                      ) : (
-                        "Update Incident"
-                      )}
-                    </Button>
+                        <div className="space-y-2">
+                          <Label>Internal Notes</Label>
+                          <Textarea
+                            value={internalNotes}
+                            onChange={(e) => setInternalNotes(e.target.value)}
+                            placeholder="Add internal notes"
+                            rows={3}
+                          />
+                        </div>
+
+                        <Button onClick={handleUpdateIncident} disabled={updateIncident.isPending} className="w-full">
+                          {updateIncident.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                          Update Incident
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </TabsContent>
+
+                <TabsContent value="ld-review" className="flex-1 overflow-hidden mt-4">
+                  <LDReviewPanel incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
+                </TabsContent>
+
+                <TabsContent value="send-email" className="flex-1 overflow-hidden mt-4">
+                  <OPSSendEmailPanel incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </DialogContent>

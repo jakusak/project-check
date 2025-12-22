@@ -1033,6 +1033,7 @@ export type Database = {
           description: string
           driver_incident_count_this_season: number | null
           email_sent_at: string | null
+          final_email_content: Json | null
           fs_communication_status: string | null
           id: string
           incident_date: string
@@ -1043,10 +1044,17 @@ export type Database = {
           ld_draft_generated_at: string | null
           ld_draft_status: string | null
           ld_email_sent_at: string | null
+          ld_preventability_decision: string | null
+          ld_review_comment: string | null
+          ld_review_status: string | null
+          ld_reviewed_at: string | null
+          ld_reviewed_by: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id: string | null
           ops_area: string
+          ops_email_sent_at: string | null
+          ops_email_sent_by: string | null
           status: Database["public"]["Enums"]["incident_status"]
           trip_id: string | null
           updated_at: string
@@ -1067,6 +1075,7 @@ export type Database = {
           description: string
           driver_incident_count_this_season?: number | null
           email_sent_at?: string | null
+          final_email_content?: Json | null
           fs_communication_status?: string | null
           id?: string
           incident_date: string
@@ -1077,10 +1086,17 @@ export type Database = {
           ld_draft_generated_at?: string | null
           ld_draft_status?: string | null
           ld_email_sent_at?: string | null
+          ld_preventability_decision?: string | null
+          ld_review_comment?: string | null
+          ld_review_status?: string | null
+          ld_reviewed_at?: string | null
+          ld_reviewed_by?: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id?: string | null
           ops_area: string
+          ops_email_sent_at?: string | null
+          ops_email_sent_by?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           trip_id?: string | null
           updated_at?: string
@@ -1101,6 +1117,7 @@ export type Database = {
           description?: string
           driver_incident_count_this_season?: number | null
           email_sent_at?: string | null
+          final_email_content?: Json | null
           fs_communication_status?: string | null
           id?: string
           incident_date?: string
@@ -1111,10 +1128,17 @@ export type Database = {
           ld_draft_generated_at?: string | null
           ld_draft_status?: string | null
           ld_email_sent_at?: string | null
+          ld_preventability_decision?: string | null
+          ld_review_comment?: string | null
+          ld_review_status?: string | null
+          ld_reviewed_at?: string | null
+          ld_reviewed_by?: string | null
           license_plate?: string
           location_text?: string
           ops_admin_user_id?: string | null
           ops_area?: string
+          ops_email_sent_at?: string | null
+          ops_email_sent_by?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           trip_id?: string | null
           updated_at?: string
@@ -1133,8 +1157,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "van_incidents_ld_reviewed_by_fkey"
+            columns: ["ld_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "van_incidents_ops_admin_user_id_fkey"
             columns: ["ops_admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "van_incidents_ops_email_sent_by_fkey"
+            columns: ["ops_email_sent_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

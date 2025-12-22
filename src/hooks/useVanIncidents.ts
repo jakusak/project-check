@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { toast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
 
 export interface LDDraftContent {
   incident_overview: {
@@ -68,7 +69,19 @@ export interface VanIncident {
   driver_incident_count_this_season: number;
   vehicle_drivable: boolean | null;
   was_towed: boolean | null;
+  // LD Review fields
+  ld_review_status: "pending" | "approved" | "needs_revision" | null;
+  ld_review_comment: string | null;
+  ld_reviewed_by: string | null;
+  ld_reviewed_at: string | null;
+  ld_preventability_decision: "preventable" | "non_preventable" | null;
+  // OPS Email fields
+  ops_email_sent_at: string | null;
+  ops_email_sent_by: string | null;
+  final_email_content: Record<string, unknown> | null;
+  // Relations
   creator?: { full_name: string | null; email: string | null };
+  ld_reviewer?: { full_name: string | null; email: string | null };
 }
 
 export interface VanIncidentFile {
@@ -350,6 +363,129 @@ export function useUpdateIncident() {
         description: error.message,
         variant: "destructive",
       });
+    },
+  });
+}
+
+export function useLDReviewIncident() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ld_review_status,
+      ld_review_comment,
+      ld_preventability_decision,
+    }: {
+      id: string;
+      ld_review_status: "approved" | "needs_revision";
+      ld_review_comment?: string;
+      ld_preventability_decision?: "preventable" | "non_preventable";
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const updateData: Record<string, unknown> = {
+        ld_review_status,
+        ld_reviewed_by: user.id,
+        ld_reviewed_at: new Date().toISOString(),
+      };
+      
+      if (ld_review_comment !== undefined) updateData.ld_review_comment = ld_review_comment;
+      if (ld_preventability_decision !== undefined) updateData.ld_preventability_decision = ld_preventability_decision;
+      
+      // If approved, update ld_draft_status to reflect LD has approved
+      if (ld_review_status === "approved") {
+        updateData.ld_draft_status = "reviewed";
+      }
+
+      const { data, error } = await supabase
+        .from("van_incidents")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["van-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["van-incident", data.id] });
+      toast({ title: "LD review submitted" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to submit review",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useSendOPSEmail() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      final_email_content,
+    }: {
+      id: string;
+      final_email_content: Json;
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("van_incidents")
+        .update({
+          ops_email_sent_at: new Date().toISOString(),
+          ops_email_sent_by: user.id,
+          final_email_content,
+          fs_communication_status: "sent",
+          ld_draft_status: "sent",
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["van-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["van-incident", data.id] });
+      toast({ title: "Email sent to field staff" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to send email",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useRegenerateAnalysis() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (incidentId: string) => {
+      const { data, error } = await supabase.functions.invoke("analyze-incident-damage", {
+        body: { incident_id: incidentId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["van-incidents"] });
+      toast({ title: "Analysis regenerated" });
+    },
+    onError: (error) => {
+      toast({ title: "Failed to regenerate", description: error.message, variant: "destructive" });
     },
   });
 }
