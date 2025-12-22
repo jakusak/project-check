@@ -16,6 +16,13 @@ import { Plus, Filter, AlertTriangle, Calendar, MapPin, Car, FileText, ExternalL
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+const REGION_OPTIONS = [
+  { value: "all", label: "All Regions" },
+  { value: "europe", label: "Europe" },
+  { value: "usa_lappa", label: "USA / LAPPA" },
+  { value: "canada", label: "Canada" },
+];
+
 const STATUS_OPTIONS = [
   { value: "all", label: "All Statuses" },
   { value: "submitted", label: "Submitted" },
@@ -46,6 +53,7 @@ export default function IncidentList() {
   const updateIncident = useUpdateIncident();
 
   const [filters, setFilters] = useState({
+    region: "all",
     dateFrom: "",
     dateTo: "",
     opsArea: "",
@@ -53,6 +61,7 @@ export default function IncidentList() {
   });
 
   const [opsAreas, setOpsAreas] = useState<string[]>([]);
+  const [allOpsAreaMappings, setAllOpsAreaMappings] = useState<{ ops_area: string; region: string }[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<VanIncident | null>(null);
   const [internalNotes, setInternalNotes] = useState("");
   const [newStatus, setNewStatus] = useState<string>("");
@@ -72,26 +81,51 @@ export default function IncidentList() {
     loadOpsAreas();
   }, [user, isAdmin, isOPX]);
 
+  // Filter ops areas when region changes
+  useEffect(() => {
+    if (filters.region === "all") {
+      setOpsAreas([...new Set(allOpsAreaMappings.map((a) => a.ops_area))]);
+    } else {
+      const filtered = allOpsAreaMappings
+        .filter((a) => a.region === filters.region)
+        .map((a) => a.ops_area);
+      setOpsAreas([...new Set(filtered)]);
+    }
+    // Reset ops area filter when region changes
+    setFilters((prev) => ({ ...prev, opsArea: "" }));
+  }, [filters.region, allOpsAreaMappings]);
+
   async function loadOpsAreas() {
     if (!user) return;
 
     if (isAdmin) {
-      // Admins see all areas
+      // Admins see all areas with their regions
       const { data } = await supabase
         .from("ops_area_to_hub")
-        .select("ops_area")
+        .select("ops_area, region")
         .order("ops_area");
       if (data) {
+        setAllOpsAreaMappings(data.map((a) => ({ ops_area: a.ops_area, region: a.region || "europe" })));
         setOpsAreas([...new Set(data.map((a) => a.ops_area))]);
       }
     } else if (isOPX) {
-      // OPX see only assigned areas
-      const { data } = await supabase
+      // OPX see only assigned areas - need to get region info too
+      const { data: assignments } = await supabase
         .from("opx_area_assignments")
         .select("ops_area")
         .eq("user_id", user.id);
-      if (data) {
-        setOpsAreas(data.map((a) => a.ops_area));
+      
+      if (assignments) {
+        const opsAreaNames = assignments.map((a) => a.ops_area);
+        const { data: mappings } = await supabase
+          .from("ops_area_to_hub")
+          .select("ops_area, region")
+          .in("ops_area", opsAreaNames);
+        
+        if (mappings) {
+          setAllOpsAreaMappings(mappings.map((a) => ({ ops_area: a.ops_area, region: a.region || "europe" })));
+        }
+        setOpsAreas(opsAreaNames);
       }
     }
   }
@@ -157,7 +191,30 @@ export default function IncidentList() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Region Filter - First */}
+              {(isAdmin || isOPX) && (
+                <div className="space-y-2">
+                  <Label>Region</Label>
+                  <Select
+                    value={filters.region}
+                    onValueChange={(v) =>
+                      setFilters((prev) => ({ ...prev, region: v }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Regions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REGION_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Date From</Label>
                 <Input
