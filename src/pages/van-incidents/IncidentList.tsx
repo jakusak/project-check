@@ -28,8 +28,8 @@ const REGION_OPTIONS = [
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Statuses" },
-  { value: "submitted", label: "Submitted" },
-  { value: "in_review", label: "In Review" },
+  { value: "submitted", label: "New Accident" },
+  { value: "in_review", label: "In Progress" },
   { value: "closed", label: "Closed" },
 ];
 
@@ -37,6 +37,12 @@ const STATUS_COLORS: Record<string, string> = {
   submitted: "bg-yellow-100 text-yellow-800 border-yellow-200",
   in_review: "bg-blue-100 text-blue-800 border-blue-200",
   closed: "bg-green-100 text-green-800 border-green-200",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  submitted: "New Accident",
+  in_review: "In Progress",
+  closed: "Closed",
 };
 
 const LD_REVIEW_STATUS: Record<string, { label: string; color: string }> = {
@@ -133,11 +139,19 @@ export default function IncidentList() {
     }
   }
 
-  function openDetail(incident: VanIncident) {
+  async function openDetail(incident: VanIncident) {
     setSelectedIncident(incident);
     setInternalNotes(incident.internal_notes || "");
     setNewStatus(incident.status);
     setActiveTab("details");
+    
+    // Auto-update status to "in_review" when opening a "submitted" incident
+    if (incident.status === "submitted" && canEdit) {
+      await updateIncident.mutateAsync({
+        id: incident.id,
+        status: "in_review",
+      });
+    }
   }
 
   async function handleUpdateIncident() {
@@ -346,11 +360,11 @@ export default function IncidentList() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge
+                          <Badge
                               variant="outline"
                               className={cn(STATUS_COLORS[incident.status])}
                             >
-                              {incident.status.replace("_", " ")}
+                              {STATUS_LABELS[incident.status] || incident.status}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -407,28 +421,13 @@ export default function IncidentList() {
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="ld-review">LD Review</TabsTrigger>
-                  <TabsTrigger value="send-email">Send Email</TabsTrigger>
+                  <TabsTrigger value="send-email">Field Staff Final Email Draft</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="flex-1 overflow-y-auto mt-4">
                   <div className="space-y-4">
-                    {/* Status Badge */}
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={cn(STATUS_COLORS[selectedIncident.status])}>
-                        {selectedIncident.status.replace("_", " ")}
-                      </Badge>
-                    </div>
-
                     {/* Details Grid */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Operations Area</p>
-                        <p className="font-medium">{selectedIncident.ops_area}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Van ID</p>
-                        <p className="font-medium">{selectedIncident.van_id}</p>
-                      </div>
                       <div>
                         <p className="text-muted-foreground">License Plate</p>
                         <p className="font-medium">{selectedIncident.license_plate}</p>
@@ -455,23 +454,9 @@ export default function IncidentList() {
                       <p className="text-sm bg-muted p-3 rounded-md">{selectedIncident.description}</p>
                     </div>
 
-                    {/* Admin/OPX Actions */}
+                    {/* Admin/OPX Actions - Internal Notes only */}
                     {canEdit && (
                       <div className="border-t pt-4 space-y-4">
-                        <div className="space-y-2">
-                          <Label>Status</Label>
-                          <Select value={newStatus} onValueChange={setNewStatus}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="submitted">Submitted</SelectItem>
-                              <SelectItem value="in_review">In Review</SelectItem>
-                              <SelectItem value="closed">Closed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
                         <div className="space-y-2">
                           <Label>Internal Notes</Label>
                           <Textarea

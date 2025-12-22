@@ -27,6 +27,130 @@ const CONFIDENCE_LABELS: Record<string, { label: string; color: string }> = {
   low: { label: "Low", color: "text-red-600" },
 };
 
+// Policy Consequence Guidance based on the penalty chart
+function PolicyConsequenceGuidance({ costBucket, incidentNumber }: { costBucket: string; incidentNumber: number }) {
+  // Determine consequences based on the penalty chart
+  const getConsequences = () => {
+    // Third or more incident - maximum penalties
+    if (incidentNumber >= 3) {
+      return {
+        title: "THIRD+ INCIDENT of Season",
+        titleColor: "bg-red-600 text-white",
+        points: "Maximum penalties apply",
+        mandatory: ["May result in termination", "Application of maximum penalties regardless of cost"],
+        optional: [],
+        note: "Any THIRD incident may result in termination or application of max penalties regardless of cost of the incident."
+      };
+    }
+    
+    // Second incident - additional 6 points for any cost
+    if (incidentNumber === 2) {
+      return {
+        title: "SECOND INCIDENT of Season",
+        titleColor: "bg-sky-500 text-white",
+        costLabel: "Any Cost at All",
+        points: "Loss of additional 6 Performance Points",
+        mandatory: ["Loss of additional 6 Performance Points"],
+        optional: ["Termination"],
+        note: "Policy indicates additional loss of 6 performance points for a second incident."
+      };
+    }
+    
+    // First incident - varies by cost bucket
+    if (costBucket === "under_1500") {
+      return {
+        title: "FIRST INCIDENT of Season",
+        titleColor: "bg-gray-800 text-white",
+        costLabel: "Less than €1,500",
+        costColor: "bg-sky-200",
+        points: "Loss of 4 Performance Points",
+        mandatory: ["Loss of 4 Performance Points"],
+        optional: [],
+        note: null
+      };
+    } else if (costBucket === "1500_to_3500") {
+      return {
+        title: "FIRST INCIDENT of Season",
+        titleColor: "bg-gray-800 text-white",
+        costLabel: "€1,500 to €3,500",
+        costColor: "bg-sky-200",
+        points: "Loss of 4 Performance Points",
+        mandatory: [
+          "Loss of 4 Performance Points",
+          "1-Year Warning",
+          "Staff Ride Disqualification",
+          "Backroads Gear Ineligibility"
+        ],
+        optional: ["Termination"],
+        note: "1-Year Warning: You will have lower priority for Staff Ride approval, scheduling, Winter Work, and/or career progression opportunities for the duration of the warning."
+      };
+    } else {
+      // over_3500
+      return {
+        title: "FIRST INCIDENT of Season",
+        titleColor: "bg-gray-800 text-white",
+        costLabel: "Over €3,500",
+        costColor: "bg-red-200",
+        points: "Loss of 6 Performance Points",
+        mandatory: [
+          "Loss of 6 Performance Points",
+          "1-Year Warning",
+          "Staff Ride Disqualification",
+          "Backroads Gear Ineligibility"
+        ],
+        optional: ["Termination"],
+        note: "1-Year Warning: You will have lower priority for Staff Ride approval, scheduling, Winter Work, and/or career progression opportunities for the duration of the warning."
+      };
+    }
+  };
+  
+  const consequences = getConsequences();
+  
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      {/* Header */}
+      <div className={cn("px-4 py-2 font-semibold text-center", consequences.titleColor)}>
+        {consequences.title}
+      </div>
+      
+      {/* Cost Label if applicable */}
+      {consequences.costLabel && (
+        <div className={cn("px-4 py-2 text-center font-medium border-b", consequences.costColor || "bg-gray-100")}>
+          {consequences.costLabel}
+        </div>
+      )}
+      
+      {/* Consequences List */}
+      <div className="p-4 space-y-2">
+        {consequences.mandatory.map((item, idx) => (
+          <div key={idx} className="flex items-start gap-2 text-sm">
+            <span className="text-foreground">•</span>
+            <span className="font-medium">{item}</span>
+          </div>
+        ))}
+        {consequences.optional.map((item, idx) => (
+          <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <span>•</span>
+            <span className="italic">{item} (optional)</span>
+          </div>
+        ))}
+      </div>
+      
+      {/* Note */}
+      {consequences.note && (
+        <div className="px-4 py-3 bg-muted/50 text-xs text-muted-foreground border-t">
+          <strong>Note:</strong> {consequences.note}
+        </div>
+      )}
+      
+      {/* Footer note */}
+      <div className="px-4 py-2 bg-muted/30 text-xs text-muted-foreground border-t">
+        All penalties applied for 1 calendar year. Items in <em>italic</em> are optional to be applied.
+      </div>
+    </div>
+  );
+}
+
 interface LDReviewPanelProps {
   incident: VanIncident;
   onClose: () => void;
@@ -185,19 +309,13 @@ export function LDReviewPanel({ incident, onClose }: LDReviewPanelProps) {
 
               <Separator />
 
-              {/* Consequence Guidance */}
+              {/* Policy Consequence Guidance */}
               <section>
                 <h4 className="font-medium mb-2">Policy Consequence Guidance</h4>
-                <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Performance Points:</span>
-                    <span className="font-medium">{draft.consequence_guidance?.performance_points_impact}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Additional Measures:</span>
-                    <span className="font-medium">{draft.consequence_guidance?.additional_measures}</span>
-                  </div>
-                </div>
+                <PolicyConsequenceGuidance 
+                  costBucket={incident.ai_cost_bucket || "1500_to_3500"}
+                  incidentNumber={incident.driver_incident_count_this_season || 1}
+                />
               </section>
             </>
           ) : (

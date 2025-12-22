@@ -446,6 +446,7 @@ export function useSendOPSEmail() {
           final_email_content,
           fs_communication_status: "sent",
           ld_draft_status: "sent",
+          status: "closed", // Set status to closed when email is sent
         })
         .eq("id", id)
         .select()
