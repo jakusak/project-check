@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-incident-confirmation]
 verify_jwt = false
+
+[functions.analyze-incident-damage]
+verify_jwt = false

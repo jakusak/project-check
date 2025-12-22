@@ -28,6 +28,7 @@ import NotFound from "./pages/NotFound";
 import IncidentList from "./pages/van-incidents/IncidentList";
 import NewIncident from "./pages/van-incidents/NewIncident";
 import SuperAdminIncidentsDashboard from "./pages/van-incidents/SuperAdminIncidentsDashboard";
+import LDDashboard from "./pages/van-incidents/LDDashboard";
 import OpsAnalytics from "./pages/analytics/OpsAnalytics";
 import NewCycleCount from "./pages/cycle-counts/NewCycleCount";
 import MyCycleCounts from "./pages/cycle-counts/MyCycleCounts";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/van-incidents" element={<IncidentList />} />
               <Route path="/van-incidents/new" element={<NewIncident />} />
               <Route path="/van-incidents/admin" element={<SuperAdminIncidentsDashboard />} />
+              <Route path="/van-incidents/ld" element={<LDDashboard />} />
               <Route path="/analytics/ops" element={<OpsAnalytics />} />
               <Route path="/cycle-counts/new" element={<NewCycleCount />} />
               <Route path="/cycle-counts/my" element={<MyCycleCounts />} />

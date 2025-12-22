@@ -3,6 +3,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { toast } from "@/hooks/use-toast";
 
+export interface LDDraftContent {
+  incident_overview: {
+    report_id: string;
+    driver_email: string;
+    ops_area: string;
+    van_id: string;
+    date_time: string;
+    location: string;
+  };
+  incident_summary: string;
+  reported_damage: string;
+  ai_damage_review: {
+    damaged_components: string[];
+    severity: string;
+    repair_complexity: string;
+    cost_bucket: string;
+    cost_range: string;
+    notes: string;
+  };
+  consequence_guidance: {
+    cost_tier: string;
+    incident_number: string;
+    suggested_consequences: string;
+    performance_points_impact: string;
+    additional_measures: string;
+  };
+  incident_history_flag: string;
+  attachments: string[];
+  open_items: string[];
+}
+
 export interface VanIncident {
   id: string;
   created_at: string;
@@ -24,6 +55,19 @@ export interface VanIncident {
   email_sent_at: string | null;
   ld_communication_status: "not_sent" | "in_progress" | "completed";
   fs_communication_status: "sent" | "not_sent";
+  // AI and LD fields
+  ai_cost_bucket: string | null;
+  ai_severity: string | null;
+  ai_confidence: string | null;
+  ai_damaged_components: string[] | null;
+  ai_analysis_notes: string | null;
+  ld_draft_status: string;
+  ld_draft_content: LDDraftContent | Record<string, unknown> | null;
+  ld_draft_generated_at: string | null;
+  ld_email_sent_at: string | null;
+  driver_incident_count_this_season: number;
+  vehicle_drivable: boolean | null;
+  was_towed: boolean | null;
   creator?: { full_name: string | null; email: string | null };
 }
 
@@ -179,10 +223,22 @@ export function useCreateIncident() {
       // Call placeholder notification function
       notifyOpsAdminForIncident(incident.id);
       
+      // Trigger AI damage analysis
+      try {
+        await supabase.functions.invoke("analyze-incident-damage", {
+          body: { incident_id: incident.id },
+        });
+        console.log("AI damage analysis triggered for incident:", incident.id);
+      } catch (analysisError) {
+        console.error("Failed to trigger AI analysis:", analysisError);
+        // Don't fail the mutation if analysis fails
+      }
+      
       return incident;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["van-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["ld-incidents"] });
       toast({ title: "Incident report submitted successfully" });
     },
     onError: (error) => {
@@ -288,6 +344,7 @@ export function useUpdateIncident() {
       toast({ title: "Incident updated" });
     },
     onError: (error) => {
+      queryClient.invalidateQueries({ queryKey: ["ld-incidents"] });
       toast({
         title: "Failed to update incident",
         description: error.message,
