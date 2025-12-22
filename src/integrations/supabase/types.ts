@@ -1023,9 +1023,15 @@ export type Database = {
       }
       van_incidents: {
         Row: {
+          ai_analysis_notes: string | null
+          ai_confidence: string | null
+          ai_cost_bucket: string | null
+          ai_damaged_components: string[] | null
+          ai_severity: string | null
           created_at: string
           created_by_user_id: string
           description: string
+          driver_incident_count_this_season: number | null
           email_sent_at: string | null
           fs_communication_status: string | null
           id: string
@@ -1033,6 +1039,10 @@ export type Database = {
           incident_time: string
           internal_notes: string | null
           ld_communication_status: string | null
+          ld_draft_content: Json | null
+          ld_draft_generated_at: string | null
+          ld_draft_status: string | null
+          ld_email_sent_at: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id: string | null
@@ -1041,13 +1051,21 @@ export type Database = {
           trip_id: string | null
           updated_at: string
           van_id: string
+          vehicle_drivable: boolean | null
           vin: string
+          was_towed: boolean | null
           weather: string
         }
         Insert: {
+          ai_analysis_notes?: string | null
+          ai_confidence?: string | null
+          ai_cost_bucket?: string | null
+          ai_damaged_components?: string[] | null
+          ai_severity?: string | null
           created_at?: string
           created_by_user_id: string
           description: string
+          driver_incident_count_this_season?: number | null
           email_sent_at?: string | null
           fs_communication_status?: string | null
           id?: string
@@ -1055,6 +1073,10 @@ export type Database = {
           incident_time: string
           internal_notes?: string | null
           ld_communication_status?: string | null
+          ld_draft_content?: Json | null
+          ld_draft_generated_at?: string | null
+          ld_draft_status?: string | null
+          ld_email_sent_at?: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id?: string | null
@@ -1063,13 +1085,21 @@ export type Database = {
           trip_id?: string | null
           updated_at?: string
           van_id: string
+          vehicle_drivable?: boolean | null
           vin: string
+          was_towed?: boolean | null
           weather: string
         }
         Update: {
+          ai_analysis_notes?: string | null
+          ai_confidence?: string | null
+          ai_cost_bucket?: string | null
+          ai_damaged_components?: string[] | null
+          ai_severity?: string | null
           created_at?: string
           created_by_user_id?: string
           description?: string
+          driver_incident_count_this_season?: number | null
           email_sent_at?: string | null
           fs_communication_status?: string | null
           id?: string
@@ -1077,6 +1107,10 @@ export type Database = {
           incident_time?: string
           internal_notes?: string | null
           ld_communication_status?: string | null
+          ld_draft_content?: Json | null
+          ld_draft_generated_at?: string | null
+          ld_draft_status?: string | null
+          ld_email_sent_at?: string | null
           license_plate?: string
           location_text?: string
           ops_admin_user_id?: string | null
@@ -1085,7 +1119,9 @@ export type Database = {
           trip_id?: string | null
           updated_at?: string
           van_id?: string
+          vehicle_drivable?: boolean | null
           vin?: string
+          was_towed?: boolean | null
           weather?: string
         }
         Relationships: [
