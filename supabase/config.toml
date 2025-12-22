@@ -2,3 +2,6 @@ project_id = "jkndmvvuekoqtqrkrpio"
 
 [functions.bulk-invite-opx]
 verify_jwt = false
+
+[functions.send-incident-confirmation]
+verify_jwt = false

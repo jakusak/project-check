@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Filter, AlertTriangle, Calendar, MapPin, Car, FileText, ExternalLink, Loader2 } from "lucide-react";
+import { Plus, Filter, AlertTriangle, Calendar, MapPin, Car, FileText, ExternalLink, Loader2, Mail, MessageSquare, Send, CheckCircle, Clock, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,17 @@ const STATUS_COLORS: Record<string, string> = {
   submitted: "bg-yellow-100 text-yellow-800 border-yellow-200",
   in_review: "bg-blue-100 text-blue-800 border-blue-200",
   closed: "bg-green-100 text-green-800 border-green-200",
+};
+
+const LD_STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; className: string }> = {
+  not_sent: { label: "Not Sent", icon: XCircle, className: "text-muted-foreground" },
+  in_progress: { label: "In Progress", icon: Clock, className: "text-amber-600" },
+  completed: { label: "Completed", icon: CheckCircle, className: "text-green-600" },
+};
+
+const FS_STATUS_CONFIG: Record<string, { label: string; icon: typeof Send; className: string }> = {
+  not_sent: { label: "Not Sent", icon: XCircle, className: "text-muted-foreground" },
+  sent: { label: "Sent", icon: CheckCircle, className: "text-green-600" },
 };
 
 export default function IncidentList() {
@@ -45,6 +56,8 @@ export default function IncidentList() {
   const [selectedIncident, setSelectedIncident] = useState<VanIncident | null>(null);
   const [internalNotes, setInternalNotes] = useState("");
   const [newStatus, setNewStatus] = useState<string>("");
+  const [ldStatus, setLdStatus] = useState<string>("not_sent");
+  const [fsStatus, setFsStatus] = useState<string>("not_sent");
 
   const { data: incidents, isLoading } = useVanIncidents({
     dateFrom: filters.dateFrom || undefined,
@@ -87,6 +100,8 @@ export default function IncidentList() {
     setSelectedIncident(incident);
     setInternalNotes(incident.internal_notes || "");
     setNewStatus(incident.status);
+    setLdStatus(incident.ld_communication_status || "not_sent");
+    setFsStatus(incident.fs_communication_status || "not_sent");
   }
 
   async function handleUpdateIncident() {
@@ -97,6 +112,8 @@ export default function IncidentList() {
       status: newStatus as "submitted" | "in_review" | "closed",
       internal_notes: internalNotes,
       ops_admin_user_id: user.id,
+      ld_communication_status: ldStatus as "not_sent" | "in_progress" | "completed",
+      fs_communication_status: fsStatus as "sent" | "not_sent",
     });
 
     setSelectedIncident(null);
@@ -234,57 +251,81 @@ export default function IncidentList() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Van</TableHead>
-                      <TableHead>Location</TableHead>
                       <TableHead>Ops Area</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Reported By</TableHead>
+                      <TableHead>Email Sent</TableHead>
+                      <TableHead>LD Comm.</TableHead>
+                      <TableHead>FS Comm.</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {incidents.map((incident) => (
-                      <TableRow
-                        key={incident.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => openDetail(incident)}
-                      >
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {format(new Date(incident.incident_date), "MMM d, yyyy")}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{incident.van_id}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 max-w-[200px]">
-                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="truncate">{incident.location_text}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{incident.ops_area}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(STATUS_COLORS[incident.status])}
-                          >
-                            {incident.status.replace("_", " ")}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {incident.creator?.full_name || incident.creator?.email || "—"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {incidents.map((incident) => {
+                      const ldConfig = LD_STATUS_CONFIG[incident.ld_communication_status || "not_sent"];
+                      const fsConfig = FS_STATUS_CONFIG[incident.fs_communication_status || "not_sent"];
+                      const LdIcon = ldConfig.icon;
+                      const FsIcon = fsConfig.icon;
+                      
+                      return (
+                        <TableRow
+                          key={incident.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => openDetail(incident)}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {format(new Date(incident.incident_date), "MMM d, yyyy")}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Car className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">{incident.van_id}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{incident.ops_area}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(STATUS_COLORS[incident.status])}
+                            >
+                              {incident.status.replace("_", " ")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {incident.email_sent_at ? (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <Mail className="h-4 w-4" />
+                                <span className="text-xs">Sent</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Mail className="h-4 w-4" />
+                                <span className="text-xs">Pending</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className={cn("flex items-center gap-1", ldConfig.className)}>
+                              <LdIcon className="h-4 w-4" />
+                              <span className="text-xs">{ldConfig.label}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className={cn("flex items-center gap-1", fsConfig.className)}>
+                              <FsIcon className="h-4 w-4" />
+                              <span className="text-xs">{fsConfig.label}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm">
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -392,16 +433,43 @@ export default function IncidentList() {
                 {/* Admin/OPX Actions */}
                 {canEdit && (
                   <div className="border-t pt-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={newStatus} onValueChange={setNewStatus}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="submitted">Submitted</SelectItem>
+                            <SelectItem value="in_review">In Review</SelectItem>
+                            <SelectItem value="closed">Closed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>LD Communication</Label>
+                        <Select value={ldStatus} onValueChange={setLdStatus}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="not_sent">Not Sent</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div className="space-y-2">
-                      <Label>Status</Label>
-                      <Select value={newStatus} onValueChange={setNewStatus}>
+                      <Label>Final FS Communication</Label>
+                      <Select value={fsStatus} onValueChange={setFsStatus}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="submitted">Submitted</SelectItem>
-                          <SelectItem value="in_review">In Review</SelectItem>
-                          <SelectItem value="closed">Closed</SelectItem>
+                          <SelectItem value="not_sent">Not Sent</SelectItem>
+                          <SelectItem value="sent">Sent</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

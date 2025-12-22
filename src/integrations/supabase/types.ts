@@ -1026,10 +1026,13 @@ export type Database = {
           created_at: string
           created_by_user_id: string
           description: string
+          email_sent_at: string | null
+          fs_communication_status: string | null
           id: string
           incident_date: string
           incident_time: string
           internal_notes: string | null
+          ld_communication_status: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id: string | null
@@ -1045,10 +1048,13 @@ export type Database = {
           created_at?: string
           created_by_user_id: string
           description: string
+          email_sent_at?: string | null
+          fs_communication_status?: string | null
           id?: string
           incident_date: string
           incident_time: string
           internal_notes?: string | null
+          ld_communication_status?: string | null
           license_plate: string
           location_text: string
           ops_admin_user_id?: string | null
@@ -1064,10 +1070,13 @@ export type Database = {
           created_at?: string
           created_by_user_id?: string
           description?: string
+          email_sent_at?: string | null
+          fs_communication_status?: string | null
           id?: string
           incident_date?: string
           incident_time?: string
           internal_notes?: string | null
+          ld_communication_status?: string | null
           license_plate?: string
           location_text?: string
           ops_admin_user_id?: string | null

@@ -21,6 +21,9 @@ export interface VanIncident {
   ops_admin_user_id: string | null;
   internal_notes: string | null;
   updated_at: string;
+  email_sent_at: string | null;
+  ld_communication_status: "not_sent" | "in_progress" | "completed";
+  fs_communication_status: "sent" | "not_sent";
   creator?: { full_name: string | null; email: string | null };
 }
 
@@ -135,6 +138,13 @@ export function useCreateIncident() {
     mutationFn: async (data: CreateIncidentData) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Get user profile for email
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
       const { data: incident, error } = await supabase
         .from("van_incidents")
         .insert({
@@ -146,6 +156,25 @@ export function useCreateIncident() {
         .single();
 
       if (error) throw error;
+      
+      // Send confirmation email via edge function
+      if (profile?.email) {
+        try {
+          await supabase.functions.invoke("send-incident-confirmation", {
+            body: {
+              incidentId: incident.id,
+              userEmail: profile.email,
+              userName: profile.full_name || "",
+              vanId: data.van_id,
+              incidentDate: data.incident_date,
+              opsArea: data.ops_area,
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError);
+          // Don't fail the mutation if email fails
+        }
+      }
       
       // Call placeholder notification function
       notifyOpsAdminForIncident(incident.id);
@@ -226,15 +255,26 @@ export function useUpdateIncident() {
       status,
       internal_notes,
       ops_admin_user_id,
+      ld_communication_status,
+      fs_communication_status,
     }: {
       id: string;
       status?: "submitted" | "in_review" | "closed";
       internal_notes?: string;
       ops_admin_user_id?: string;
+      ld_communication_status?: "not_sent" | "in_progress" | "completed";
+      fs_communication_status?: "sent" | "not_sent";
     }) => {
+      const updateData: Record<string, any> = {};
+      if (status !== undefined) updateData.status = status;
+      if (internal_notes !== undefined) updateData.internal_notes = internal_notes;
+      if (ops_admin_user_id !== undefined) updateData.ops_admin_user_id = ops_admin_user_id;
+      if (ld_communication_status !== undefined) updateData.ld_communication_status = ld_communication_status;
+      if (fs_communication_status !== undefined) updateData.fs_communication_status = fs_communication_status;
+
       const { data, error } = await supabase
         .from("van_incidents")
-        .update({ status, internal_notes, ops_admin_user_id })
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
