@@ -75,6 +75,9 @@ export interface VanIncident {
   ld_reviewed_by: string | null;
   ld_reviewed_at: string | null;
   ld_preventability_decision: "preventable" | "non_preventable" | null;
+  // LD Draft editing fields
+  ld_edited_draft: { subject?: string; body?: string } | null;
+  ld_cost_bucket_override: string | null;
   // OPS Email fields
   ops_email_sent_at: string | null;
   ops_email_sent_by: string | null;
