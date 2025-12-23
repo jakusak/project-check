@@ -27,6 +27,65 @@ export function OPSSendEmailPanel({ incident, onClose }: OPSSendEmailPanelProps)
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
 
+  // Helper function to get policy consequences based on cost bucket and incident number
+  function getConsequenceDetails(costBucket: string, incidentNumber: number) {
+    if (incidentNumber >= 3) {
+      return {
+        title: "THIRD+ INCIDENT of Season",
+        costLabel: null,
+        mandatory: ["May result in termination", "Application of maximum penalties regardless of cost"],
+        optional: [],
+        note: "Any THIRD incident may result in termination or application of max penalties regardless of cost."
+      };
+    }
+    
+    if (incidentNumber === 2) {
+      return {
+        title: "SECOND INCIDENT of Season",
+        costLabel: "Any Cost at All",
+        mandatory: ["Loss of additional 6 Performance Points"],
+        optional: ["Termination"],
+        note: "Policy indicates additional loss of 6 performance points for a second incident."
+      };
+    }
+    
+    if (costBucket === "under_1500") {
+      return {
+        title: "FIRST INCIDENT of Season",
+        costLabel: "Less than €1,500",
+        mandatory: ["Loss of 4 Performance Points"],
+        optional: [],
+        note: null
+      };
+    } else if (costBucket === "1500_to_3500") {
+      return {
+        title: "FIRST INCIDENT of Season",
+        costLabel: "€1,500 to €3,500",
+        mandatory: [
+          "Loss of 4 Performance Points",
+          "1-Year Warning",
+          "Staff Ride Disqualification",
+          "Backroads Gear Ineligibility"
+        ],
+        optional: ["Termination"],
+        note: "1-Year Warning: You will have lower priority for Staff Ride approval, scheduling, Winter Work, and/or career progression opportunities for the duration of the warning."
+      };
+    } else {
+      return {
+        title: "FIRST INCIDENT of Season",
+        costLabel: "Over €3,500",
+        mandatory: [
+          "Loss of 6 Performance Points",
+          "1-Year Warning",
+          "Staff Ride Disqualification",
+          "Backroads Gear Ineligibility"
+        ],
+        optional: ["Termination"],
+        note: "1-Year Warning: You will have lower priority for Staff Ride approval, scheduling, Winter Work, and/or career progression opportunities for the duration of the warning."
+      };
+    }
+  }
+
   useEffect(() => {
     if (draft) {
       setEmailSubject(`Van Incident Follow-up - ${incident.van_id} (${format(new Date(incident.incident_date), "MMM d, yyyy")})`);
@@ -34,6 +93,17 @@ export function OPSSendEmailPanel({ incident, onClose }: OPSSendEmailPanelProps)
       const preventability = incident.ld_preventability_decision === "non_preventable" 
         ? "non-preventable" 
         : "preventable";
+      
+      // Get detailed consequences based on cost bucket and incident number
+      const costBucket = incident.ai_cost_bucket || "1500_to_3500";
+      const incidentNumber = incident.driver_incident_count_this_season || 1;
+      const consequences = getConsequenceDetails(costBucket, incidentNumber);
+      
+      // Format mandatory consequences
+      const mandatoryList = consequences.mandatory.map(item => `  • ${item}`).join("\n");
+      const optionalList = consequences.optional.length > 0 
+        ? consequences.optional.map(item => `  • ${item} (optional)`).join("\n")
+        : "";
       
       const bodyContent = `Dear Team Member,
 
@@ -50,11 +120,15 @@ DAMAGE ASSESSMENT:
 DETERMINATION:
 This incident has been determined to be ${preventability}.
 
-CONSEQUENCE GUIDANCE:
-${draft.consequence_guidance?.suggested_consequences || "To be determined based on review."}
+POLICY CONSEQUENCES:
+${consequences.title}${consequences.costLabel ? ` (${consequences.costLabel})` : ""}
 
-Performance Points Impact: ${draft.consequence_guidance?.performance_points_impact || "N/A"}
-${draft.consequence_guidance?.additional_measures ? `Additional Measures: ${draft.consequence_guidance.additional_measures}` : ""}
+Mandatory:
+${mandatoryList}
+${optionalList ? `\nOptional:\n${optionalList}` : ""}
+${consequences.note ? `\nNote: ${consequences.note}` : ""}
+
+All penalties apply for 1 calendar year.
 
 If you have any questions about this determination, please contact your Operations Manager.
 
