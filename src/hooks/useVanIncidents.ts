@@ -438,6 +438,51 @@ export function useSendOPSEmail() {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Get incident details for recipient info
+      const { data: incident, error: fetchError } = await supabase
+        .from("van_incidents")
+        .select(`
+          *,
+          creator:profiles!van_incidents_created_by_user_id_fkey(full_name, email)
+        `)
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const emailContent = final_email_content as { subject?: string; body?: string };
+      const recipientEmail = incident.creator?.email;
+      const recipientName = incident.creator?.full_name || "Team Member";
+
+      if (!recipientEmail) {
+        throw new Error("Could not find recipient email address");
+      }
+
+      // Call edge function to actually send the email via Resend
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        "send-ops-final-email",
+        {
+          body: {
+            incidentId: id,
+            recipientEmail,
+            recipientName,
+            emailSubject: emailContent.subject || `Van Incident Update - ${incident.van_id}`,
+            emailBody: emailContent.body || "",
+          },
+        }
+      );
+
+      if (emailError) {
+        console.error("Email function error:", emailError);
+        throw new Error(emailError.message || "Failed to send email");
+      }
+
+      if (emailResult?.error) {
+        console.error("Email send error:", emailResult.error);
+        throw new Error(emailResult.error);
+      }
+
+      // Update local record with email content
       const { data, error } = await supabase
         .from("van_incidents")
         .update({
@@ -446,7 +491,7 @@ export function useSendOPSEmail() {
           final_email_content,
           fs_communication_status: "sent",
           ld_draft_status: "sent",
-          status: "closed", // Set status to closed when email is sent
+          status: "closed",
         })
         .eq("id", id)
         .select()
