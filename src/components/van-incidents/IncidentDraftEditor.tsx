@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Save, User, Clock } from "lucide-react";
+import { Mail, Save, User, Clock, Send } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useIncidentReviewComments, useAddIncidentComment } from "@/hooks/useIncidentReviewComments";
@@ -16,8 +15,11 @@ import { useAuth } from "@/integrations/supabase/auth";
 interface IncidentDraftEditorProps {
   incident: VanIncident;
   onSaveDraft: (draft: { subject: string; body: string }) => Promise<void>;
+  onMarkReadyForOPS?: () => Promise<void>;
   isSaving?: boolean;
-  readOnly?: boolean;
+  isMarkingReady?: boolean;
+  isLDView?: boolean;  // LD can edit and mark ready
+  isOPSView?: boolean; // OPS can do final edits
 }
 
 // Policy consequence logic
@@ -127,7 +129,15 @@ Best regards,
 Backroads OPS Team`;
 }
 
-export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly }: IncidentDraftEditorProps) {
+export function IncidentDraftEditor({ 
+  incident, 
+  onSaveDraft, 
+  onMarkReadyForOPS,
+  isSaving, 
+  isMarkingReady,
+  isLDView = true,
+  isOPSView = false 
+}: IncidentDraftEditorProps) {
   const draft = incident.ld_draft_content as LDDraftContent | null;
   const existingEditedDraft = incident.ld_edited_draft as { subject?: string; body?: string } | null;
   
@@ -137,6 +147,7 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const { user } = useAuth();
   const { data: comments, isLoading: commentsLoading } = useIncidentReviewComments(incident.id);
@@ -151,17 +162,38 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
       setEmailSubject(`Van Incident Follow-up - ${incident.van_id} (${format(new Date(incident.incident_date), "MMM d, yyyy")})`);
       setEmailBody(generateEmailBody(incident, draft, effectiveCostBucket));
     }
-  }, [incident, draft, effectiveCostBucket, existingEditedDraft]);
+    setHasUnsavedChanges(false);
+  }, [incident.id]); // Only reset on incident change
 
   // Regenerate body when cost bucket changes (from override)
   useEffect(() => {
     if (incident.ld_cost_bucket_override) {
-      setEmailBody(generateEmailBody(incident, draft, effectiveCostBucket));
+      const newBody = generateEmailBody(incident, draft, effectiveCostBucket);
+      setEmailBody(newBody);
+      setHasUnsavedChanges(true);
     }
   }, [incident.ld_cost_bucket_override]);
 
+  function handleEmailChange(field: 'subject' | 'body', value: string) {
+    if (field === 'subject') {
+      setEmailSubject(value);
+    } else {
+      setEmailBody(value);
+    }
+    setHasUnsavedChanges(true);
+  }
+
   async function handleSave() {
     await onSaveDraft({ subject: emailSubject, body: emailBody });
+    setHasUnsavedChanges(false);
+  }
+
+  async function handleMarkReady() {
+    // Save draft first, then mark ready
+    await onSaveDraft({ subject: emailSubject, body: emailBody });
+    if (onMarkReadyForOPS) {
+      await onMarkReadyForOPS();
+    }
   }
 
   async function handleAddComment() {
@@ -169,6 +201,9 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
     await addComment.mutateAsync({ incidentId: incident.id, comment: newComment.trim() });
     setNewComment("");
   }
+
+  const canEdit = isLDView || isOPSView;
+  const showReadyButton = isLDView && onMarkReadyForOPS && incident.ld_review_status !== "approved";
 
   return (
     <div className="flex flex-col h-full">
@@ -178,17 +213,32 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
           <h4 className="font-semibold flex items-center gap-2">
             <Mail className="h-4 w-4" />
             Field Staff Email Draft
+            {hasUnsavedChanges && <span className="text-xs text-amber-600">(unsaved)</span>}
           </h4>
-          {!readOnly && (
-            <Button 
-              size="sm" 
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4 mr-1" />
-              {isSaving ? "Saving..." : "Save Draft"}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {canEdit && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleSave}
+                disabled={isSaving || !hasUnsavedChanges}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {isSaving ? "Saving..." : "Save Draft"}
+              </Button>
+            )}
+            {showReadyButton && (
+              <Button 
+                size="sm" 
+                onClick={handleMarkReady}
+                disabled={isMarkingReady || isSaving}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Send className="h-4 w-4 mr-1" />
+                {isMarkingReady ? "Processing..." : "Ready for OPS"}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -196,8 +246,8 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
             <Label className="text-xs text-muted-foreground">Subject</Label>
             <Input
               value={emailSubject}
-              onChange={(e) => setEmailSubject(e.target.value)}
-              disabled={readOnly}
+              onChange={(e) => handleEmailChange('subject', e.target.value)}
+              disabled={!canEdit}
               className="mt-1"
             />
           </div>
@@ -205,9 +255,9 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
             <Label className="text-xs text-muted-foreground">Email Body</Label>
             <Textarea
               value={emailBody}
-              onChange={(e) => setEmailBody(e.target.value)}
-              disabled={readOnly}
-              rows={15}
+              onChange={(e) => handleEmailChange('body', e.target.value)}
+              disabled={!canEdit}
+              rows={18}
               className="mt-1 font-mono text-xs"
             />
           </div>
@@ -218,9 +268,9 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
 
       {/* Threaded Comments Section */}
       <div className="space-y-3">
-        <h4 className="font-semibold text-sm">Review Comments</h4>
+        <h4 className="font-semibold text-sm">Review Comments (LD ↔ OPS)</h4>
         
-        <ScrollArea className="h-32 border rounded-lg p-2">
+        <ScrollArea className="h-36 border rounded-lg p-2">
           {commentsLoading ? (
             <p className="text-xs text-muted-foreground text-center py-4">Loading comments...</p>
           ) : comments && comments.length > 0 ? (
@@ -243,28 +293,26 @@ export function IncidentDraftEditor({ incident, onSaveDraft, isSaving, readOnly 
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground text-center py-4">No comments yet</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No comments yet. Add notes for OPS or LD.</p>
           )}
         </ScrollArea>
 
-        {!readOnly && (
-          <div className="flex gap-2">
-            <Input
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment for LD/OPS..."
-              className="flex-1 text-sm"
-              onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-            />
-            <Button 
-              size="sm" 
-              onClick={handleAddComment}
-              disabled={addComment.isPending || !newComment.trim()}
-            >
-              Add
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Input
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Add a comment for LD/OPS..."
+            className="flex-1 text-sm"
+            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleAddComment()}
+          />
+          <Button 
+            size="sm" 
+            onClick={handleAddComment}
+            disabled={addComment.isPending || !newComment.trim()}
+          >
+            Add
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -402,9 +402,10 @@ export default function IncidentList() {
         </Card>
       </div>
 
-      {/* Detail Dialog with Tabs */}
+      {/* Detail Dialog with Tabs - Made larger for LD Review */}
       <Dialog open={!!selectedIncident} onOpenChange={() => setSelectedIncident(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] overflow-hidden flex flex-col">
+        
           {selectedIncident && (
             <>
               <DialogHeader>

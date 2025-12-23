@@ -524,8 +524,19 @@ export function LDReviewPanel({ incident, onClose }: LDReviewPanelProps) {
           <IncidentDraftEditor
             incident={incidentWithOverride as VanIncident}
             onSaveDraft={handleSaveDraft}
+            onMarkReadyForOPS={async () => {
+              await ldReview.mutateAsync({
+                id: incident.id,
+                ld_review_status: "approved",
+                ld_review_comment: comment || undefined,
+                ld_preventability_decision: preventability,
+              });
+              onClose();
+            }}
             isSaving={isSavingDraft}
-            readOnly={isAlreadyReviewed}
+            isMarkingReady={ldReview.isPending}
+            isLDView={!isAlreadyReviewed}
+            isOPSView={false}
           />
         </div>
       )}
