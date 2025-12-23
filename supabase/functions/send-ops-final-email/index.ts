@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send the final email to the field staff
     const emailResponse = await resend.emails.send({
-      from: "Backroads Ops <onboarding@resend.dev>",
+      from: "Backroads OPS <ops@backroads.com>",
       to: [recipientEmail],
       subject: emailSubject,
       html: `
