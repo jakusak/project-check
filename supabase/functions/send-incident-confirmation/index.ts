@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the submitter
     const emailResponse = await resend.emails.send({
-      from: "Backroads Ops <onboarding@resend.dev>",
+      from: "Backroads OPS <ops@backroads.com>",
       to: [userEmail],
       subject: `Van Incident Report Received - ${vanId}`,
       html: `
