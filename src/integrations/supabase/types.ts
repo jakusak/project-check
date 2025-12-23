@@ -533,6 +533,38 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_review_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          incident_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          incident_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          incident_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_review_comments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "van_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_move_lines: {
         Row: {
           created_at: string
@@ -1040,9 +1072,11 @@ export type Database = {
           incident_time: string
           internal_notes: string | null
           ld_communication_status: string | null
+          ld_cost_bucket_override: string | null
           ld_draft_content: Json | null
           ld_draft_generated_at: string | null
           ld_draft_status: string | null
+          ld_edited_draft: Json | null
           ld_email_sent_at: string | null
           ld_preventability_decision: string | null
           ld_review_comment: string | null
@@ -1082,9 +1116,11 @@ export type Database = {
           incident_time: string
           internal_notes?: string | null
           ld_communication_status?: string | null
+          ld_cost_bucket_override?: string | null
           ld_draft_content?: Json | null
           ld_draft_generated_at?: string | null
           ld_draft_status?: string | null
+          ld_edited_draft?: Json | null
           ld_email_sent_at?: string | null
           ld_preventability_decision?: string | null
           ld_review_comment?: string | null
@@ -1124,9 +1160,11 @@ export type Database = {
           incident_time?: string
           internal_notes?: string | null
           ld_communication_status?: string | null
+          ld_cost_bucket_override?: string | null
           ld_draft_content?: Json | null
           ld_draft_generated_at?: string | null
           ld_draft_status?: string | null
+          ld_edited_draft?: Json | null
           ld_email_sent_at?: string | null
           ld_preventability_decision?: string | null
           ld_review_comment?: string | null
