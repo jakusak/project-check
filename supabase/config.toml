@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.analyze-incident-damage]
 verify_jwt = false
+
+[functions.send-ops-final-email]
+verify_jwt = false

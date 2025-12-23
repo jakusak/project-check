@@ -10,17 +10,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface IncidentEmailRequest {
+interface OPSEmailRequest {
   incidentId: string;
-  userEmail: string;
-  userName: string;
-  vanId: string;
-  incidentDate: string;
-  opsArea: string;
+  recipientEmail: string;
+  recipientName: string;
+  emailSubject: string;
+  emailBody: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("send-incident-confirmation function called");
+  console.log("send-ops-final-email function called");
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -28,15 +27,15 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { incidentId, userEmail, userName, vanId, incidentDate, opsArea }: IncidentEmailRequest = await req.json();
+    const { incidentId, recipientEmail, recipientName, emailSubject, emailBody }: OPSEmailRequest = await req.json();
     
-    console.log(`Sending confirmation email for incident ${incidentId} to ${userEmail}`);
+    console.log(`Sending OPS final email for incident ${incidentId} to ${recipientEmail}`);
 
-    // Send confirmation email to the submitter
+    // Send the final email to the field staff
     const emailResponse = await resend.emails.send({
       from: "Backroads Ops <onboarding@resend.dev>",
-      to: [userEmail],
-      subject: `Van Incident Report Received - ${vanId}`,
+      to: [recipientEmail],
+      subject: emailSubject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -45,27 +44,24 @@ const handler = async (req: Request): Promise<Response> => {
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { background: #1a365d; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background: #f9fafb; }
+            .content { padding: 20px; background: #f9fafb; white-space: pre-wrap; }
             .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Accident Report Received</h1>
+              <h1>Van Incident Update</h1>
             </div>
             <div class="content">
-              <p>Dear ${userName || 'Team Member'},</p>
+              <p>Dear ${recipientName || 'Team Member'},</p>
               
-              <p>Thank you for submitting the accident form. We are sorry you have had an accident with a Backroads van – please don't panic, there are worse things that can happen.</p>
+              ${emailBody}
               
-              <p>We will now take a couple of days to process the accident information and get back to you in case we have further questions.</p>
-              
-              <p>Thank you,</p>
-              <p><strong>Best,<br>OPS Team Global</strong></p>
+              <p style="margin-top: 24px;"><strong>Best regards,<br>OPS Team Global</strong></p>
             </div>
             <div class="footer">
-              <p>Reference: ${vanId} | ${incidentDate} | ${opsArea}</p>
+              <p>Backroads Operations Team</p>
             </div>
           </div>
         </body>
@@ -73,25 +69,46 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("OPS email response:", JSON.stringify(emailResponse));
 
-    // Update the incident to mark email as sent
+    // Check if email was actually sent
+    if (emailResponse.error) {
+      console.error("Resend error:", emailResponse.error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: emailResponse.error.message,
+          note: "If using test mode, emails can only be sent to the verified account email. Verify a domain at resend.com/domains to send to other addresses."
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Update the incident to mark OPS email as sent
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { error: updateError } = await supabase
       .from("van_incidents")
-      .update({ email_sent_at: new Date().toISOString() })
+      .update({ 
+        ops_email_sent_at: new Date().toISOString(),
+        status: "closed",
+        fs_communication_status: "sent",
+        ld_draft_status: "sent"
+      })
       .eq("id", incidentId);
 
     if (updateError) {
-      console.error("Failed to update email_sent_at:", updateError);
+      console.error("Failed to update incident:", updateError);
     } else {
-      console.log("Updated email_sent_at for incident:", incidentId);
+      console.log("Updated incident status for:", incidentId);
     }
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-incident-confirmation function:", error);
+    console.error("Error in send-ops-final-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
