@@ -468,6 +468,365 @@ export type Database = {
         }
         Relationships: []
       }
+      fleet_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          new_values: Json | null
+          notes: string | null
+          old_values: Json | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+        }
+        Relationships: []
+      }
+      fleet_drivers: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string | null
+          employment_type: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fleet_notice_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          is_primary: boolean | null
+          notice_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          is_primary?: boolean | null
+          notice_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          is_primary?: boolean | null
+          notice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_notice_files_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_notices: {
+        Row: {
+          confidence_overall: number | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          deadline_date: string | null
+          dispute_date: string | null
+          dispute_notes: string | null
+          dispute_reason: string | null
+          document_source: string | null
+          driver_id: string | null
+          field_confidence_map: Json | null
+          fine_amount: number | null
+          id: string
+          issuing_authority: string | null
+          language_detected: string | null
+          license_plate: string | null
+          notes_internal: string | null
+          notice_type: Database["public"]["Enums"]["fleet_notice_type"]
+          paid_amount: number | null
+          paid_date: string | null
+          payment_method: string | null
+          raw_extracted_text: string | null
+          received_date: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["fleet_notice_status"]
+          tags: string[] | null
+          unit_or_trip_id: string | null
+          updated_at: string
+          vehicle_id: string | null
+          violation_datetime: string | null
+          violation_location: string | null
+        }
+        Insert: {
+          confidence_overall?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline_date?: string | null
+          dispute_date?: string | null
+          dispute_notes?: string | null
+          dispute_reason?: string | null
+          document_source?: string | null
+          driver_id?: string | null
+          field_confidence_map?: Json | null
+          fine_amount?: number | null
+          id?: string
+          issuing_authority?: string | null
+          language_detected?: string | null
+          license_plate?: string | null
+          notes_internal?: string | null
+          notice_type?: Database["public"]["Enums"]["fleet_notice_type"]
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_method?: string | null
+          raw_extracted_text?: string | null
+          received_date?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["fleet_notice_status"]
+          tags?: string[] | null
+          unit_or_trip_id?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+          violation_datetime?: string | null
+          violation_location?: string | null
+        }
+        Update: {
+          confidence_overall?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline_date?: string | null
+          dispute_date?: string | null
+          dispute_notes?: string | null
+          dispute_reason?: string | null
+          document_source?: string | null
+          driver_id?: string | null
+          field_confidence_map?: Json | null
+          fine_amount?: number | null
+          id?: string
+          issuing_authority?: string | null
+          language_detected?: string | null
+          license_plate?: string | null
+          notes_internal?: string | null
+          notice_type?: Database["public"]["Enums"]["fleet_notice_type"]
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_method?: string | null
+          raw_extracted_text?: string | null
+          received_date?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["fleet_notice_status"]
+          tags?: string[] | null
+          unit_or_trip_id?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+          violation_datetime?: string | null
+          violation_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_notices_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_notices_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      fleet_vehicle_assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          driver_id: string
+          end_datetime: string | null
+          id: string
+          source: string | null
+          start_datetime: string
+          unit_or_trip_id: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          driver_id: string
+          end_datetime?: string | null
+          id?: string
+          source?: string | null
+          start_datetime: string
+          unit_or_trip_id?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string
+          end_datetime?: string | null
+          id?: string
+          source?: string | null
+          start_datetime?: string
+          unit_or_trip_id?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_vehicle_assignments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_vehicle_assignments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_vehicles: {
+        Row: {
+          country_base: string | null
+          created_at: string
+          fleet_type: string
+          id: string
+          is_active: boolean
+          license_plate: string
+          make: string | null
+          model: string | null
+          notes: string | null
+          updated_at: string
+          vendor: string | null
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          country_base?: string | null
+          created_at?: string
+          fleet_type?: string
+          id?: string
+          is_active?: boolean
+          license_plate: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          updated_at?: string
+          vendor?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          country_base?: string | null
+          created_at?: string
+          fleet_type?: string
+          id?: string
+          is_active?: boolean
+          license_plate?: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          updated_at?: string
+          vendor?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       guest_reservations: {
         Row: {
           bike_size: string | null
@@ -1252,6 +1611,22 @@ export type Database = {
       broken_item_severity: "low" | "medium" | "high"
       broken_item_status: "open" | "in_maintenance" | "resolved"
       cycle_count_status: "submitted" | "validated" | "rejected"
+      fleet_notice_status:
+        | "new"
+        | "needs_review"
+        | "ready_to_assign"
+        | "assigned"
+        | "in_payment"
+        | "paid"
+        | "in_dispute"
+        | "closed"
+        | "exception"
+      fleet_notice_type:
+        | "speeding"
+        | "parking"
+        | "restricted_zone"
+        | "toll_fine"
+        | "unknown"
       incident_status: "submitted" | "in_review" | "closed"
       maintenance_status: "open" | "completed"
     }
@@ -1393,6 +1768,24 @@ export const Constants = {
       broken_item_severity: ["low", "medium", "high"],
       broken_item_status: ["open", "in_maintenance", "resolved"],
       cycle_count_status: ["submitted", "validated", "rejected"],
+      fleet_notice_status: [
+        "new",
+        "needs_review",
+        "ready_to_assign",
+        "assigned",
+        "in_payment",
+        "paid",
+        "in_dispute",
+        "closed",
+        "exception",
+      ],
+      fleet_notice_type: [
+        "speeding",
+        "parking",
+        "restricted_zone",
+        "toll_fine",
+        "unknown",
+      ],
       incident_status: ["submitted", "in_review", "closed"],
       maintenance_status: ["open", "completed"],
     },
