@@ -81,19 +81,14 @@ Only return the JSON object, no additional text.`;
         throw new Error('Failed to download PDF file');
       }
 
-      // Convert to base64 using chunked approach (avoids stack overflow)
+      // Convert to base64 safely (avoid stack/memory issues)
       const arrayBuffer = await fileData.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer);
-      
-      // Process in chunks to avoid call stack overflow
-      let base64 = '';
-      const chunkSize = 8192;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.subarray(i, i + chunkSize);
-        base64 += String.fromCharCode.apply(null, Array.from(chunk));
-      }
-      base64 = btoa(base64);
-      
+
+      // Use std base64 encoder (works directly on bytes)
+      const { encode } = await import("https://deno.land/std@0.168.0/encoding/base64.ts");
+      const base64 = encode(arrayBuffer);
+
       const dataUrl = `data:application/pdf;base64,${base64}`;
 
       console.log('PDF converted to base64, size:', base64.length);
