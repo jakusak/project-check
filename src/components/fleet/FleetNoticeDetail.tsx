@@ -63,6 +63,7 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [driverName, setDriverName] = useState("");
 
   if (isLoading || !notice) {
     return (
@@ -76,8 +77,29 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
     await updateNotice.mutateAsync({ id: noticeId, status });
   };
 
-  const handleAssignDriver = async (driverId: string) => {
-    await updateNotice.mutateAsync({ id: noticeId, driver_id: driverId } as any);
+  const handleAssignDriverByName = async (name: string) => {
+    if (!name.trim()) return;
+    
+    // First check if driver exists
+    let driver = drivers?.find(d => d.name.toLowerCase() === name.toLowerCase().trim());
+    
+    if (!driver) {
+      // Create new driver with this name
+      const { data: newDriver, error } = await supabase
+        .from("fleet_drivers")
+        .insert({ name: name.trim() })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Failed to create driver:", error);
+        return;
+      }
+      driver = newDriver;
+    }
+    
+    await updateNotice.mutateAsync({ id: noticeId, driver_id: driver.id } as any);
+    setDriverName("");
   };
 
   const handleAssignVehicle = async (vehicleId: string) => {
@@ -351,18 +373,25 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
                 ) : (
                   <>
                     <p className="text-muted-foreground text-sm">No driver assigned</p>
-                    <Select onValueChange={handleAssignDriver}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Assign driver..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {drivers?.map((d) => (
-                          <SelectItem key={d.id} value={d.id}>
-                            {d.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Enter driver name..."
+                        value={driverName}
+                        onChange={(e) => setDriverName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAssignDriverByName(driverName);
+                          }
+                        }}
+                      />
+                      <Button 
+                        onClick={() => handleAssignDriverByName(driverName)}
+                        disabled={!driverName.trim()}
+                      >
+                        Assign
+                      </Button>
+                    </div>
                   </>
                 )}
               </CardContent>
