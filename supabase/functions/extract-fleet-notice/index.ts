@@ -81,9 +81,19 @@ Only return the JSON object, no additional text.`;
         throw new Error('Failed to download PDF file');
       }
 
-      // Convert to base64
+      // Convert to base64 using chunked approach (avoids stack overflow)
       const arrayBuffer = await fileData.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const bytes = new Uint8Array(arrayBuffer);
+      
+      // Process in chunks to avoid call stack overflow
+      let base64 = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        base64 += String.fromCharCode.apply(null, Array.from(chunk));
+      }
+      base64 = btoa(base64);
+      
       const dataUrl = `data:application/pdf;base64,${base64}`;
 
       console.log('PDF converted to base64, size:', base64.length);
