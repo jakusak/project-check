@@ -105,6 +105,10 @@ const App = () => (
               <Route path="/inventory/moves" element={<InventoryMovesList />} />
               <Route path="/inventory/moves/new" element={<NewInventoryMove />} />
               <Route path="/inventory/moves/:id" element={<InventoryMoveDetail />} />
+              <Route path="/fleet" element={<FleetDashboard />} />
+              <Route path="/fleet/notices" element={<FleetNoticesList />} />
+              <Route path="/fleet/drivers" element={<FleetDriversList />} />
+              <Route path="/fleet/vehicles" element={<FleetVehiclesList />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             {/* Mobile Field App Routes */}

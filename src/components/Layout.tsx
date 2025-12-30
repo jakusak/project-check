@@ -119,6 +119,19 @@ export default function Layout() {
               Van Incidents
             </Link>
 
+            {/* Fleet Violations */}
+            <Link
+              to="/fleet"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname.startsWith("/fleet")
+                  ? "bg-sidebar-accent text-primary-foreground"
+                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+              )}
+            >
+              Fleet Violations
+            </Link>
+
             {/* Equipment & Inventory Mega-Dropdown */}
             <div className="relative group">
               <button
