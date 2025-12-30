@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { filePath } = await req.json();
+    const { filePath, fileType } = await req.json();
     
     if (!filePath) {
       return new Response(
@@ -26,22 +26,21 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Create Supabase client to get the file URL
+    // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get public URL for the file
-    const { data: urlData } = supabase.storage
-      .from('fleet-notices')
-      .getPublicUrl(filePath);
+    // Determine if file is PDF or image
+    const isPdf = fileType === 'application/pdf' || filePath.toLowerCase().endsWith('.pdf');
+    
+    console.log('Processing file:', filePath, 'isPdf:', isPdf);
 
-    const fileUrl = urlData.publicUrl;
-    console.log('Processing file:', fileUrl);
-
+    let messageContent: any[];
+    
     const systemPrompt = `You are an expert document analyzer specializing in traffic violations, parking tickets, speeding fines, and toll notices. 
     
-Your task is to extract key information from violation/fine documents. Analyze the image carefully and extract all available fields.
+Your task is to extract key information from violation/fine documents. Analyze the document carefully and extract all available fields.
 
 IMPORTANT: 
 - For dates, use ISO format (YYYY-MM-DD)
@@ -50,7 +49,7 @@ IMPORTANT:
 - Be accurate and only extract what you can clearly identify
 - If a field is not visible or unclear, set it to null`;
 
-    const userPrompt = `Analyze this violation/fine document image and extract the following information in JSON format:
+    const userPrompt = `Analyze this violation/fine document and extract the following information in JSON format:
 
 {
   "notice_type": "speeding | parking | restricted_zone | toll_fine | unknown",
@@ -69,6 +68,48 @@ IMPORTANT:
 
 Only return the JSON object, no additional text.`;
 
+    if (isPdf) {
+      // For PDFs, download the file and send as base64
+      console.log('Downloading PDF for analysis...');
+      
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('fleet-notices')
+        .download(filePath);
+
+      if (downloadError || !fileData) {
+        console.error('Failed to download PDF:', downloadError);
+        throw new Error('Failed to download PDF file');
+      }
+
+      // Convert to base64
+      const arrayBuffer = await fileData.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const dataUrl = `data:application/pdf;base64,${base64}`;
+
+      console.log('PDF converted to base64, size:', base64.length);
+
+      messageContent = [
+        { type: "text", text: userPrompt },
+        { 
+          type: "image_url", 
+          image_url: { url: dataUrl }
+        }
+      ];
+    } else {
+      // For images, use the public URL
+      const { data: urlData } = supabase.storage
+        .from('fleet-notices')
+        .getPublicUrl(filePath);
+
+      const fileUrl = urlData.publicUrl;
+      console.log('Using image URL:', fileUrl);
+
+      messageContent = [
+        { type: "text", text: userPrompt },
+        { type: "image_url", image_url: { url: fileUrl } }
+      ];
+    }
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -79,13 +120,7 @@ Only return the JSON object, no additional text.`;
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
-            content: [
-              { type: "text", text: userPrompt },
-              { type: "image_url", image_url: { url: fileUrl } }
-            ]
-          }
+          { role: "user", content: messageContent }
         ],
       }),
     });
