@@ -76,11 +76,14 @@ export default function NewFleetNoticeForm({ onSuccess }: NewFleetNoticeFormProp
         return;
       }
 
-      toast.info('Analyzing document with AI...', { duration: 3000 });
+      const fileType = file.type;
+      const isPdf = fileType === 'application/pdf';
+      
+      toast.info(`Analyzing ${isPdf ? 'PDF' : 'image'} with AI...`, { duration: 3000 });
 
-      // Call the edge function
+      // Call the edge function with file type info
       const { data, error } = await supabase.functions.invoke('extract-fleet-notice', {
-        body: { filePath: tempPath },
+        body: { filePath: tempPath, fileType },
       });
 
       if (error) {
@@ -207,13 +210,14 @@ export default function NewFleetNoticeForm({ onSuccess }: NewFleetNoticeFormProp
       const selectedFiles = Array.from(e.target.files);
       setFiles(selectedFiles);
 
-      // Auto-extract from first image file
-      const imageFile = selectedFiles.find(f => 
+      // Auto-extract from first image or PDF file
+      const extractableFile = selectedFiles.find(f => 
         f.type.startsWith('image/') || f.type === 'application/pdf'
       );
       
-      if (imageFile && imageFile.type.startsWith('image/')) {
-        await extractDataFromFile(imageFile);
+      // Extract from both images and PDFs
+      if (extractableFile) {
+        await extractDataFromFile(extractableFile);
       }
     }
   };
