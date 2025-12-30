@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-ops-final-email]
 verify_jwt = false
+
+[functions.extract-fleet-notice]
+verify_jwt = false
