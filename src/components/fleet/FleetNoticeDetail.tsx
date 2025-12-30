@@ -33,8 +33,10 @@ import {
   Clock,
   Upload,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Mail
 } from "lucide-react";
+import { FleetNoticeEmailDialog } from "./FleetNoticeEmailDialog";
 
 interface FleetNoticeDetailProps {
   noticeId: string;
@@ -64,6 +66,7 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [driverName, setDriverName] = useState("");
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
   if (isLoading || !notice) {
     return (
@@ -142,6 +145,10 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setEmailDialogOpen(true)}>
+            <Mail className="h-4 w-4 mr-2" />
+            Email Driver
+          </Button>
           <Select value={notice.status} onValueChange={(v) => handleStatusChange(v as FleetNoticeStatus)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />
@@ -154,6 +161,12 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
           </Select>
         </div>
       </div>
+
+      <FleetNoticeEmailDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        notice={notice}
+      />
 
       <Tabs defaultValue="details">
         <TabsList>

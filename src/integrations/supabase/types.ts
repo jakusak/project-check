@@ -546,6 +546,56 @@ export type Database = {
         }
         Relationships: []
       }
+      fleet_notice_emails: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notice_id: string
+          recipient_email: string
+          recipient_name: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notice_id: string
+          recipient_email: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notice_id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_notice_emails_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fleet_notice_files: {
         Row: {
           created_at: string

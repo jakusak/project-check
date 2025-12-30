@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.extract-fleet-notice]
 verify_jwt = false
+
+[functions.send-fleet-notice-email]
+verify_jwt = false
