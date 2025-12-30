@@ -47,6 +47,7 @@ export interface FleetNotice {
 export interface FleetVehicle {
   id: string;
   license_plate: string;
+  backroads_van_number: string | null;
   fleet_type: string;
   vendor: string | null;
   country_base: string | null;
@@ -399,7 +400,7 @@ export function useCreateFleetVehicle() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: { license_plate: string; fleet_type?: string; vendor?: string; country_base?: string; make?: string; model?: string; year?: number; vin?: string }) => {
+    mutationFn: async (data: { license_plate: string; backroads_van_number?: string; fleet_type?: string; vendor?: string; country_base?: string; make?: string; model?: string; year?: number; vin?: string }) => {
       const { data: vehicle, error } = await supabase
         .from("fleet_vehicles")
         .insert(data)

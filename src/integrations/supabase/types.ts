@@ -781,6 +781,7 @@ export type Database = {
       }
       fleet_vehicles: {
         Row: {
+          backroads_van_number: string | null
           country_base: string | null
           created_at: string
           fleet_type: string
@@ -796,6 +797,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          backroads_van_number?: string | null
           country_base?: string | null
           created_at?: string
           fleet_type?: string
@@ -811,6 +813,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          backroads_van_number?: string | null
           country_base?: string | null
           created_at?: string
           fleet_type?: string
