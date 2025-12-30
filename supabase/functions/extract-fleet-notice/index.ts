@@ -176,8 +176,48 @@ Only return the JSON object, no additional text.`;
 
     console.log('Extracted data:', extractedData);
 
+    // Look up the Backroads van number from the license plate
+    let backroadsVanNumber = null;
+    let vehicleId = null;
+    
+    if (extractedData.license_plate) {
+      // Normalize the license plate (remove spaces, dashes, make uppercase)
+      const normalizedPlate = extractedData.license_plate.replace(/[\s\-]/g, '').toUpperCase();
+      
+      console.log('Looking up vehicle for license plate:', normalizedPlate);
+      
+      // Query vehicles table for matching license plate
+      const { data: vehicleData, error: vehicleError } = await supabase
+        .from('fleet_vehicles')
+        .select('id, license_plate, backroads_van_number')
+        .eq('is_active', true);
+      
+      if (!vehicleError && vehicleData) {
+        // Find a match by comparing normalized plates
+        const matchedVehicle = vehicleData.find(v => {
+          const dbPlate = v.license_plate.replace(/[\s\-]/g, '').toUpperCase();
+          return dbPlate === normalizedPlate;
+        });
+        
+        if (matchedVehicle) {
+          backroadsVanNumber = matchedVehicle.backroads_van_number;
+          vehicleId = matchedVehicle.id;
+          console.log('Found matching vehicle:', matchedVehicle.id, 'Van number:', backroadsVanNumber);
+        } else {
+          console.log('No matching vehicle found for plate:', normalizedPlate);
+        }
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, data: extractedData }),
+      JSON.stringify({ 
+        success: true, 
+        data: {
+          ...extractedData,
+          backroads_van_number: backroadsVanNumber,
+          matched_vehicle_id: vehicleId,
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
