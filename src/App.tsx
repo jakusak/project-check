@@ -48,6 +48,7 @@ import NewInventoryMove from "./pages/inventory/NewInventoryMove";
 import InventoryMoveDetail from "./pages/inventory/InventoryMoveDetail";
 import FleetDashboard from "./pages/fleet/FleetDashboard";
 import FleetNoticesList from "./pages/fleet/FleetNoticesList";
+import NewFleetNotice from "./pages/fleet/NewFleetNotice";
 import FleetDriversList from "./pages/fleet/FleetDriversList";
 import FleetVehiclesList from "./pages/fleet/FleetVehiclesList";
 import MobileLayout from "./components/MobileLayout";
@@ -111,6 +112,7 @@ const App = () => (
               <Route path="/inventory/moves/:id" element={<InventoryMoveDetail />} />
               <Route path="/fleet" element={<FleetDashboard />} />
               <Route path="/fleet/notices" element={<FleetNoticesList />} />
+              <Route path="/fleet/notices/new" element={<NewFleetNotice />} />
               <Route path="/fleet/drivers" element={<FleetDriversList />} />
               <Route path="/fleet/vehicles" element={<FleetVehiclesList />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
