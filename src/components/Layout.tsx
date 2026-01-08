@@ -132,6 +132,78 @@ export default function Layout() {
               Fleet Violations
             </Link>
 
+            {/* Lease Management Dropdown */}
+            {(isAdmin || isSuperAdmin) && (
+              <div className="relative group">
+                <button
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                    location.pathname.startsWith("/leases")
+                      ? "bg-sidebar-accent text-primary-foreground"
+                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                  )}
+                >
+                  Lease Management
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                <div className="absolute left-0 top-full mt-1 w-56 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  {/* Contracts Section */}
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    Contracts
+                  </div>
+                  <Link
+                    to="/leases/contracts"
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === "/leases/contracts"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    All Contracts
+                  </Link>
+                  <Link
+                    to="/leases/contracts/new"
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === "/leases/contracts/new"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    New Contract
+                  </Link>
+
+                  {/* Property Search Section */}
+                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-t border-b border-border mt-1">
+                    Property Search
+                  </div>
+                  <Link
+                    to="/leases/property-search"
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === "/leases/property-search"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    Search Cases
+                  </Link>
+                  <Link
+                    to="/leases/property-search/new"
+                    className={cn(
+                      "flex items-center px-4 py-2.5 text-sm transition-colors",
+                      location.pathname === "/leases/property-search/new"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    New Search Case
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Equipment & Inventory Mega-Dropdown */}
             <div className="relative group">
               <button

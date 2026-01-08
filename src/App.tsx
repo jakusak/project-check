@@ -58,6 +58,11 @@ import MobileInventoryRequest from "./pages/mobile/MobileInventoryRequest";
 import MobileMyRequests from "./pages/mobile/MobileMyRequests";
 import MobileCycleCount from "./pages/mobile/MobileCycleCount";
 import MobileAssignBike from "./pages/mobile/MobileAssignBike";
+import ContractsDashboard from "./pages/leases/ContractsDashboard";
+import NewContract from "./pages/leases/NewContract";
+import ContractDetail from "./pages/leases/ContractDetail";
+import PropertySearchDashboard from "./pages/leases/PropertySearchDashboard";
+import NewPropertySearch from "./pages/leases/NewPropertySearch";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +120,11 @@ const App = () => (
               <Route path="/fleet/notices/new" element={<NewFleetNotice />} />
               <Route path="/fleet/drivers" element={<FleetDriversList />} />
               <Route path="/fleet/vehicles" element={<FleetVehiclesList />} />
+              <Route path="/leases/contracts" element={<ContractsDashboard />} />
+              <Route path="/leases/contracts/new" element={<NewContract />} />
+              <Route path="/leases/contracts/:id" element={<ContractDetail />} />
+              <Route path="/leases/property-search" element={<PropertySearchDashboard />} />
+              <Route path="/leases/property-search/new" element={<NewPropertySearch />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
             </Route>
             {/* Mobile Field App Routes */}
