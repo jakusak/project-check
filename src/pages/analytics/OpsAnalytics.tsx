@@ -38,6 +38,7 @@ export default function OpsAnalytics() {
   const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 30));
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [opsArea, setOpsArea] = useState<string>("__all__");
+  const [overlayHovered, setOverlayHovered] = useState(false);
 
   // RBAC check
   useEffect(() => {
@@ -59,6 +60,12 @@ export default function OpsAnalytics() {
   const { data: requestsByArea, isLoading: requestsByAreaLoading } = useRequestsByOpsArea(filters);
   const { data: incidentsByArea, isLoading: incidentsByAreaLoading } = useIncidentsByOpsArea(filters);
 
+  const resetFilters = () => {
+    setStartDate(subDays(new Date(), 30));
+    setEndDate(new Date());
+    setOpsArea("__all__");
+  };
+
   if (authLoading) {
     return (
       <div className="p-6 space-y-6">
@@ -73,15 +80,6 @@ export default function OpsAnalytics() {
   if (!isOPX && !isAdmin && !isSuperAdmin) {
     return null;
   }
-
-  const resetFilters = () => {
-    setStartDate(subDays(new Date(), 30));
-    setEndDate(new Date());
-    setOpsArea("__all__");
-    setOpsArea("");
-  };
-
-  const [overlayHovered, setOverlayHovered] = useState(false);
 
   return (
     <div className="relative">
