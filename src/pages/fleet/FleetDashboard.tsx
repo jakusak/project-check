@@ -84,16 +84,18 @@ export default function FleetDashboard() {
           </Card>
         </Link>
 
-        <Card className="border-destructive/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Due in 7 Days</CardTitle>
-            <Clock className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{isLoading ? "..." : stats?.dueSoon || 0}</div>
-            <p className="text-xs text-muted-foreground">Urgent attention needed</p>
-          </CardContent>
-        </Card>
+        <Link to="/fleet/notices?status=needs_review" className="block">
+          <Card className="border-destructive/50 hover:border-destructive hover:shadow-md transition-all cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Due in 7 Days</CardTitle>
+              <Clock className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">{isLoading ? "..." : stats?.dueSoon || 0}</div>
+              <p className="text-xs text-muted-foreground">Urgent attention needed</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
