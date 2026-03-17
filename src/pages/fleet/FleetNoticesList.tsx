@@ -1,15 +1,18 @@
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Filter, Eye, Upload, FileText, AlertTriangle, Clock } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Search, Eye, AlertTriangle, CalendarIcon, X } from "lucide-react";
 import { useFleetNotices, FleetNoticeStatus, FleetNoticeType } from "@/hooks/useFleetNotices";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
+import { cn } from "@/lib/utils";
 import FleetNoticeDetail from "@/components/fleet/FleetNoticeDetail";
 import NewFleetNoticeForm from "@/components/fleet/NewFleetNoticeForm";
 
@@ -25,6 +28,18 @@ const STATUS_COLORS: Record<FleetNoticeStatus, string> = {
   exception: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
 };
 
+const STATUS_LABELS: Record<FleetNoticeStatus, string> = {
+  new: "New",
+  needs_review: "Needs Review",
+  ready_to_assign: "Ready to Assign",
+  assigned: "Assigned",
+  in_payment: "In Payment",
+  paid: "Paid",
+  in_dispute: "In Dispute",
+  closed: "Closed",
+  exception: "Exception",
+};
+
 const TYPE_LABELS: Record<FleetNoticeType, string> = {
   speeding: "Speeding",
   parking: "Parking",
@@ -33,29 +48,123 @@ const TYPE_LABELS: Record<FleetNoticeType, string> = {
   unknown: "Unknown",
 };
 
+function DateRangeFilter({ label, from, to, onFromChange, onToChange }: {
+  label: string;
+  from: Date | undefined;
+  to: Date | undefined;
+  onFromChange: (d: Date | undefined) => void;
+  onToChange: (d: Date | undefined) => void;
+}) {
+  const hasFilter = from || to;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className={cn("h-9 text-xs gap-1", hasFilter && "border-primary text-primary")}>
+          <CalendarIcon className="h-3 w-3" />
+          {hasFilter
+            ? `${from ? format(from, "MM/dd") : "..."} – ${to ? format(to, "MM/dd") : "..."}`
+            : label}
+          {hasFilter && (
+            <X className="h-3 w-3 ml-1" onClick={(e) => { e.stopPropagation(); onFromChange(undefined); onToChange(undefined); }} />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-3 space-y-3" align="start">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">From</p>
+          <Calendar mode="single" selected={from} onSelect={onFromChange} className={cn("p-2 pointer-events-auto")} />
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">To</p>
+          <Calendar mode="single" selected={to} onSelect={onToChange} className={cn("p-2 pointer-events-auto")} />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function FleetNoticesList() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [driverFilter, setDriverFilter] = useState<string>("all");
+  const [fineMin, setFineMin] = useState<string>("");
+  const [fineMax, setFineMax] = useState<string>("");
+  const [receivedFrom, setReceivedFrom] = useState<Date | undefined>();
+  const [receivedTo, setReceivedTo] = useState<Date | undefined>();
+  const [deadlineFrom, setDeadlineFrom] = useState<Date | undefined>();
+  const [deadlineTo, setDeadlineTo] = useState<Date | undefined>();
   const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
 
+  // Only pass status/type to the API query; the rest we filter client-side
   const { data: notices, isLoading } = useFleetNotices({
     status: statusFilter !== "all" ? [statusFilter as FleetNoticeStatus] : undefined,
     notice_type: typeFilter !== "all" ? [typeFilter as FleetNoticeType] : undefined,
   });
 
-  const filteredNotices = notices?.filter(notice => {
-    if (!searchTerm) return true;
-    const search = searchTerm.toLowerCase();
-    return (
-      notice.license_plate?.toLowerCase().includes(search) ||
-      notice.reference_number?.toLowerCase().includes(search) ||
-      notice.driver?.name?.toLowerCase().includes(search) ||
-      notice.violation_location?.toLowerCase().includes(search)
-    );
-  });
+  // Derive unique countries and drivers for filter dropdowns
+  const { countries, drivers } = useMemo(() => {
+    if (!notices) return { countries: [], drivers: [] };
+    const countrySet = new Set<string>();
+    const driverMap = new Map<string, string>();
+    notices.forEach((n) => {
+      if (n.country) countrySet.add(n.country);
+      if (n.driver?.id && n.driver?.name) driverMap.set(n.driver.id, n.driver.name);
+    });
+    return {
+      countries: Array.from(countrySet).sort(),
+      drivers: Array.from(driverMap.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name)),
+    };
+  }, [notices]);
+
+  const hasActiveFilters = searchTerm || statusFilter !== "all" || typeFilter !== "all" || countryFilter !== "all" || driverFilter !== "all" || fineMin || fineMax || receivedFrom || receivedTo || deadlineFrom || deadlineTo;
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setCountryFilter("all");
+    setDriverFilter("all");
+    setFineMin("");
+    setFineMax("");
+    setReceivedFrom(undefined);
+    setReceivedTo(undefined);
+    setDeadlineFrom(undefined);
+    setDeadlineTo(undefined);
+  };
+
+  const filteredNotices = useMemo(() => {
+    if (!notices) return [];
+    return notices.filter((notice) => {
+      // Text search
+      if (searchTerm) {
+        const s = searchTerm.toLowerCase();
+        const match =
+          notice.license_plate?.toLowerCase().includes(s) ||
+          notice.reference_number?.toLowerCase().includes(s) ||
+          notice.driver?.name?.toLowerCase().includes(s) ||
+          notice.violation_location?.toLowerCase().includes(s);
+        if (!match) return false;
+      }
+      // Country
+      if (countryFilter !== "all" && notice.country !== countryFilter) return false;
+      // Driver
+      if (driverFilter !== "all" && notice.driver_id !== driverFilter) return false;
+      // Fine amount range
+      if (fineMin && (notice.fine_amount == null || notice.fine_amount < Number(fineMin))) return false;
+      if (fineMax && (notice.fine_amount == null || notice.fine_amount > Number(fineMax))) return false;
+      // Received date range
+      if (receivedFrom && isBefore(new Date(notice.received_date), startOfDay(receivedFrom))) return false;
+      if (receivedTo && isAfter(new Date(notice.received_date), endOfDay(receivedTo))) return false;
+      // Deadline date range
+      if (deadlineFrom && (!notice.deadline_date || isBefore(new Date(notice.deadline_date), startOfDay(deadlineFrom)))) return false;
+      if (deadlineTo && (!notice.deadline_date || isAfter(new Date(notice.deadline_date), endOfDay(deadlineTo)))) return false;
+      return true;
+    });
+  }, [notices, searchTerm, countryFilter, driverFilter, fineMin, fineMax, receivedFrom, receivedTo, deadlineFrom, deadlineTo]);
 
   const getDeadlineStatus = (deadline: string | null) => {
     if (!deadline) return null;
@@ -67,7 +176,7 @@ export default function FleetNoticesList() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -92,50 +201,103 @@ export default function FleetNoticesList() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="py-4">
-          <div className="flex gap-4 flex-wrap">
+        <CardContent className="py-4 space-y-3">
+          {/* Row 1: Search + Status + Type */}
+          <div className="flex gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by plate, reference, driver, location..."
+                placeholder="Search plate, ref, driver, location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[160px] h-9">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="needs_review">Needs Review</SelectItem>
-                <SelectItem value="ready_to_assign">Ready to Assign</SelectItem>
-                <SelectItem value="assigned">Assigned</SelectItem>
-                <SelectItem value="in_payment">In Payment</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="in_dispute">In Dispute</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-                <SelectItem value="exception">Exception</SelectItem>
+                {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[160px] h-9">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="speeding">Speeding</SelectItem>
-                <SelectItem value="parking">Parking</SelectItem>
-                <SelectItem value="restricted_zone">Restricted Zone</SelectItem>
-                <SelectItem value="toll_fine">Toll Fine</SelectItem>
-                <SelectItem value="unknown">Unknown</SelectItem>
+                {Object.entries(TYPE_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* Row 2: Country, Driver, Fine range, Date ranges */}
+          <div className="flex gap-3 flex-wrap items-center">
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-[140px] h-9">
+                <SelectValue placeholder="Country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {countries.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={driverFilter} onValueChange={setDriverFilter}>
+              <SelectTrigger className="w-[160px] h-9">
+                <SelectValue placeholder="Driver" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Drivers</SelectItem>
+                {drivers.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-1">
+              <Input
+                type="number"
+                placeholder="Min €"
+                value={fineMin}
+                onChange={(e) => setFineMin(e.target.value)}
+                className="w-[80px] h-9 text-xs"
+              />
+              <span className="text-muted-foreground text-xs">–</span>
+              <Input
+                type="number"
+                placeholder="Max €"
+                value={fineMax}
+                onChange={(e) => setFineMax(e.target.value)}
+                className="w-[80px] h-9 text-xs"
+              />
+            </div>
+
+            <DateRangeFilter label="Received" from={receivedFrom} to={receivedTo} onFromChange={setReceivedFrom} onToChange={setReceivedTo} />
+            <DateRangeFilter label="Deadline" from={deadlineFrom} to={deadlineTo} onFromChange={setDeadlineFrom} onToChange={setDeadlineTo} />
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="h-9 text-xs text-muted-foreground">
+                <X className="h-3 w-3 mr-1" />
+                Clear all
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
+
+      {/* Results count */}
+      <div className="text-sm text-muted-foreground">
+        {isLoading ? "Loading..." : `${filteredNotices.length} notice${filteredNotices.length !== 1 ? "s" : ""} found`}
+      </div>
 
       {/* Table */}
       <Card>
@@ -161,14 +323,14 @@ export default function FleetNoticesList() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filteredNotices?.length === 0 ? (
+              ) : filteredNotices.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No notices found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredNotices?.map((notice) => {
+                filteredNotices.map((notice) => {
                   const deadlineStatus = getDeadlineStatus(notice.deadline_date);
                   return (
                     <TableRow key={notice.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedNoticeId(notice.id)}>
