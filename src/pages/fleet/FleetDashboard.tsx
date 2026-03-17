@@ -71,16 +71,18 @@ export default function FleetDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Notices</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isLoading ? "..." : stats?.openNotices || 0}</div>
-            <p className="text-xs text-muted-foreground">Requiring action</p>
-          </CardContent>
-        </Card>
+        <Link to="/fleet/notices" className="block">
+          <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Open Notices</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.openNotices || 0}</div>
+              <p className="text-xs text-muted-foreground">Requiring action</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="border-destructive/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
