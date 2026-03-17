@@ -54,6 +54,12 @@ export default function FleetDashboard() {
               Manage Vehicles
             </Link>
           </Button>
+          <Button asChild variant="secondary">
+            <Link to="/fleet/notices">
+              <FileText className="h-4 w-4 mr-2" />
+              View All Notices
+            </Link>
+          </Button>
           <Button asChild>
             <Link to="/fleet/notices/new">
               <Plus className="h-4 w-4 mr-2" />
