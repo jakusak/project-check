@@ -54,6 +54,12 @@ export default function FleetDashboard() {
               Manage Vehicles
             </Link>
           </Button>
+          <Button asChild variant="secondary">
+            <Link to="/fleet/notices">
+              <FileText className="h-4 w-4 mr-2" />
+              View All Notices
+            </Link>
+          </Button>
           <Button asChild>
             <Link to="/fleet/notices/new">
               <Plus className="h-4 w-4 mr-2" />
@@ -65,40 +71,46 @@ export default function FleetDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Notices</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isLoading ? "..." : stats?.openNotices || 0}</div>
-            <p className="text-xs text-muted-foreground">Requiring action</p>
-          </CardContent>
-        </Card>
+        <Link to="/fleet/notices" className="block">
+          <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Open Notices</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{isLoading ? "..." : stats?.openNotices || 0}</div>
+              <p className="text-xs text-muted-foreground">Requiring action</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="border-destructive/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Due in 7 Days</CardTitle>
-            <Clock className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{isLoading ? "..." : stats?.dueSoon || 0}</div>
-            <p className="text-xs text-muted-foreground">Urgent attention needed</p>
-          </CardContent>
-        </Card>
+        <Link to="/fleet/notices?status=needs_review" className="block">
+          <Card className="border-destructive/50 hover:border-destructive hover:shadow-md transition-all cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Due in 7 Days</CardTitle>
+              <Clock className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">{isLoading ? "..." : stats?.dueSoon || 0}</div>
+              <p className="text-xs text-muted-foreground">Urgent attention needed</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Open Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              €{isLoading ? "..." : (stats?.totalOpenAmount || 0).toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground">Outstanding fines</p>
-          </CardContent>
-        </Card>
+        <Link to="/fleet/notices?status=in_payment" className="block">
+          <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Open Amount</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                €{isLoading ? "..." : (stats?.totalOpenAmount || 0).toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">Outstanding fines</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
