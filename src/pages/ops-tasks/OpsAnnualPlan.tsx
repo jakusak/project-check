@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { useOpsTasks, useOpsTeamMembers } from "@/hooks/useOpsTasks";
 import { ArrowLeft } from "lucide-react";

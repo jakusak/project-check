@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useOpsTasks, useOpsTeamMembers, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, OpsTask } from "@/hooks/useOpsTasks";
+import { useOpsTasks, useOpsTeamMembers, CATEGORY_LABELS } from "@/hooks/useOpsTasks";
 import { Plus, AlertTriangle, CheckCircle, Clock, Ban, TrendingUp, Users } from "lucide-react";
-import { format, isThisWeek, isThisMonth, isPast, parseISO, startOfWeek, endOfWeek } from "date-fns";
+import { format, isThisWeek, isThisMonth, isPast, parseISO } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 

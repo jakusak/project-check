@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useOpsTasks, useOpsTeamMembers, STATUS_COLORS, STATUS_LABELS } from "@/hooks/useOpsTasks";
+import { useOpsTasks, useOpsTeamMembers } from "@/hooks/useOpsTasks";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { isPast, parseISO } from "date-fns";
 

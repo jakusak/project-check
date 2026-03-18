@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useOpsTasks, useOpsTeamMembers, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { ArrowLeft } from "lucide-react";
-import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isPast, isBefore } from "date-fns";
+import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isBefore } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
