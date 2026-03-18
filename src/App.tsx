@@ -58,6 +58,14 @@ import MobileInventoryRequest from "./pages/mobile/MobileInventoryRequest";
 import MobileMyRequests from "./pages/mobile/MobileMyRequests";
 import MobileCycleCount from "./pages/mobile/MobileCycleCount";
 import MobileAssignBike from "./pages/mobile/MobileAssignBike";
+import OpsTasksDashboard from "./pages/ops-tasks/OpsTasksDashboard";
+import OpsTasksList from "./pages/ops-tasks/OpsTasksList";
+import OpsQuickRequest from "./pages/ops-tasks/OpsQuickRequest";
+import OpsNewTask from "./pages/ops-tasks/OpsNewTask";
+import OpsWeeklyView from "./pages/ops-tasks/OpsWeeklyView";
+import OpsMonthlyView from "./pages/ops-tasks/OpsMonthlyView";
+import OpsAnnualPlan from "./pages/ops-tasks/OpsAnnualPlan";
+import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +124,14 @@ const App = () => (
               <Route path="/fleet/drivers" element={<FleetDriversList />} />
               <Route path="/fleet/vehicles" element={<FleetVehiclesList />} />
               <Route path="/docs/prd" element={<PRDViewer />} />
+              <Route path="/ops-tasks/dashboard" element={<OpsTasksDashboard />} />
+              <Route path="/ops-tasks" element={<OpsTasksList />} />
+              <Route path="/ops-tasks/request" element={<OpsQuickRequest />} />
+              <Route path="/ops-tasks/new" element={<OpsNewTask />} />
+              <Route path="/ops-tasks/weekly" element={<OpsWeeklyView />} />
+              <Route path="/ops-tasks/monthly" element={<OpsMonthlyView />} />
+              <Route path="/ops-tasks/annual" element={<OpsAnnualPlan />} />
+              <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
             </Route>
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>

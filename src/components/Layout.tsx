@@ -131,6 +131,19 @@ export default function Layout() {
               Fleet Violations
             </Link>
 
+            {/* Ops Control */}
+            <Link
+              to="/ops-tasks/dashboard"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname.startsWith("/ops-tasks")
+                  ? "bg-sidebar-accent text-primary-foreground"
+                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+              )}
+            >
+              Ops Control
+            </Link>
+
             {/* Equipment & Inventory Mega-Dropdown */}
             <div className="relative group">
               <button
