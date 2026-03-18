@@ -58,6 +58,14 @@ import MobileInventoryRequest from "./pages/mobile/MobileInventoryRequest";
 import MobileMyRequests from "./pages/mobile/MobileMyRequests";
 import MobileCycleCount from "./pages/mobile/MobileCycleCount";
 import MobileAssignBike from "./pages/mobile/MobileAssignBike";
+import OpsTasksDashboard from "./pages/ops-tasks/OpsTasksDashboard";
+import OpsTasksList from "./pages/ops-tasks/OpsTasksList";
+import OpsQuickRequest from "./pages/ops-tasks/OpsQuickRequest";
+import OpsNewTask from "./pages/ops-tasks/OpsNewTask";
+import OpsWeeklyView from "./pages/ops-tasks/OpsWeeklyView";
+import OpsMonthlyView from "./pages/ops-tasks/OpsMonthlyView";
+import OpsAnnualPlan from "./pages/ops-tasks/OpsAnnualPlan";
+import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
 
 const queryClient = new QueryClient();
 
