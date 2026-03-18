@@ -54,10 +54,6 @@ export default function Layout() {
     { to: "/tps/bike-history", label: "TPS: Bike History" },
   ];
 
-  const tpsItems = [
-    { to: "/tps/assign-bikes", label: "Assign Bikes" },
-    { to: "/tps/bike-history", label: "Bike History Search" },
-  ];
 
   const adminNavItems = [
     { to: "/admin/requests", label: "All Requests" },
