@@ -49,6 +49,9 @@ export default function Layout() {
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
     { to: "/warehouses", label: "Warehouses" },
+    { to: "/hub/dashboard", label: "Hub Fulfillment" },
+    { to: "/tps/assign-bikes", label: "TPS: Assign Bikes" },
+    { to: "/tps/bike-history", label: "TPS: Bike History" },
   ];
 
   const tpsItems = [
