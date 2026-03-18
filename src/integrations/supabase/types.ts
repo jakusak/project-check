@@ -1235,6 +1235,205 @@ export type Database = {
         }
         Relationships: []
       }
+      ops_task_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_user_id: string | null
+          created_at: string
+          field_changed: string
+          id: string
+          new_value: string | null
+          notes: string | null
+          old_value: string | null
+          task_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          field_changed: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          task_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          field_changed?: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_task_history_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "ops_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_tasks: {
+        Row: {
+          actual_completion_date: string | null
+          blocker_reason: string | null
+          category: Database["public"]["Enums"]["ops_task_category"]
+          completion_evidence: string | null
+          created_at: string
+          created_by_user_id: string | null
+          current_owner_id: string | null
+          definition_of_done: string | null
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          location: string | null
+          notes: string | null
+          photo_paths: string[] | null
+          planned_month: string | null
+          planned_week: string | null
+          primary_owner_id: string | null
+          priority: Database["public"]["Enums"]["ops_task_priority"]
+          recurring_frequency: Database["public"]["Enums"]["ops_recurring_frequency"]
+          requested_by: string | null
+          requested_due_date: string | null
+          rightful_owner_id: string | null
+          secondary_owner_id: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["ops_task_status"]
+          target_end_date: string | null
+          task_mode: string | null
+          title: string
+          updated_at: string
+          work_type: string | null
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          blocker_reason?: string | null
+          category?: Database["public"]["Enums"]["ops_task_category"]
+          completion_evidence?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          current_owner_id?: string | null
+          definition_of_done?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          photo_paths?: string[] | null
+          planned_month?: string | null
+          planned_week?: string | null
+          primary_owner_id?: string | null
+          priority?: Database["public"]["Enums"]["ops_task_priority"]
+          recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
+          requested_by?: string | null
+          requested_due_date?: string | null
+          rightful_owner_id?: string | null
+          secondary_owner_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ops_task_status"]
+          target_end_date?: string | null
+          task_mode?: string | null
+          title: string
+          updated_at?: string
+          work_type?: string | null
+        }
+        Update: {
+          actual_completion_date?: string | null
+          blocker_reason?: string | null
+          category?: Database["public"]["Enums"]["ops_task_category"]
+          completion_evidence?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          current_owner_id?: string | null
+          definition_of_done?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          photo_paths?: string[] | null
+          planned_month?: string | null
+          planned_week?: string | null
+          primary_owner_id?: string | null
+          priority?: Database["public"]["Enums"]["ops_task_priority"]
+          recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
+          requested_by?: string | null
+          requested_due_date?: string | null
+          rightful_owner_id?: string | null
+          secondary_owner_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ops_task_status"]
+          target_end_date?: string | null
+          task_mode?: string | null
+          title?: string
+          updated_at?: string
+          work_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_tasks_current_owner_id_fkey"
+            columns: ["current_owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_tasks_primary_owner_id_fkey"
+            columns: ["primary_owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_tasks_rightful_owner_id_fkey"
+            columns: ["rightful_owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_tasks_secondary_owner_id_fkey"
+            columns: ["secondary_owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_team_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       opx_area_assignments: {
         Row: {
           assigned_by: string | null
@@ -1682,6 +1881,35 @@ export type Database = {
         | "unknown"
       incident_status: "submitted" | "in_review" | "closed"
       maintenance_status: "open" | "completed"
+      ops_recurring_frequency:
+        | "none"
+        | "daily"
+        | "weekly"
+        | "biweekly"
+        | "monthly"
+        | "quarterly"
+        | "annually"
+      ops_task_category:
+        | "trailer_management"
+        | "facilities"
+        | "trailer_overhaul"
+        | "building_requests"
+        | "build_trays"
+        | "racking_unracking"
+        | "spare_parts"
+        | "interior_build"
+        | "other"
+      ops_task_priority: "low" | "medium" | "high" | "urgent"
+      ops_task_status:
+        | "new_request"
+        | "triaged"
+        | "planned"
+        | "in_progress"
+        | "blocked"
+        | "waiting"
+        | "done"
+        | "cannot_complete"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1841,6 +2069,38 @@ export const Constants = {
       ],
       incident_status: ["submitted", "in_review", "closed"],
       maintenance_status: ["open", "completed"],
+      ops_recurring_frequency: [
+        "none",
+        "daily",
+        "weekly",
+        "biweekly",
+        "monthly",
+        "quarterly",
+        "annually",
+      ],
+      ops_task_category: [
+        "trailer_management",
+        "facilities",
+        "trailer_overhaul",
+        "building_requests",
+        "build_trays",
+        "racking_unracking",
+        "spare_parts",
+        "interior_build",
+        "other",
+      ],
+      ops_task_priority: ["low", "medium", "high", "urgent"],
+      ops_task_status: [
+        "new_request",
+        "triaged",
+        "planned",
+        "in_progress",
+        "blocked",
+        "waiting",
+        "done",
+        "cannot_complete",
+        "cancelled",
+      ],
     },
   },
 } as const
