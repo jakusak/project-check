@@ -180,9 +180,9 @@ export default function OpsTasksList() {
                       </TableCell>
                       <TableCell className="text-xs">{CATEGORY_LABELS[task.category]}</TableCell>
                       <TableCell>
-                        <Select value={task.current_owner_id || "unassigned"} onValueChange={(v) => handleInlineOwnerChange(task, v)}>
+                        <Select value={task.main_owner_id || "unassigned"} onValueChange={(v) => handleInlineOwnerChange(task, v)}>
                           <SelectTrigger className="h-7 text-xs w-[110px] border-0 p-0">
-                            <span className="text-xs">{task.current_owner?.name || "Unassigned"}</span>
+                            <span className="text-xs">{task.main_owner?.name || "Unassigned"}</span>
                           </SelectTrigger>
                           <SelectContent>
                             {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
