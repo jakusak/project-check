@@ -1287,23 +1287,21 @@ export type Database = {
           completion_evidence: string | null
           created_at: string
           created_by_user_id: string | null
-          current_owner_id: string | null
           definition_of_done: string | null
           description: string | null
           estimated_hours: number | null
           id: string
           location: string | null
+          main_owner_id: string | null
           notes: string | null
+          other_owner_id: string | null
           photo_paths: string[] | null
           planned_month: string | null
           planned_week: string | null
-          primary_owner_id: string | null
           priority: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by: string | null
           requested_due_date: string | null
-          rightful_owner_id: string | null
-          secondary_owner_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["ops_task_status"]
           target_end_date: string | null
@@ -1319,23 +1317,21 @@ export type Database = {
           completion_evidence?: string | null
           created_at?: string
           created_by_user_id?: string | null
-          current_owner_id?: string | null
           definition_of_done?: string | null
           description?: string | null
           estimated_hours?: number | null
           id?: string
           location?: string | null
+          main_owner_id?: string | null
           notes?: string | null
+          other_owner_id?: string | null
           photo_paths?: string[] | null
           planned_month?: string | null
           planned_week?: string | null
-          primary_owner_id?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
           requested_due_date?: string | null
-          rightful_owner_id?: string | null
-          secondary_owner_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["ops_task_status"]
           target_end_date?: string | null
@@ -1351,23 +1347,21 @@ export type Database = {
           completion_evidence?: string | null
           created_at?: string
           created_by_user_id?: string | null
-          current_owner_id?: string | null
           definition_of_done?: string | null
           description?: string | null
           estimated_hours?: number | null
           id?: string
           location?: string | null
+          main_owner_id?: string | null
           notes?: string | null
+          other_owner_id?: string | null
           photo_paths?: string[] | null
           planned_month?: string | null
           planned_week?: string | null
-          primary_owner_id?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
           requested_due_date?: string | null
-          rightful_owner_id?: string | null
-          secondary_owner_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["ops_task_status"]
           target_end_date?: string | null
@@ -1378,29 +1372,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ops_tasks_current_owner_id_fkey"
-            columns: ["current_owner_id"]
+            foreignKeyName: "ops_tasks_main_owner_id_fkey"
+            columns: ["main_owner_id"]
             isOneToOne: false
             referencedRelation: "ops_team_members"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ops_tasks_primary_owner_id_fkey"
-            columns: ["primary_owner_id"]
-            isOneToOne: false
-            referencedRelation: "ops_team_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ops_tasks_rightful_owner_id_fkey"
-            columns: ["rightful_owner_id"]
-            isOneToOne: false
-            referencedRelation: "ops_team_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ops_tasks_secondary_owner_id_fkey"
-            columns: ["secondary_owner_id"]
+            foreignKeyName: "ops_tasks_other_owner_id_fkey"
+            columns: ["other_owner_id"]
             isOneToOne: false
             referencedRelation: "ops_team_members"
             referencedColumns: ["id"]
