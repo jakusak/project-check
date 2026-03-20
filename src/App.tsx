@@ -66,6 +66,7 @@ import OpsWeeklyView from "./pages/ops-tasks/OpsWeeklyView";
 import OpsMonthlyView from "./pages/ops-tasks/OpsMonthlyView";
 import OpsAnnualPlan from "./pages/ops-tasks/OpsAnnualPlan";
 import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
+import OpsFacilitiesDashboard from "./pages/ops-tasks/OpsFacilitiesDashboard";
 import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
 
