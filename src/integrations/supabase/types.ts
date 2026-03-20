@@ -1482,6 +1482,51 @@ export type Database = {
         }
         Relationships: []
       }
+      supply_requests: {
+        Row: {
+          category: Database["public"]["Enums"]["supply_request_category"]
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          items: string
+          notes: string | null
+          priority: Database["public"]["Enums"]["supply_request_priority"]
+          quantity: number
+          requested_by: string
+          status: Database["public"]["Enums"]["supply_request_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["supply_request_category"]
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          items: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["supply_request_priority"]
+          quantity?: number
+          requested_by: string
+          status?: Database["public"]["Enums"]["supply_request_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["supply_request_category"]
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          items?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["supply_request_priority"]
+          quantity?: number
+          requested_by?: string
+          status?: Database["public"]["Enums"]["supply_request_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           created_at: string
@@ -1910,6 +1955,9 @@ export type Database = {
         | "done"
         | "cannot_complete"
         | "cancelled"
+      supply_request_category: "kitchen_supplies" | "office_supplies"
+      supply_request_priority: "low" | "medium" | "high"
+      supply_request_status: "open" | "in_progress" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2101,6 +2149,9 @@ export const Constants = {
         "cannot_complete",
         "cancelled",
       ],
+      supply_request_category: ["kitchen_supplies", "office_supplies"],
+      supply_request_priority: ["low", "medium", "high"],
+      supply_request_status: ["open", "in_progress", "closed"],
     },
   },
 } as const
