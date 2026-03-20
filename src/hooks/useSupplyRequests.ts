@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 export type SupplyRequest = {
   id: string;
   title: string;
-  category: "kitchen_supplies" | "office_supplies";
+  category: "kitchen_supplies" | "office_supplies" | "other";
   items: string;
   quantity: number;
   priority: "low" | "medium" | "high";

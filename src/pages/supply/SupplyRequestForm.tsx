@@ -75,6 +75,7 @@ export default function SupplyRequestForm() {
                   <SelectContent>
                     <SelectItem value="kitchen_supplies">Kitchen Supplies</SelectItem>
                     <SelectItem value="office_supplies">Office Supplies</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
