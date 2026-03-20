@@ -16,7 +16,8 @@ const ALL_PRIORITIES: OpsTaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as OpsTaskCategory[];
 
 export default function OpsTasksList() {
-  const { data: tasks = [], isLoading } = useOpsTasks();
+  const { data: allTasks = [], isLoading } = useOpsTasks();
+  const tasks = useMemo(() => allTasks.filter(t => t.task_mode !== "facility_request"), [allTasks]);
   const { data: members = [] } = useOpsTeamMembers();
   const updateTask = useUpdateOpsTask();
 
