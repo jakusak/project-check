@@ -32,10 +32,8 @@ export default function OpsNewTask() {
     const payload: any = {
       ...form,
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
-      current_owner_id: form.current_owner_id || null,
-      primary_owner_id: form.primary_owner_id || null,
-      secondary_owner_id: form.secondary_owner_id || null,
-      rightful_owner_id: form.rightful_owner_id || null,
+      main_owner_id: form.main_owner_id || null,
+      other_owner_id: form.other_owner_id || null,
       requested_due_date: form.requested_due_date || null,
       start_date: form.start_date || null,
       target_end_date: form.target_end_date || null,
