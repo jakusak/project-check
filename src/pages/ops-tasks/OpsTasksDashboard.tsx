@@ -128,7 +128,7 @@ export default function OpsTasksDashboard() {
                   <div className="text-xs text-muted-foreground flex gap-2">
                     <span>Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")}</span>
                     <span>•</span>
-                    <span>{t.current_owner?.name || "Unassigned"}</span>
+                    <span>{t.main_owner?.name || "Unassigned"}</span>
                   </div>
                 </Link>
               ))}
