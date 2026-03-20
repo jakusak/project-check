@@ -22,10 +22,8 @@ export interface OpsTask {
   priority: OpsTaskPriority;
   status: OpsTaskStatus;
   requested_by: string | null;
-  current_owner_id: string | null;
-  primary_owner_id: string | null;
-  secondary_owner_id: string | null;
-  rightful_owner_id: string | null;
+  main_owner_id: string | null;
+  other_owner_id: string | null;
   location: string | null;
   requested_due_date: string | null;
   start_date: string | null;
@@ -45,10 +43,8 @@ export interface OpsTask {
   created_at: string;
   updated_at: string;
   // Joined
-  current_owner?: OpsTeamMember;
-  primary_owner?: OpsTeamMember;
-  secondary_owner?: OpsTeamMember;
-  rightful_owner?: OpsTeamMember;
+  main_owner?: OpsTeamMember;
+  other_owner?: OpsTeamMember;
 }
 
 export interface OpsTaskHistory {
@@ -85,10 +81,8 @@ export function useOpsTasks() {
         .from("ops_tasks")
         .select(`
           *,
-          current_owner:ops_team_members!ops_tasks_current_owner_id_fkey(id, name, role),
-          primary_owner:ops_team_members!ops_tasks_primary_owner_id_fkey(id, name, role),
-          secondary_owner:ops_team_members!ops_tasks_secondary_owner_id_fkey(id, name, role),
-          rightful_owner:ops_team_members!ops_tasks_rightful_owner_id_fkey(id, name, role)
+          main_owner:ops_team_members!ops_tasks_main_owner_id_fkey(id, name, role),
+          other_owner:ops_team_members!ops_tasks_other_owner_id_fkey(id, name, role)
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;

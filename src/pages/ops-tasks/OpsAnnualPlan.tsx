@@ -17,7 +17,7 @@ export default function OpsAnnualPlan() {
     return members.map(m => {
       const monthData = FULL_MONTHS.map((month, i) => {
         const memberTasks = tasks.filter(t => 
-          t.current_owner_id === m.id && 
+          t.main_owner_id === m.id && 
           t.planned_month?.toLowerCase() === month.toLowerCase()
         );
         return {

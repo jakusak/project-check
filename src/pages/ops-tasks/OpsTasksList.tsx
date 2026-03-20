@@ -33,7 +33,7 @@ export default function OpsTasksList() {
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
       if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
-      if (ownerFilter !== "all" && t.current_owner_id !== ownerFilter) return false;
+      if (ownerFilter !== "all" && t.main_owner_id !== ownerFilter) return false;
       return true;
     });
 
@@ -45,7 +45,7 @@ export default function OpsTasksList() {
           return (order[a.priority] || 3) - (order[b.priority] || 3);
         }
         case "status": return a.status.localeCompare(b.status);
-        case "owner": return (a.current_owner?.name || "zzz").localeCompare(b.current_owner?.name || "zzz");
+        case "owner": return (a.main_owner?.name || "zzz").localeCompare(b.main_owner?.name || "zzz");
         default: return 0;
       }
     });
@@ -63,12 +63,12 @@ export default function OpsTasksList() {
   };
 
   const handleInlineOwnerChange = (task: OpsTask, newOwnerId: string) => {
-    const oldOwner = task.current_owner?.name || "Unassigned";
+    const oldOwner = task.main_owner?.name || "Unassigned";
     const newOwner = members.find(m => m.id === newOwnerId)?.name || "Unknown";
     updateTask.mutate({
       id: task.id,
-      updates: { current_owner_id: newOwnerId } as any,
-      historyEntry: { field_changed: "current_owner", old_value: oldOwner, new_value: newOwner, changed_by: "Manager" },
+      updates: { main_owner_id: newOwnerId } as any,
+      historyEntry: { field_changed: "main_owner", old_value: oldOwner, new_value: newOwner, changed_by: "Manager" },
     });
   };
 
@@ -150,7 +150,7 @@ export default function OpsTasksList() {
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Owner</TableHead>
+                  <TableHead>Main Owner</TableHead>
                   <TableHead>Due Date</TableHead>
                   <TableHead>Hours</TableHead>
                 </TableRow>
@@ -180,9 +180,9 @@ export default function OpsTasksList() {
                       </TableCell>
                       <TableCell className="text-xs">{CATEGORY_LABELS[task.category]}</TableCell>
                       <TableCell>
-                        <Select value={task.current_owner_id || "unassigned"} onValueChange={(v) => handleInlineOwnerChange(task, v)}>
+                        <Select value={task.main_owner_id || "unassigned"} onValueChange={(v) => handleInlineOwnerChange(task, v)}>
                           <SelectTrigger className="h-7 text-xs w-[110px] border-0 p-0">
-                            <span className="text-xs">{task.current_owner?.name || "Unassigned"}</span>
+                            <span className="text-xs">{task.main_owner?.name || "Unassigned"}</span>
                           </SelectTrigger>
                           <SelectContent>
                             {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}

@@ -31,8 +31,8 @@ export default function OpsMonthlyView() {
 
     const byOwner = members.map(m => ({
       member: m,
-      total: monthTasks.filter(t => t.current_owner_id === m.id).length,
-      hours: monthTasks.filter(t => t.current_owner_id === m.id).reduce((sum, t) => sum + (t.estimated_hours || 0), 0),
+      total: monthTasks.filter(t => t.main_owner_id === m.id).length,
+      hours: monthTasks.filter(t => t.main_owner_id === m.id).reduce((sum, t) => sum + (t.estimated_hours || 0), 0),
     }));
 
     return { monthTasks, completed, slipping, byCategory, byOwner };
@@ -102,7 +102,7 @@ export default function OpsMonthlyView() {
               <div key={t.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-red-50">
                 <div>
                   <div className="font-medium">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.current_owner?.name}</div>
+                  <div className="text-xs text-muted-foreground">Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.main_owner?.name}</div>
                 </div>
                 <Badge className={`${STATUS_COLORS[t.status]} text-xs`}>{STATUS_LABELS[t.status]}</Badge>
               </div>
@@ -122,7 +122,7 @@ export default function OpsMonthlyView() {
               <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted text-sm">
                 <div className="flex-1">
                   <span className="font-medium">{t.title}</span>
-                  <span className="text-muted-foreground ml-2 text-xs">{t.current_owner?.name || "Unassigned"}</span>
+                  <span className="text-muted-foreground ml-2 text-xs">{t.main_owner?.name || "Unassigned"}</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge className={`${PRIORITY_COLORS[t.priority]} text-xs capitalize`}>{t.priority}</Badge>

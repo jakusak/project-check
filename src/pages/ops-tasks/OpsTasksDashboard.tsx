@@ -26,8 +26,8 @@ export default function OpsTasksDashboard() {
     
     const byOwner = members.map(m => ({
       member: m,
-      active: tasks.filter(t => t.current_owner_id === m.id && !TERMINAL.includes(t.status)).length,
-      overdue: tasks.filter(t => t.current_owner_id === m.id && t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)).length,
+      active: tasks.filter(t => t.main_owner_id === m.id && !TERMINAL.includes(t.status)).length,
+      overdue: tasks.filter(t => t.main_owner_id === m.id && t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)).length,
     }));
 
     const byCategory: Record<string, number> = {};
@@ -128,7 +128,7 @@ export default function OpsTasksDashboard() {
                   <div className="text-xs text-muted-foreground flex gap-2">
                     <span>Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")}</span>
                     <span>•</span>
-                    <span>{t.current_owner?.name || "Unassigned"}</span>
+                    <span>{t.main_owner?.name || "Unassigned"}</span>
                   </div>
                 </Link>
               ))}
@@ -170,7 +170,7 @@ export default function OpsTasksDashboard() {
               <div key={t.id} className="text-sm p-2 rounded-md bg-green-50">
                 <div className="font-medium">{t.title}</div>
                 <div className="text-xs text-muted-foreground">
-                  {t.actual_completion_date && format(parseISO(t.actual_completion_date), "MMM d")} • {t.current_owner?.name}
+                  {t.actual_completion_date && format(parseISO(t.actual_completion_date), "MMM d")} • {t.main_owner?.name}
                 </div>
               </div>
             ))}
