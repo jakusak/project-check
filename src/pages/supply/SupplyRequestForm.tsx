@@ -17,7 +17,7 @@ export default function SupplyRequestForm() {
   const { user } = useAuth();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<"kitchen_supplies" | "office_supplies">("kitchen_supplies");
+  const [category, setCategory] = useState<"kitchen_supplies" | "office_supplies" | "other">("kitchen_supplies");
   const [items, setItems] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
