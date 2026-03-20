@@ -1955,7 +1955,7 @@ export type Database = {
         | "done"
         | "cannot_complete"
         | "cancelled"
-      supply_request_category: "kitchen_supplies" | "office_supplies"
+      supply_request_category: "kitchen_supplies" | "office_supplies" | "other"
       supply_request_priority: "low" | "medium" | "high"
       supply_request_status: "open" | "in_progress" | "closed"
     }
@@ -2149,7 +2149,7 @@ export const Constants = {
         "cannot_complete",
         "cancelled",
       ],
-      supply_request_category: ["kitchen_supplies", "office_supplies"],
+      supply_request_category: ["kitchen_supplies", "office_supplies", "other"],
       supply_request_priority: ["low", "medium", "high"],
       supply_request_status: ["open", "in_progress", "closed"],
     },

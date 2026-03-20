@@ -1,0 +1,1 @@
+ALTER TYPE public.supply_request_category ADD VALUE IF NOT EXISTS 'other';
