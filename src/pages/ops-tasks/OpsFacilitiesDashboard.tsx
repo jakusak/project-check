@@ -14,7 +14,7 @@ const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
 export default function OpsFacilitiesDashboard() {
   const { data: allTasks = [], isLoading } = useOpsTasks();
-  const { data: members = [] } = useOpsTeamMembers();
+  const { data: _members = [] } = useOpsTeamMembers();
   const updateTask = useUpdateOpsTask();
 
   // Only facility requests

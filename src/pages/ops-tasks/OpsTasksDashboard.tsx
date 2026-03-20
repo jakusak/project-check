@@ -12,7 +12,7 @@ const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
 export default function OpsTasksDashboard() {
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
-  const { data: members = [] } = useOpsTeamMembers();
+  const { data: _members = [] } = useOpsTeamMembers();
   const { data: supplyRequests = [], isLoading: supplyLoading } = useSupplyRequests();
 
   const isLoading = tasksLoading || supplyLoading;
