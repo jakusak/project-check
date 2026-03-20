@@ -31,8 +31,8 @@ export default function OpsMonthlyView() {
 
     const byOwner = members.map(m => ({
       member: m,
-      total: monthTasks.filter(t => t.current_owner_id === m.id).length,
-      hours: monthTasks.filter(t => t.current_owner_id === m.id).reduce((sum, t) => sum + (t.estimated_hours || 0), 0),
+      total: monthTasks.filter(t => t.main_owner_id === m.id).length,
+      hours: monthTasks.filter(t => t.main_owner_id === m.id).reduce((sum, t) => sum + (t.estimated_hours || 0), 0),
     }));
 
     return { monthTasks, completed, slipping, byCategory, byOwner };
