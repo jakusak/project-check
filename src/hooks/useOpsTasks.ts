@@ -159,26 +159,34 @@ export function useUpdateOpsTask() {
 // Utility constants
 export const STATUS_LABELS: Record<OpsTaskStatus, string> = {
   new_request: "New Request",
-  triaged: "Triaged",
-  planned: "Planned",
+  triaged: "New Request",
+  planned: "In Progress",
   in_progress: "In Progress",
-  blocked: "Blocked",
-  waiting: "Waiting",
+  blocked: "In Progress",
+  waiting: "In Progress",
   done: "Done",
-  cannot_complete: "Cannot Complete",
-  cancelled: "Cancelled",
+  cannot_complete: "Done",
+  cancelled: "Done",
+};
+
+// Only these 3 statuses appear in UI dropdowns
+export const UI_STATUSES: OpsTaskStatus[] = ["new_request", "in_progress", "done"];
+export const UI_STATUS_LABELS: Record<string, string> = {
+  new_request: "New Request",
+  in_progress: "In Progress",
+  done: "Done",
 };
 
 export const STATUS_COLORS: Record<OpsTaskStatus, string> = {
   new_request: "bg-blue-100 text-blue-800",
-  triaged: "bg-purple-100 text-purple-800",
-  planned: "bg-indigo-100 text-indigo-800",
+  triaged: "bg-blue-100 text-blue-800",
+  planned: "bg-yellow-100 text-yellow-800",
   in_progress: "bg-yellow-100 text-yellow-800",
-  blocked: "bg-red-100 text-red-800",
-  waiting: "bg-orange-100 text-orange-800",
+  blocked: "bg-yellow-100 text-yellow-800",
+  waiting: "bg-yellow-100 text-yellow-800",
   done: "bg-green-100 text-green-800",
-  cannot_complete: "bg-gray-100 text-gray-800",
-  cancelled: "bg-gray-100 text-gray-500",
+  cannot_complete: "bg-green-100 text-green-800",
+  cancelled: "bg-green-100 text-green-800",
 };
 
 export const PRIORITY_COLORS: Record<OpsTaskPriority, string> = {
