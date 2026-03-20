@@ -32,6 +32,7 @@ const priorityColors: Record<SupplyRequest["priority"], string> = {
 const categoryLabels: Record<SupplyRequest["category"], string> = {
   kitchen_supplies: "Kitchen",
   office_supplies: "Office",
+  other: "Other",
 };
 
 export default function SupplyDashboard() {
