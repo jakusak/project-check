@@ -63,12 +63,12 @@ export default function OpsTasksList() {
   };
 
   const handleInlineOwnerChange = (task: OpsTask, newOwnerId: string) => {
-    const oldOwner = task.current_owner?.name || "Unassigned";
+    const oldOwner = task.main_owner?.name || "Unassigned";
     const newOwner = members.find(m => m.id === newOwnerId)?.name || "Unknown";
     updateTask.mutate({
       id: task.id,
-      updates: { current_owner_id: newOwnerId } as any,
-      historyEntry: { field_changed: "current_owner", old_value: oldOwner, new_value: newOwner, changed_by: "Manager" },
+      updates: { main_owner_id: newOwnerId } as any,
+      historyEntry: { field_changed: "main_owner", old_value: oldOwner, new_value: newOwner, changed_by: "Manager" },
     });
   };
 
