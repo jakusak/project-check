@@ -36,8 +36,9 @@ export default function OpsQuickRequest() {
       location: location || null,
       requested_due_date: requestedDueDate || null,
       notes: notes || null,
+      task_mode: "facility_request",
     } as any, {
-      onSuccess: () => navigate("/ops-tasks/dashboard"),
+      onSuccess: () => navigate("/ops-tasks/facilities"),
     });
   };
 
