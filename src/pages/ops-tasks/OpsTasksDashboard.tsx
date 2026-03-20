@@ -52,6 +52,9 @@ export default function OpsTasksDashboard() {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
+            <Link to="/supply/new">Shopping Request</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
             <Link to="/ops-tasks/request">Quick Request</Link>
           </Button>
           <Button asChild size="sm">
