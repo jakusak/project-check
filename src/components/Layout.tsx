@@ -141,7 +141,7 @@ export default function Layout() {
                   : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
               )}
             >
-              Ops Control
+              801 FR Building & OPS
             </Link>
 
             {/* Supply Requests */}
