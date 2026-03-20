@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTask, OpsTaskStatus, OpsTaskPriority, OpsTaskCategory } from "@/hooks/useOpsTasks";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, ArrowLeft } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
@@ -75,7 +75,10 @@ export default function OpsTasksList() {
   return (
     <div className="p-6 space-y-4 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">All Tasks</h1>
+        <div>
+          <Button variant="ghost" size="sm" asChild><Link to="/ops-tasks/dashboard"><ArrowLeft className="h-4 w-4 mr-1" />Dashboard</Link></Button>
+          <h1 className="text-2xl font-bold text-foreground mt-1">All Tasks</h1>
+        </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/request">Quick Request</Link></Button>
           <Button asChild size="sm"><Link to="/ops-tasks/new"><Plus className="h-4 w-4 mr-1" />New Task</Link></Button>
