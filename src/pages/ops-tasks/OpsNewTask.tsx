@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, STATUS_LABELS, OpsTaskCategory, OpsTaskPriority, OpsTaskStatus, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
+import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTaskCategory, OpsTaskPriority, OpsTaskStatus, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
 import { ArrowLeft } from "lucide-react";
 
 export default function OpsNewTask() {
@@ -16,7 +16,7 @@ export default function OpsNewTask() {
 
   const [form, setForm] = useState({
     title: "", description: "", category: "other" as OpsTaskCategory, priority: "medium" as OpsTaskPriority,
-    status: "planned" as OpsTaskStatus, requested_by: "", main_owner_id: "",
+    status: "new_request" as OpsTaskStatus, requested_by: "", main_owner_id: "",
     other_owner_id: "", location: "", requested_due_date: "", start_date: "",
     target_end_date: "", planned_week: "", planned_month: "", estimated_hours: "",
     recurring_frequency: "none" as OpsRecurringFrequency, definition_of_done: "", work_type: "manual",
@@ -99,7 +99,7 @@ export default function OpsNewTask() {
                   <Label>Status</Label>
                   <Select value={form.status} onValueChange={v => set("status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                    <SelectContent>{UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>

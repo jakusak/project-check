@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, OpsTask, OpsTaskStatus, OpsTaskPriority, OpsTaskCategory } from "@/hooks/useOpsTasks";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTask, OpsTaskStatus, OpsTaskPriority, OpsTaskCategory } from "@/hooks/useOpsTasks";
 import { Plus, Search, X } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
-const ALL_STATUSES = Object.keys(STATUS_LABELS) as OpsTaskStatus[];
+const ALL_STATUSES = UI_STATUSES;
 const ALL_PRIORITIES: OpsTaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as OpsTaskCategory[];
 
@@ -94,7 +94,7 @@ export default function OpsTasksList() {
               <SelectTrigger className="w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                {ALL_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                {ALL_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -171,7 +171,7 @@ export default function OpsTasksList() {
                             <Badge className={`${STATUS_COLORS[task.status]} text-xs`}>{STATUS_LABELS[task.status]}</Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            {ALL_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                            {UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </TableCell>
