@@ -22,10 +22,8 @@ export interface OpsTask {
   priority: OpsTaskPriority;
   status: OpsTaskStatus;
   requested_by: string | null;
-  current_owner_id: string | null;
-  primary_owner_id: string | null;
-  secondary_owner_id: string | null;
-  rightful_owner_id: string | null;
+  main_owner_id: string | null;
+  other_owner_id: string | null;
   location: string | null;
   requested_due_date: string | null;
   start_date: string | null;
@@ -45,10 +43,8 @@ export interface OpsTask {
   created_at: string;
   updated_at: string;
   // Joined
-  current_owner?: OpsTeamMember;
-  primary_owner?: OpsTeamMember;
-  secondary_owner?: OpsTeamMember;
-  rightful_owner?: OpsTeamMember;
+  main_owner?: OpsTeamMember;
+  other_owner?: OpsTeamMember;
 }
 
 export interface OpsTaskHistory {
