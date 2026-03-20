@@ -102,7 +102,7 @@ export default function OpsMonthlyView() {
               <div key={t.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-red-50">
                 <div>
                   <div className="font-medium">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.current_owner?.name}</div>
+                  <div className="text-xs text-muted-foreground">Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.main_owner?.name}</div>
                 </div>
                 <Badge className={`${STATUS_COLORS[t.status]} text-xs`}>{STATUS_LABELS[t.status]}</Badge>
               </div>
