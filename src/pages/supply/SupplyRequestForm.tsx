@@ -53,6 +53,9 @@ export default function SupplyRequestForm() {
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
+      <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate(-1)}>
+        ← Back
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
