@@ -99,7 +99,7 @@ export default function OpsNewTask() {
                   <Label>Status</Label>
                   <Select value={form.status} onValueChange={v => set("status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                    <SelectContent>{UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
