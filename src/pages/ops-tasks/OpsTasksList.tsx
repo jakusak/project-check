@@ -150,7 +150,7 @@ export default function OpsTasksList() {
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Owner</TableHead>
+                  <TableHead>Main Owner</TableHead>
                   <TableHead>Due Date</TableHead>
                   <TableHead>Hours</TableHead>
                 </TableRow>
