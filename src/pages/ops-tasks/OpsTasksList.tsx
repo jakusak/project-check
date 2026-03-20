@@ -45,7 +45,7 @@ export default function OpsTasksList() {
           return (order[a.priority] || 3) - (order[b.priority] || 3);
         }
         case "status": return a.status.localeCompare(b.status);
-        case "owner": return (a.current_owner?.name || "zzz").localeCompare(b.current_owner?.name || "zzz");
+        case "owner": return (a.main_owner?.name || "zzz").localeCompare(b.main_owner?.name || "zzz");
         default: return 0;
       }
     });
