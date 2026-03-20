@@ -170,7 +170,7 @@ export default function OpsTasksDashboard() {
               <div key={t.id} className="text-sm p-2 rounded-md bg-green-50">
                 <div className="font-medium">{t.title}</div>
                 <div className="text-xs text-muted-foreground">
-                  {t.actual_completion_date && format(parseISO(t.actual_completion_date), "MMM d")} • {t.current_owner?.name}
+                  {t.actual_completion_date && format(parseISO(t.actual_completion_date), "MMM d")} • {t.main_owner?.name}
                 </div>
               </div>
             ))}

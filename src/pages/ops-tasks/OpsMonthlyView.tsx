@@ -122,7 +122,7 @@ export default function OpsMonthlyView() {
               <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted text-sm">
                 <div className="flex-1">
                   <span className="font-medium">{t.title}</span>
-                  <span className="text-muted-foreground ml-2 text-xs">{t.current_owner?.name || "Unassigned"}</span>
+                  <span className="text-muted-foreground ml-2 text-xs">{t.main_owner?.name || "Unassigned"}</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge className={`${PRIORITY_COLORS[t.priority]} text-xs capitalize`}>{t.priority}</Badge>

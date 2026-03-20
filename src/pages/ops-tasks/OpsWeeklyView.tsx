@@ -35,7 +35,7 @@ export default function OpsWeeklyView() {
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted text-sm">
       <div className="flex-1">
         <span className="font-medium">{task.title}</span>
-        <span className="text-muted-foreground ml-2 text-xs">{task.current_owner?.name || "Unassigned"}</span>
+        <span className="text-muted-foreground ml-2 text-xs">{task.main_owner?.name || "Unassigned"}</span>
       </div>
       <div className="flex gap-2">
         <Badge className={`${PRIORITY_COLORS[task.priority]} text-xs capitalize`}>{task.priority}</Badge>

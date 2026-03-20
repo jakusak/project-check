@@ -16,25 +16,24 @@ export default function OpsTeamCapacity() {
 
   const capacityData = useMemo(() => {
     return members.map(m => {
-      const memberTasks = tasks.filter(t => t.current_owner_id === m.id);
-      const active = memberTasks.filter(t => !TERMINAL.includes(t.status));
+      const mainOwnerTasks = tasks.filter(t => t.main_owner_id === m.id);
+      const otherOwnerTasks = tasks.filter(t => t.other_owner_id === m.id);
+      const allMemberTasks = tasks.filter(t => t.main_owner_id === m.id || t.other_owner_id === m.id);
+      const active = allMemberTasks.filter(t => !TERMINAL.includes(t.status));
       const overdue = active.filter(t => t.target_end_date && isPast(parseISO(t.target_end_date)));
       const blocked = active.filter(t => t.status === "blocked");
-      const completed = memberTasks.filter(t => t.status === "done");
-      const totalTasks = memberTasks.length;
+      const completed = allMemberTasks.filter(t => t.status === "done");
+      const totalTasks = allMemberTasks.length;
       const completionRate = totalTasks > 0 ? Math.round((completed.length / totalTasks) * 100) : 0;
       const estimatedHours = active.reduce((s, t) => s + (t.estimated_hours || 0), 0);
       const adminTasks = active.filter(t => t.work_type === "admin").length;
       const manualTasks = active.filter(t => t.work_type === "manual").length;
 
-      // Ownership drift: tasks where this person is current owner but NOT rightful owner
-      const driftTasks = active.filter(t => t.rightful_owner_id && t.rightful_owner_id !== m.id);
-      // Tasks this person SHOULD own but someone else has
-      const shouldOwn = tasks.filter(t => t.rightful_owner_id === m.id && t.current_owner_id !== m.id && !TERMINAL.includes(t.status));
-
       return {
         member: m,
         active: active.length,
+        overseeing: mainOwnerTasks.filter(t => !TERMINAL.includes(t.status)).length,
+        executing: otherOwnerTasks.filter(t => !TERMINAL.includes(t.status)).length,
         overdue: overdue.length,
         blocked: blocked.length,
         completed: completed.length,
@@ -42,8 +41,6 @@ export default function OpsTeamCapacity() {
         estimatedHours,
         adminTasks,
         manualTasks,
-        driftTasks,
-        shouldOwn,
       };
     });
   }, [tasks, members]);
@@ -53,10 +50,10 @@ export default function OpsTeamCapacity() {
       <div>
         <Button variant="ghost" size="sm" asChild><Link to="/ops-tasks/dashboard"><ArrowLeft className="h-4 w-4 mr-1" />Dashboard</Link></Button>
         <h1 className="text-2xl font-bold mt-2">Team Capacity</h1>
-        <p className="text-sm text-muted-foreground">Workload, completion rates, and ownership analysis</p>
+        <p className="text-sm text-muted-foreground">Workload, completion rates, and ownership breakdown</p>
       </div>
 
-      {capacityData.map(({ member, active, overdue, blocked, completed, completionRate, estimatedHours, adminTasks, manualTasks, driftTasks, shouldOwn }) => (
+      {capacityData.map(({ member, active, overseeing, executing, overdue, blocked, completed, completionRate, estimatedHours, adminTasks, manualTasks }) => (
         <Card key={member.id}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between">
@@ -90,37 +87,15 @@ export default function OpsTeamCapacity() {
               </div>
             </div>
 
-            {/* Work Type Mix */}
-            <div className="flex gap-4 text-sm">
-              <span className="text-muted-foreground">Task Mix:</span>
+            {/* Ownership Breakdown + Work Type Mix */}
+            <div className="flex gap-4 text-sm flex-wrap">
+              <span className="text-muted-foreground">Roles:</span>
+              <Badge variant="outline">{overseeing} Overseeing</Badge>
+              <Badge variant="secondary">{executing} Executing</Badge>
+              <span className="text-muted-foreground ml-2">Task Mix:</span>
               <Badge variant="outline">{manualTasks} Manual</Badge>
               <Badge variant="secondary">{adminTasks} Admin</Badge>
             </div>
-
-            {/* Ownership Drift */}
-            {(driftTasks.length > 0 || shouldOwn.length > 0) && (
-              <div className="border-t pt-3 space-y-2">
-                <h4 className="text-xs font-semibold text-orange-700 uppercase tracking-wider">Ownership Drift</h4>
-                {driftTasks.length > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    <span className="text-orange-600 font-medium">{driftTasks.length} tasks</span> assigned to {member.name} where someone else is the rightful owner
-                  </div>
-                )}
-                {shouldOwn.length > 0 && (
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">
-                      <span className="text-orange-600 font-medium">{shouldOwn.length} tasks</span> {member.name} should own but someone else is carrying:
-                    </div>
-                    {shouldOwn.map(t => (
-                      <div key={t.id} className="text-xs p-2 rounded bg-orange-50 flex justify-between">
-                        <span>{t.title}</span>
-                        <span className="text-muted-foreground">Currently: {t.current_owner?.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
       ))}
