@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useOpsTasks, useOpsTeamMembers, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
-import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, Clock, CheckCircle2 } from "lucide-react";
+import { Plus, Building2, ShoppingCart, Wrench, ArrowRight } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
