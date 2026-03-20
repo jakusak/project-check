@@ -16,7 +16,7 @@ export default function OpsNewTask() {
 
   const [form, setForm] = useState({
     title: "", description: "", category: "other" as OpsTaskCategory, priority: "medium" as OpsTaskPriority,
-    status: "planned" as OpsTaskStatus, requested_by: "", main_owner_id: "",
+    status: "new_request" as OpsTaskStatus, requested_by: "", main_owner_id: "",
     other_owner_id: "", location: "", requested_due_date: "", start_date: "",
     target_end_date: "", planned_week: "", planned_month: "", estimated_hours: "",
     recurring_frequency: "none" as OpsRecurringFrequency, definition_of_done: "", work_type: "manual",

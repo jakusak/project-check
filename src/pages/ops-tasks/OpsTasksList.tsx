@@ -171,7 +171,7 @@ export default function OpsTasksList() {
                             <Badge className={`${STATUS_COLORS[task.status]} text-xs`}>{STATUS_LABELS[task.status]}</Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            {ALL_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                            {UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </TableCell>
