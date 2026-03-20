@@ -26,8 +26,8 @@ export default function OpsTasksDashboard() {
     
     const byOwner = members.map(m => ({
       member: m,
-      active: tasks.filter(t => t.current_owner_id === m.id && !TERMINAL.includes(t.status)).length,
-      overdue: tasks.filter(t => t.current_owner_id === m.id && t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)).length,
+      active: tasks.filter(t => t.main_owner_id === m.id && !TERMINAL.includes(t.status)).length,
+      overdue: tasks.filter(t => t.main_owner_id === m.id && t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)).length,
     }));
 
     const byCategory: Record<string, number> = {};
