@@ -89,7 +89,7 @@ export default function Layout() {
           </Link>
 
           {/* Main Navigation */}
-          <nav className="flex items-center gap-1 flex-1">
+          <nav className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
             {/* Analytics - OPX/Admin only */}
             {(isOPX || isAdmin || isSuperAdmin) && (
               <Link
