@@ -49,8 +49,10 @@ export default function OpsQuickRequest() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Submit Work Request</CardTitle>
-          <p className="text-sm text-muted-foreground">Quick form — just describe what needs to be done. The ops team will handle scheduling and assignment.</p>
+          <CardTitle>Facilities & Building Request</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Use this form to report building issues or request renovations — including plumbing, electrical, safety hazards, structural defects, or any other facility-related work. The ops team will triage, schedule, and assign.
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
