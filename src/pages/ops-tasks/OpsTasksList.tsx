@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, OpsTask, OpsTaskStatus, OpsTaskPriority, OpsTaskCategory } from "@/hooks/useOpsTasks";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTask, OpsTaskStatus, OpsTaskPriority, OpsTaskCategory } from "@/hooks/useOpsTasks";
 import { Plus, Search, X } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
