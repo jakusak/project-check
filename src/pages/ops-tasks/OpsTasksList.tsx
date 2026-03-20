@@ -11,7 +11,7 @@ import { Plus, Search, X } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
-const ALL_STATUSES = Object.keys(STATUS_LABELS) as OpsTaskStatus[];
+const ALL_STATUSES = UI_STATUSES;
 const ALL_PRIORITIES: OpsTaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as OpsTaskCategory[];
 
