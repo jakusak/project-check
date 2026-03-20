@@ -25,7 +25,7 @@ export default function OpsWeeklyView() {
 
     const byOwner = members.map(m => ({
       member: m,
-      tasks: [...planned, ...carryOver].filter(t => t.current_owner_id === m.id),
+      tasks: [...planned, ...carryOver].filter(t => t.main_owner_id === m.id),
     }));
 
     return { planned, carryOver, completed, blocked, byOwner };
