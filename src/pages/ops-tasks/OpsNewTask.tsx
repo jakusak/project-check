@@ -110,7 +110,7 @@ export default function OpsNewTask() {
               <h3 className="text-sm font-semibold mb-3">Ownership</h3>
               <div className="grid grid-cols-2 gap-4">
                 <OwnerSelect label="Main Owner (Oversees)" field="main_owner_id" />
-                <OwnerSelect label="Other Owner (Executes)" field="other_owner_id" />
+                <OwnerSelect label="Secondary Owner (Executes)" field="other_owner_id" />
               </div>
             </div>
 
