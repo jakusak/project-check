@@ -33,7 +33,7 @@ export default function OpsTasksList() {
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
       if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
-      if (ownerFilter !== "all" && t.current_owner_id !== ownerFilter) return false;
+      if (ownerFilter !== "all" && t.main_owner_id !== ownerFilter) return false;
       return true;
     });
 
