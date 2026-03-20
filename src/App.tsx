@@ -134,6 +134,8 @@ const App = () => (
               <Route path="/ops-tasks/monthly" element={<OpsMonthlyView />} />
               <Route path="/ops-tasks/annual" element={<OpsAnnualPlan />} />
               <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
+              <Route path="/supply/dashboard" element={<SupplyDashboard />} />
+              <Route path="/supply/new" element={<SupplyRequestForm />} />
             </Route>
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>
