@@ -1,23 +1,39 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useOpsTasks, useOpsTeamMembers, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
-import { useSupplyRequests } from "@/hooks/useSupplyRequests";
-import { Plus, Building2, ShoppingCart, Wrench, ArrowRight } from "lucide-react";
-import { format, parseISO, isPast } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, OpsTask } from "@/hooks/useOpsTasks";
+import { useSupplyRequests, SupplyRequest } from "@/hooks/useSupplyRequests";
+import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2 } from "lucide-react";
+import { format, parseISO, isPast, startOfWeek, endOfWeek } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
+type UnifiedItem = {
+  id: string;
+  title: string;
+  source: "facility" | "ops_task" | "supply";
+  priority: string;
+  status: string;
+  owner?: string;
+  ownerId?: string | null;
+  dueDate?: string | null;
+  planning_horizon: string | null;
+};
+
 export default function OpsTasksDashboard() {
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
-  const { data: _members = [] } = useOpsTeamMembers();
-  const { data: supplyRequests = [], isLoading: supplyLoading } = useSupplyRequests();
+  const { data: members = [] } = useOpsTeamMembers();
+  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon } = useSupplyRequests();
+  const updateTask = useUpdateOpsTask();
+
+  const [ownerFilter, setOwnerFilter] = useState<string>("all");
 
   const isLoading = tasksLoading || supplyLoading;
 
-  // Split ops_tasks by task_mode
   const facilityRequests = useMemo(() => allTasks.filter(t => t.task_mode === "facility_request"), [allTasks]);
   const opsTasks = useMemo(() => allTasks.filter(t => t.task_mode !== "facility_request"), [allTasks]);
 
@@ -26,35 +42,120 @@ export default function OpsTasksDashboard() {
     const facilityNew = facilityRequests.filter(t => t.status === "new_request").length;
     const facilityActive = facilityRequests.filter(t => !TERMINAL.includes(t.status)).length;
     const facilityDone = facilityRequests.filter(t => t.status === "done").length;
-
     const opsNew = opsTasks.filter(t => t.status === "new_request").length;
     const opsActive = opsTasks.filter(t => !TERMINAL.includes(t.status)).length;
     const opsDone = opsTasks.filter(t => t.status === "done").length;
-
     const supplyNew = supplyRequests.filter(r => r.status === "open").length;
     const supplyActive = supplyRequests.filter(r => r.status !== "closed").length;
     const supplyDone = supplyRequests.filter(r => r.status === "closed").length;
-
     return { facilityNew, facilityActive, facilityDone, opsNew, opsActive, opsDone, supplyNew, supplyActive, supplyDone };
   }, [facilityRequests, opsTasks, supplyRequests]);
 
-  // Recent new items across all 3 streams
-  const recentFacility = useMemo(() =>
-    facilityRequests.filter(t => t.status === "new_request").slice(0, 3),
-  [facilityRequests]);
+  // Unify all items for planning boards
+  const allUnified: UnifiedItem[] = useMemo(() => {
+    const fromTasks = allTasks.filter(t => !TERMINAL.includes(t.status)).map((t): UnifiedItem => ({
+      id: t.id,
+      title: t.title,
+      source: t.task_mode === "facility_request" ? "facility" : "ops_task",
+      priority: t.priority,
+      status: t.status,
+      owner: t.main_owner?.name || undefined,
+      ownerId: t.main_owner_id,
+      dueDate: t.target_end_date,
+      planning_horizon: t.planning_horizon,
+    }));
+    const fromSupply = supplyRequests.filter(r => r.status !== "closed").map((r): UnifiedItem => ({
+      id: r.id,
+      title: r.title,
+      source: "supply",
+      priority: r.priority,
+      status: r.status,
+      owner: r.requested_by,
+      ownerId: null,
+      dueDate: null,
+      planning_horizon: r.planning_horizon,
+    }));
+    return [...fromTasks, ...fromSupply];
+  }, [allTasks, supplyRequests]);
 
-  const recentOps = useMemo(() =>
-    opsTasks.filter(t => t.status === "new_request").slice(0, 3),
-  [opsTasks]);
+  const weeklyItems = useMemo(() => {
+    let items = allUnified.filter(i => i.planning_horizon === "weekly");
+    if (ownerFilter !== "all") items = items.filter(i => i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId));
+    return items;
+  }, [allUnified, ownerFilter]);
 
-  const recentSupply = useMemo(() =>
-    supplyRequests.filter(r => r.status === "open").slice(0, 3),
-  [supplyRequests]);
+  const longTermItems = useMemo(() => {
+    let items = allUnified.filter(i => i.planning_horizon === "long_term");
+    if (ownerFilter !== "all") items = items.filter(i => i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId));
+    return items;
+  }, [allUnified, ownerFilter]);
 
-  // Global stats
+  const unassignedItems = useMemo(() => {
+    let items = allUnified.filter(i => !i.planning_horizon);
+    if (ownerFilter !== "all") items = items.filter(i => i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId));
+    return items;
+  }, [allUnified, ownerFilter]);
+
   const overdue = useMemo(() =>
     allTasks.filter(t => t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)),
   [allTasks]);
+
+  const assignHorizon = (item: UnifiedItem, horizon: string | null) => {
+    if (item.source === "supply") {
+      updateSupplyHorizon.mutate({ id: item.id, planning_horizon: horizon });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { planning_horizon: horizon } as any,
+      });
+    }
+  };
+
+  const sourceIcon = (source: string) => {
+    if (source === "facility") return <Building2 className="h-3 w-3 text-blue-600" />;
+    if (source === "supply") return <ShoppingCart className="h-3 w-3 text-emerald-600" />;
+    return <Wrench className="h-3 w-3 text-yellow-600" />;
+  };
+
+  const sourceLabel = (source: string) => {
+    if (source === "facility") return "Facility";
+    if (source === "supply") return "Supply";
+    return "Ops";
+  };
+
+  const PlanningRow = ({ item, showAssignButtons }: { item: UnifiedItem; showAssignButtons?: boolean }) => (
+    <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {sourceIcon(item.source)}
+        <span className="font-medium truncate">{item.title}</span>
+        <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
+      </div>
+      <div className="flex items-center gap-2 shrink-0 ml-2">
+        {item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>}
+        <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
+        {item.planning_horizon === "weekly" && (
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from weekly">
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+        {item.planning_horizon === "long_term" && (
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from long-term">
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+        {showAssignButtons && (
+          <>
+            <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "weekly")}>
+              <CalendarDays className="h-3 w-3 mr-1" />Week
+            </Button>
+            <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "long_term")}>
+              <Landmark className="h-3 w-3 mr-1" />Long
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center text-muted-foreground">Loading...</div>;
@@ -65,8 +166,8 @@ export default function OpsTasksDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Operations Control</h1>
-          <p className="text-muted-foreground text-sm">Facilities, Ops Tasks & Supply Requests</p>
+          <h1 className="text-2xl font-bold text-foreground">801 FR Building & OPS Dashboard</h1>
+          <p className="text-muted-foreground text-sm">Steve • Fabian • Ops Coordinator</p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
@@ -81,137 +182,128 @@ export default function OpsTasksDashboard() {
         </div>
       </div>
 
-      {/* 3 Category Overview Cards */}
+      {/* 3 Category Overview Cards (compact) */}
       <div className="grid md:grid-cols-3 gap-4">
-        {/* Facilities */}
         <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="rounded-lg bg-blue-100 p-2"><Building2 className="h-4 w-4 text-blue-700" /></div>
-              Facilities & Building
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-3 text-sm">
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-blue-500" />
-                <span className="font-semibold">{categories.facilityNew}</span>
-                <span className="text-muted-foreground">New</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                <span className="font-semibold">{categories.facilityActive}</span>
-                <span className="text-muted-foreground">Active</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="font-semibold">{categories.facilityDone}</span>
-                <span className="text-muted-foreground">Done</span>
-              </div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="rounded-lg bg-blue-100 p-1.5"><Building2 className="h-3.5 w-3.5 text-blue-700" /></div>
+              <span className="font-medium text-sm">Facilities</span>
             </div>
-            {recentFacility.length > 0 && (
-              <div className="space-y-1.5">
-                {recentFacility.map(t => (
-                  <div key={t.id} className="text-sm p-2 rounded-md bg-blue-50 flex justify-between items-center">
-                    <span className="truncate font-medium">{t.title}</span>
-                    <Badge className={`${PRIORITY_COLORS[t.priority]} text-[10px] capitalize`}>{t.priority}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-            {recentFacility.length === 0 && <p className="text-xs text-muted-foreground">No new requests</p>}
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <div className="flex gap-3 text-sm">
+              <span><span className="font-bold text-blue-600">{categories.facilityNew}</span> <span className="text-xs text-muted-foreground">new</span></span>
+              <span><span className="font-bold">{categories.facilityActive}</span> <span className="text-xs text-muted-foreground">active</span></span>
+              <span><span className="font-bold text-emerald-600">{categories.facilityDone}</span> <span className="text-xs text-muted-foreground">done</span></span>
+            </div>
+            <Button asChild variant="link" size="sm" className="px-0 mt-1 h-6 text-xs">
               <Link to="/ops-tasks/facilities">View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
-
-        {/* Ops Tasks */}
         <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="rounded-lg bg-yellow-100 p-2"><Wrench className="h-4 w-4 text-yellow-700" /></div>
-              Ops Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-3 text-sm">
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-blue-500" />
-                <span className="font-semibold">{categories.opsNew}</span>
-                <span className="text-muted-foreground">New</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                <span className="font-semibold">{categories.opsActive}</span>
-                <span className="text-muted-foreground">Active</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="font-semibold">{categories.opsDone}</span>
-                <span className="text-muted-foreground">Done</span>
-              </div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="rounded-lg bg-yellow-100 p-1.5"><Wrench className="h-3.5 w-3.5 text-yellow-700" /></div>
+              <span className="font-medium text-sm">Ops Tasks</span>
             </div>
-            {recentOps.length > 0 && (
-              <div className="space-y-1.5">
-                {recentOps.map(t => (
-                  <div key={t.id} className="text-sm p-2 rounded-md bg-yellow-50 flex justify-between items-center">
-                    <span className="truncate font-medium">{t.title}</span>
-                    <Badge className={`${PRIORITY_COLORS[t.priority]} text-[10px] capitalize`}>{t.priority}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-            {recentOps.length === 0 && <p className="text-xs text-muted-foreground">No new tasks</p>}
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <div className="flex gap-3 text-sm">
+              <span><span className="font-bold text-blue-600">{categories.opsNew}</span> <span className="text-xs text-muted-foreground">new</span></span>
+              <span><span className="font-bold">{categories.opsActive}</span> <span className="text-xs text-muted-foreground">active</span></span>
+              <span><span className="font-bold text-emerald-600">{categories.opsDone}</span> <span className="text-xs text-muted-foreground">done</span></span>
+            </div>
+            <Button asChild variant="link" size="sm" className="px-0 mt-1 h-6 text-xs">
               <Link to="/ops-tasks">View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
-
-        {/* Supply / Shopping */}
         <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="rounded-lg bg-emerald-100 p-2"><ShoppingCart className="h-4 w-4 text-emerald-700" /></div>
-              Supply / Shopping
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-3 text-sm">
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-blue-500" />
-                <span className="font-semibold">{categories.supplyNew}</span>
-                <span className="text-muted-foreground">Open</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                <span className="font-semibold">{categories.supplyActive}</span>
-                <span className="text-muted-foreground">Active</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="font-semibold">{categories.supplyDone}</span>
-                <span className="text-muted-foreground">Closed</span>
-              </div>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="rounded-lg bg-emerald-100 p-1.5"><ShoppingCart className="h-3.5 w-3.5 text-emerald-700" /></div>
+              <span className="font-medium text-sm">Supply / Shopping</span>
             </div>
-            {recentSupply.length > 0 && (
-              <div className="space-y-1.5">
-                {recentSupply.map(r => (
-                  <div key={r.id} className="text-sm p-2 rounded-md bg-emerald-50 flex justify-between items-center">
-                    <span className="truncate font-medium">{r.title}</span>
-                    <Badge variant="outline" className="text-[10px]">{r.category === "kitchen_supplies" ? "Kitchen" : r.category === "office_supplies" ? "Office" : "Other"}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-            {recentSupply.length === 0 && <p className="text-xs text-muted-foreground">No open requests</p>}
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <div className="flex gap-3 text-sm">
+              <span><span className="font-bold text-blue-600">{categories.supplyNew}</span> <span className="text-xs text-muted-foreground">open</span></span>
+              <span><span className="font-bold">{categories.supplyActive}</span> <span className="text-xs text-muted-foreground">active</span></span>
+              <span><span className="font-bold text-emerald-600">{categories.supplyDone}</span> <span className="text-xs text-muted-foreground">closed</span></span>
+            </div>
+            <Button asChild variant="link" size="sm" className="px-0 mt-1 h-6 text-xs">
               <Link to="/supply/dashboard">View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Owner Filter */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">Filter by owner:</span>
+        <Select value={ownerFilter} onValueChange={setOwnerFilter}>
+          <SelectTrigger className="w-[160px] h-8 text-sm">
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Team</SelectItem>
+            {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Weekly & Long-Term Planning Boards */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* This Week */}
+        <Card className="border-blue-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-blue-600" />
+              This Week
+              <Badge variant="outline" className="ml-auto">{weeklyItems.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {weeklyItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No tasks assigned to this week yet.<br />Use the Inbox below to assign tasks.</p>
+            ) : (
+              weeklyItems.map(item => <PlanningRow key={item.id} item={item} />)
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Long-Term Projects */}
+        <Card className="border-amber-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Landmark className="h-4 w-4 text-amber-600" />
+              Long-Term Projects
+              <Badge variant="outline" className="ml-auto">{longTermItems.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {longTermItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
+            ) : (
+              longTermItems.map(item => <PlanningRow key={item.id} item={item} />)
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Inbox: Unassigned items */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            📥 Inbox – Assign to Weekly or Long-Term
+            <Badge variant="outline" className="ml-auto">{unassignedItems.length}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1.5 max-h-[400px] overflow-y-auto">
+          {unassignedItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">All tasks have been assigned! 🎉</p>
+          ) : (
+            unassignedItems.map(item => <PlanningRow key={item.id} item={item} showAssignButtons />)
+          )}
+        </CardContent>
+      </Card>
 
       {/* Overdue alert */}
       {overdue.length > 0 && (
