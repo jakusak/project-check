@@ -35,7 +35,7 @@ export function useSupplyRequests() {
   });
 
   const createRequest = useMutation({
-    mutationFn: async (req: Omit<SupplyRequest, "id" | "created_at" | "updated_at" | "status" | "created_by_user_id">) => {
+    mutationFn: async (req: Omit<SupplyRequest, "id" | "created_at" | "updated_at" | "status" | "created_by_user_id" | "planning_horizon">) => {
       const { error } = await supabase.from("supply_requests").insert({
         ...req,
         created_by_user_id: user?.id ?? null,
