@@ -56,5 +56,16 @@ export function useSupplyRequests() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["supply-requests"] }),
   });
 
-  return { ...query, createRequest, updateStatus };
+  const updatePlanningHorizon = useMutation({
+    mutationFn: async ({ id, planning_horizon }: { id: string; planning_horizon: string | null }) => {
+      const { error } = await supabase
+        .from("supply_requests")
+        .update({ planning_horizon } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["supply-requests"] }),
+  });
+
+  return { ...query, createRequest, updateStatus, updatePlanningHorizon };
 }
