@@ -13,6 +13,7 @@ export type SupplyRequest = {
   requested_by: string;
   status: "open" | "in_progress" | "closed";
   created_by_user_id: string | null;
+  planning_horizon: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -34,7 +35,7 @@ export function useSupplyRequests() {
   });
 
   const createRequest = useMutation({
-    mutationFn: async (req: Omit<SupplyRequest, "id" | "created_at" | "updated_at" | "status" | "created_by_user_id">) => {
+    mutationFn: async (req: Omit<SupplyRequest, "id" | "created_at" | "updated_at" | "status" | "created_by_user_id" | "planning_horizon">) => {
       const { error } = await supabase.from("supply_requests").insert({
         ...req,
         created_by_user_id: user?.id ?? null,
@@ -55,5 +56,16 @@ export function useSupplyRequests() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["supply-requests"] }),
   });
 
-  return { ...query, createRequest, updateStatus };
+  const updatePlanningHorizon = useMutation({
+    mutationFn: async ({ id, planning_horizon }: { id: string; planning_horizon: string | null }) => {
+      const { error } = await supabase
+        .from("supply_requests")
+        .update({ planning_horizon } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["supply-requests"] }),
+  });
+
+  return { ...query, createRequest, updateStatus, updatePlanningHorizon };
 }

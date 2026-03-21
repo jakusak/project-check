@@ -38,6 +38,7 @@ export interface OpsTask {
   completion_evidence: string | null;
   work_type: string | null;
   task_mode: string | null;
+  planning_horizon: string | null;
   notes: string | null;
   photo_paths: string[] | null;
   created_at: string;
