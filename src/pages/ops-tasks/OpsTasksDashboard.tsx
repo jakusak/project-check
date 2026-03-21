@@ -4,11 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, OpsTask } from "@/hooks/useOpsTasks";
-import { useSupplyRequests, SupplyRequest } from "@/hooks/useSupplyRequests";
-import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2 } from "lucide-react";
-import { format, parseISO, isPast, startOfWeek, endOfWeek } from "date-fns";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
+import { useSupplyRequests } from "@/hooks/useSupplyRequests";
+import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X } from "lucide-react";
+import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
