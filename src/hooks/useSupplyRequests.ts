@@ -13,6 +13,7 @@ export type SupplyRequest = {
   requested_by: string;
   status: "open" | "in_progress" | "closed";
   created_by_user_id: string | null;
+  planning_horizon: string | null;
   created_at: string;
   updated_at: string;
 };
