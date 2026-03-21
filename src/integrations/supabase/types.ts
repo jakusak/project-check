@@ -1298,6 +1298,7 @@ export type Database = {
           photo_paths: string[] | null
           planned_month: string | null
           planned_week: string | null
+          planning_horizon: string | null
           priority: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by: string | null
@@ -1328,6 +1329,7 @@ export type Database = {
           photo_paths?: string[] | null
           planned_month?: string | null
           planned_week?: string | null
+          planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
@@ -1358,6 +1360,7 @@ export type Database = {
           photo_paths?: string[] | null
           planned_month?: string | null
           planned_week?: string | null
+          planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
@@ -1470,6 +1473,7 @@ export type Database = {
           id: string
           items: string
           notes: string | null
+          planning_horizon: string | null
           priority: Database["public"]["Enums"]["supply_request_priority"]
           quantity: number
           requested_by: string
@@ -1484,6 +1488,7 @@ export type Database = {
           id?: string
           items: string
           notes?: string | null
+          planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["supply_request_priority"]
           quantity?: number
           requested_by: string
@@ -1498,6 +1503,7 @@ export type Database = {
           id?: string
           items?: string
           notes?: string | null
+          planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["supply_request_priority"]
           quantity?: number
           requested_by?: string
