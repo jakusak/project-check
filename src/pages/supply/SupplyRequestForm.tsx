@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ShoppingCart } from "lucide-react";
 
 export default function SupplyRequestForm() {
