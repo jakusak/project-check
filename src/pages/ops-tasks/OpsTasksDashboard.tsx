@@ -324,7 +324,7 @@ export default function OpsTasksDashboard() {
             {longTermItems.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
             ) : (
-              longTermItems.map(item => <PlanningRow key={item.id} item={item} />)
+              longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
             )}
           </CardContent>
         </Card>
