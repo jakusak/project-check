@@ -159,14 +159,21 @@ export default function OpsTasksDashboard() {
     return "Ops";
   };
 
+  const resurface = (item: UnifiedItem) => {
+    if (item.source === "supply") {
+      updateSupplyStatus.mutate({ id: item.id, status: "open" });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { status: "in_progress", actual_completion_date: null } as any,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: "in_progress" },
+      });
+    }
+  };
+
   const PlanningRow = ({ item, showAssignButtons, showDoneButton }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        {showDoneButton && (
-          <button onClick={() => markDone(item)} className="text-green-500 hover:text-green-700 transition-colors shrink-0 p-0.5 rounded hover:bg-green-50" title="Mark as done">
-            <CheckCircle2 className="h-5 w-5" />
-          </button>
-        )}
         {sourceIcon(item.source)}
         <span className="font-medium truncate">{item.title}</span>
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
@@ -193,6 +200,11 @@ export default function OpsTasksDashboard() {
               <Landmark className="h-3 w-3 mr-1" />Long
             </Button>
           </>
+        )}
+        {showDoneButton && (
+          <button onClick={() => markDone(item)} className="text-green-500 hover:text-green-700 transition-colors shrink-0 p-0.5 rounded hover:bg-green-50" title="Mark as done">
+            <CheckCircle2 className="h-5 w-5" />
+          </button>
         )}
       </div>
     </div>
