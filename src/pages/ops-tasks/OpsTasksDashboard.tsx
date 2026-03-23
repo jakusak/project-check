@@ -160,9 +160,14 @@ export default function OpsTasksDashboard() {
     return "Ops";
   };
 
-  const PlanningRow = ({ item, showAssignButtons }: { item: UnifiedItem; showAssignButtons?: boolean }) => (
+  const PlanningRow = ({ item, showAssignButtons, showDoneButton }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
+        {showDoneButton && (
+          <button onClick={() => markDone(item)} className="text-muted-foreground hover:text-green-600 transition-colors shrink-0" title="Mark as done">
+            <CheckCircle2 className="h-4 w-4" />
+          </button>
+        )}
         {sourceIcon(item.source)}
         <span className="font-medium truncate">{item.title}</span>
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
