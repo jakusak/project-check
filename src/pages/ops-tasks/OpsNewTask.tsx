@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTaskCategory, OpsTaskPriority, OpsTaskStatus, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
+import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ArrowLeft } from "lucide-react";
 
 export default function OpsNewTask() {
