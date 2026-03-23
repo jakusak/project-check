@@ -47,7 +47,19 @@ export default function OpsNewTask() {
       requested_by: form.requested_by || null,
     };
 
-    createTask.mutate(payload, { onSuccess: () => navigate("/ops-tasks") });
+    createTask.mutate(payload, {
+      onSuccess: () => {
+        sendTaskNotification({
+          taskTitle: form.title,
+          taskType: "ops_task",
+          priority: form.priority,
+          requestedBy: form.requested_by || undefined,
+          description: form.description || undefined,
+          category: CATEGORY_LABELS[form.category],
+        });
+        navigate("/ops-tasks");
+      },
+    });
   };
 
   const OwnerSelect = ({ label, field }: { label: string; field: string }) => (

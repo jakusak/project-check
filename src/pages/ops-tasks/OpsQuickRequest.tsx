@@ -39,7 +39,17 @@ export default function OpsQuickRequest() {
       notes: notes || null,
       task_mode: "facility_request",
     } as any, {
-      onSuccess: () => navigate("/ops-tasks/facilities"),
+      onSuccess: () => {
+        sendTaskNotification({
+          taskTitle: title,
+          taskType: "facility",
+          priority,
+          requestedBy,
+          description: description || undefined,
+          category: CATEGORY_LABELS[category],
+        });
+        navigate("/ops-tasks/facilities");
+      },
     });
   };
 

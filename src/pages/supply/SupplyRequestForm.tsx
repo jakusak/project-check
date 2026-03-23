@@ -45,6 +45,14 @@ export default function SupplyRequestForm() {
       {
         onSuccess: () => {
           toast.success("Request submitted!");
+          sendTaskNotification({
+            taskTitle: title.trim(),
+            taskType: "supply",
+            priority,
+            requestedBy: requestedBy.trim(),
+            description: items.trim(),
+            category,
+          });
           navigate("/supply/dashboard");
         },
         onError: () => toast.error("Failed to submit request"),
