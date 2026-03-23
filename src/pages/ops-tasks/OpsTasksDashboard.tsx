@@ -26,7 +26,7 @@ type UnifiedItem = {
 export default function OpsTasksDashboard() {
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
   const { data: members = [] } = useOpsTeamMembers();
-  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon } = useSupplyRequests();
+  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests();
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
