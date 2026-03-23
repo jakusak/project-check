@@ -403,7 +403,12 @@ export default function OpsTasksDashboard() {
                     <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
                     <Badge variant="outline" className="text-[10px] shrink-0">{item.planning_horizon === "weekly" ? "Weekly" : "Long-Term"}</Badge>
                   </div>
-                  {item.owner && <span className="text-xs text-muted-foreground ml-2">{item.owner}</span>}
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    {item.owner && <span className="text-xs text-muted-foreground">{item.owner}</span>}
+                    <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => resurface(item)} title="Re-open and move back to board">
+                      <ArrowRight className="h-3 w-3 mr-1 rotate-[-90deg]" />Re-open
+                    </Button>
+                  </div>
                 </div>
               ))}
             </CardContent>
