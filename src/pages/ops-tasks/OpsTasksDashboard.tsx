@@ -110,6 +110,44 @@ export default function OpsTasksDashboard() {
     }
   };
 
+  const markDone = (item: UnifiedItem) => {
+    if (item.source === "supply") {
+      updateSupplyStatus.mutate({ id: item.id, status: "closed" });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { status: "done", actual_completion_date: new Date().toISOString().split("T")[0] } as any,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: "done" },
+      });
+    }
+  };
+
+  // Recently completed items (last 14 days)
+  const recentlyCompleted = useMemo(() => {
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const completedTasks = allTasks
+      .filter(t => TERMINAL.includes(t.status) && t.planning_horizon && new Date(t.updated_at) >= twoWeeksAgo)
+      .map((t): UnifiedItem => ({
+        id: t.id, title: t.title,
+        source: t.task_mode === "facility_request" ? "facility" : "ops_task",
+        priority: t.priority, status: t.status,
+        owner: t.main_owner?.name, ownerId: t.main_owner_id,
+        dueDate: t.target_end_date, planning_horizon: t.planning_horizon,
+      }));
+    const completedSupply = supplyRequests
+      .filter(r => r.status === "closed" && r.planning_horizon && new Date(r.updated_at) >= twoWeeksAgo)
+      .map((r): UnifiedItem => ({
+        id: r.id, title: r.title, source: "supply",
+        priority: r.priority, status: r.status,
+        owner: r.requested_by, ownerId: null,
+        dueDate: null, planning_horizon: r.planning_horizon,
+      }));
+    return [...completedTasks, ...completedSupply];
+  }, [allTasks, supplyRequests]);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+
   const sourceIcon = (source: string) => {
     if (source === "facility") return <Building2 className="h-3 w-3 text-blue-600" />;
     if (source === "supply") return <ShoppingCart className="h-3 w-3 text-emerald-600" />;
