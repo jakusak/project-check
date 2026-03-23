@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown, History } from "lucide-react";
