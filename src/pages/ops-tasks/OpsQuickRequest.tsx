@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateOpsTask, CATEGORY_LABELS, OpsTaskCategory, OpsTaskPriority } from "@/hooks/useOpsTasks";
+import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ArrowLeft } from "lucide-react";
 
 export default function OpsQuickRequest() {
@@ -38,7 +39,17 @@ export default function OpsQuickRequest() {
       notes: notes || null,
       task_mode: "facility_request",
     } as any, {
-      onSuccess: () => navigate("/ops-tasks/facilities"),
+      onSuccess: () => {
+        sendTaskNotification({
+          taskTitle: title,
+          taskType: "facility",
+          priority,
+          requestedBy,
+          description: description || undefined,
+          category: CATEGORY_LABELS[category],
+        });
+        navigate("/ops-tasks/facilities");
+      },
     });
   };
 

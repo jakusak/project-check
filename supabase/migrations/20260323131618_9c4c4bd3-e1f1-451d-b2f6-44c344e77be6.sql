@@ -1,0 +1,1 @@
+ALTER TABLE public.ops_team_members ADD COLUMN email text DEFAULT null;

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ShoppingCart } from "lucide-react";
 
 export default function SupplyRequestForm() {
@@ -44,6 +45,14 @@ export default function SupplyRequestForm() {
       {
         onSuccess: () => {
           toast.success("Request submitted!");
+          sendTaskNotification({
+            taskTitle: title.trim(),
+            taskType: "supply",
+            priority,
+            requestedBy: requestedBy.trim(),
+            description: items.trim(),
+            category,
+          });
           navigate("/supply/dashboard");
         },
         onError: () => toast.error("Failed to submit request"),

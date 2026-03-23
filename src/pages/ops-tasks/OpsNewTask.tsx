@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTaskCategory, OpsTaskPriority, OpsTaskStatus, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
+import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ArrowLeft } from "lucide-react";
 
 export default function OpsNewTask() {
@@ -46,7 +47,19 @@ export default function OpsNewTask() {
       requested_by: form.requested_by || null,
     };
 
-    createTask.mutate(payload, { onSuccess: () => navigate("/ops-tasks") });
+    createTask.mutate(payload, {
+      onSuccess: () => {
+        sendTaskNotification({
+          taskTitle: form.title,
+          taskType: "ops_task",
+          priority: form.priority,
+          requestedBy: form.requested_by || undefined,
+          description: form.description || undefined,
+          category: CATEGORY_LABELS[form.category],
+        });
+        navigate("/ops-tasks");
+      },
+    });
   };
 
   const OwnerSelect = ({ label, field }: { label: string; field: string }) => (
