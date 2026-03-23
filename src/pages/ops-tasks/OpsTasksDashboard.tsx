@@ -369,6 +369,37 @@ export default function OpsTasksDashboard() {
         </Card>
       )}
 
+      {/* Recently Completed */}
+      {recentlyCompleted.length > 0 && (
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <button onClick={() => setHistoryOpen(!historyOpen)} className="flex items-center gap-2 w-full text-left">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                Recently Completed ({recentlyCompleted.length})
+                <ChevronDown className={`h-3 w-3 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+              </CardTitle>
+            </button>
+          </CardHeader>
+          {historyOpen && (
+            <CardContent className="space-y-1.5 max-h-[300px] overflow-y-auto">
+              {recentlyCompleted.map(item => (
+                <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-md text-sm border border-border/50 bg-muted/30 opacity-70">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 shrink-0" />
+                    {sourceIcon(item.source)}
+                    <span className="font-medium truncate line-through">{item.title}</span>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{item.planning_horizon === "weekly" ? "Weekly" : "Long-Term"}</Badge>
+                  </div>
+                  {item.owner && <span className="text-xs text-muted-foreground ml-2">{item.owner}</span>}
+                </div>
+              ))}
+            </CardContent>
+          )}
+        </Card>
+      )}
+
       {/* Quick Nav */}
       <div className="flex gap-2 flex-wrap">
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks">All Ops Tasks</Link></Button>
