@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
-import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X } from "lucide-react";
+import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
-
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
 type UnifiedItem = {
@@ -26,7 +25,7 @@ type UnifiedItem = {
 export default function OpsTasksDashboard() {
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
   const { data: members = [] } = useOpsTeamMembers();
-  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon } = useSupplyRequests();
+  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests();
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
@@ -110,6 +109,44 @@ export default function OpsTasksDashboard() {
     }
   };
 
+  const markDone = (item: UnifiedItem) => {
+    if (item.source === "supply") {
+      updateSupplyStatus.mutate({ id: item.id, status: "closed" });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { status: "done", actual_completion_date: new Date().toISOString().split("T")[0] } as any,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: "done" },
+      });
+    }
+  };
+
+  // Recently completed items (last 14 days)
+  const recentlyCompleted = useMemo(() => {
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const completedTasks = allTasks
+      .filter(t => TERMINAL.includes(t.status) && t.planning_horizon && new Date(t.updated_at) >= twoWeeksAgo)
+      .map((t): UnifiedItem => ({
+        id: t.id, title: t.title,
+        source: t.task_mode === "facility_request" ? "facility" : "ops_task",
+        priority: t.priority, status: t.status,
+        owner: t.main_owner?.name, ownerId: t.main_owner_id,
+        dueDate: t.target_end_date, planning_horizon: t.planning_horizon,
+      }));
+    const completedSupply = supplyRequests
+      .filter(r => r.status === "closed" && r.planning_horizon && new Date(r.updated_at) >= twoWeeksAgo)
+      .map((r): UnifiedItem => ({
+        id: r.id, title: r.title, source: "supply",
+        priority: r.priority, status: r.status,
+        owner: r.requested_by, ownerId: null,
+        dueDate: null, planning_horizon: r.planning_horizon,
+      }));
+    return [...completedTasks, ...completedSupply];
+  }, [allTasks, supplyRequests]);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+
   const sourceIcon = (source: string) => {
     if (source === "facility") return <Building2 className="h-3 w-3 text-blue-600" />;
     if (source === "supply") return <ShoppingCart className="h-3 w-3 text-emerald-600" />;
@@ -122,9 +159,14 @@ export default function OpsTasksDashboard() {
     return "Ops";
   };
 
-  const PlanningRow = ({ item, showAssignButtons }: { item: UnifiedItem; showAssignButtons?: boolean }) => (
+  const PlanningRow = ({ item, showAssignButtons, showDoneButton }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
+        {showDoneButton && (
+          <button onClick={() => markDone(item)} className="text-muted-foreground hover:text-green-600 transition-colors shrink-0" title="Mark as done">
+            <CheckCircle2 className="h-4 w-4" />
+          </button>
+        )}
         {sourceIcon(item.source)}
         <span className="font-medium truncate">{item.title}</span>
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
@@ -263,7 +305,7 @@ export default function OpsTasksDashboard() {
             {weeklyItems.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No tasks assigned to this week yet.<br />Use the Inbox below to assign tasks.</p>
             ) : (
-              weeklyItems.map(item => <PlanningRow key={item.id} item={item} />)
+              weeklyItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
             )}
           </CardContent>
         </Card>
@@ -281,7 +323,7 @@ export default function OpsTasksDashboard() {
             {longTermItems.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
             ) : (
-              longTermItems.map(item => <PlanningRow key={item.id} item={item} />)
+              longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
             )}
           </CardContent>
         </Card>
@@ -323,6 +365,37 @@ export default function OpsTasksDashboard() {
               </div>
             ))}
           </CardContent>
+        </Card>
+      )}
+
+      {/* Recently Completed */}
+      {recentlyCompleted.length > 0 && (
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <button onClick={() => setHistoryOpen(!historyOpen)} className="flex items-center gap-2 w-full text-left">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                Recently Completed ({recentlyCompleted.length})
+                <ChevronDown className={`h-3 w-3 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+              </CardTitle>
+            </button>
+          </CardHeader>
+          {historyOpen && (
+            <CardContent className="space-y-1.5 max-h-[300px] overflow-y-auto">
+              {recentlyCompleted.map(item => (
+                <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-md text-sm border border-border/50 bg-muted/30 opacity-70">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 shrink-0" />
+                    {sourceIcon(item.source)}
+                    <span className="font-medium truncate line-through">{item.title}</span>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{item.planning_horizon === "weekly" ? "Weekly" : "Long-Term"}</Badge>
+                  </div>
+                  {item.owner && <span className="text-xs text-muted-foreground ml-2">{item.owner}</span>}
+                </div>
+              ))}
+            </CardContent>
+          )}
         </Card>
       )}
 
