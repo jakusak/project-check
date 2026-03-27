@@ -1862,6 +1862,124 @@ export type Database = {
           },
         ]
       }
+      workforce_roles: {
+        Row: {
+          assigned_person_name: string | null
+          color: string | null
+          created_at: string
+          department: string
+          id: string
+          is_active: boolean
+          monthly_capacity_hours: number
+          name: string
+          notes: string | null
+          ops_team_member_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_person_name?: string | null
+          color?: string | null
+          created_at?: string
+          department?: string
+          id?: string
+          is_active?: boolean
+          monthly_capacity_hours?: number
+          name: string
+          notes?: string | null
+          ops_team_member_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_person_name?: string | null
+          color?: string | null
+          created_at?: string
+          department?: string
+          id?: string
+          is_active?: boolean
+          monthly_capacity_hours?: number
+          name?: string
+          notes?: string | null
+          ops_team_member_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workforce_roles_ops_team_member_id_fkey"
+            columns: ["ops_team_member_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workforce_tasks: {
+        Row: {
+          active_months: number[]
+          assigned_role_id: string | null
+          category: string | null
+          created_at: string
+          deadline_sensitivity: string | null
+          department: string
+          description: string | null
+          estimated_hours_per_month: number
+          id: string
+          is_reassignable: boolean
+          name: string
+          notes: string | null
+          ops_task_id: string | null
+          priority: string
+          recurrence_type: string
+          skill_tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          active_months?: number[]
+          assigned_role_id?: string | null
+          category?: string | null
+          created_at?: string
+          deadline_sensitivity?: string | null
+          department?: string
+          description?: string | null
+          estimated_hours_per_month?: number
+          id?: string
+          is_reassignable?: boolean
+          name: string
+          notes?: string | null
+          ops_task_id?: string | null
+          priority?: string
+          recurrence_type?: string
+          skill_tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          active_months?: number[]
+          assigned_role_id?: string | null
+          category?: string | null
+          created_at?: string
+          deadline_sensitivity?: string | null
+          department?: string
+          description?: string | null
+          estimated_hours_per_month?: number
+          id?: string
+          is_reassignable?: boolean
+          name?: string
+          notes?: string | null
+          ops_task_id?: string | null
+          priority?: string
+          recurrence_type?: string
+          skill_tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workforce_tasks_assigned_role_id_fkey"
+            columns: ["assigned_role_id"]
+            isOneToOne: false
+            referencedRelation: "workforce_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

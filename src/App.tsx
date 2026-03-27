@@ -69,6 +69,8 @@ import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
 import OpsFacilitiesDashboard from "./pages/ops-tasks/OpsFacilitiesDashboard";
 import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
+import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
+import WorkforceTasks from "./pages/workforce/WorkforceTasks";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +140,8 @@ const App = () => (
               <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
               <Route path="/supply/dashboard" element={<SupplyDashboard />} />
               <Route path="/supply/new" element={<SupplyRequestForm />} />
+              <Route path="/workforce/capacity" element={<WorkforceCapacity />} />
+              <Route path="/workforce/tasks" element={<WorkforceTasks />} />
             </Route>
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>
