@@ -203,7 +203,7 @@ export default function WorkforceCapacity() {
                             <td key={i} className="p-1 text-center">
                               <div
                                 className={`rounded px-1 py-2 text-xs font-semibold text-white ${getUtilizationColor(pct)}`}
-                                title={`${getRoleMonthlyWorkload(role.id, tasks, i + 1)}h / ${role.monthly_capacity_hours}h`}
+                                title={`${getRoleMonthlyWorkload(role.id, tasks, i + 1)}h / ${effCap}h`}
                               >
                                 {pct}%
                               </div>
