@@ -57,7 +57,7 @@ export const PRIORITY_OPTIONS = [
 
 export const CATEGORY_OPTIONS = [
   "general", "trailer_management", "facilities", "building_requests",
-  "supplies", "maintenance", "admin", "seasonal", "other"
+  "supplies", "maintenance", "admin", "seasonal", "it", "other"
 ];
 
 // Calculate task hours for a specific month
