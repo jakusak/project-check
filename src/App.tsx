@@ -69,6 +69,8 @@ import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
 import OpsFacilitiesDashboard from "./pages/ops-tasks/OpsFacilitiesDashboard";
 import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
+import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
+import WorkforceTasks from "./pages/workforce/WorkforceTasks";
 
 const queryClient = new QueryClient();
 
