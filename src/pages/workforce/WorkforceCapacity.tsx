@@ -316,7 +316,8 @@ export default function WorkforceCapacity() {
               <CardContent>
                 <div className="space-y-2">
                   {roles.map(role => {
-                    const monthPcts = Array.from({ length: 12 }, (_, i) => getUtilization(getRoleMonthlyWorkload(role.id, tasks, i + 1), role.monthly_capacity_hours));
+                    const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
+                    const monthPcts = Array.from({ length: 12 }, (_, i) => getUtilization(getRoleMonthlyWorkload(role.id, tasks, i + 1), effCap));
                     const overMonths = monthPcts.filter(p => p > threshold).length;
                     if (overMonths === 0) return null;
                     
