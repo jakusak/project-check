@@ -88,6 +88,13 @@ export function getRoleMonthlyWorkload(
     .reduce((sum, t) => sum + getTaskHoursForMonth(t, month), 0);
 }
 
+// Get effective monthly capacity after vacation adjustment
+export function getEffectiveMonthlyCapacity(baseCapacity: number, vacationWeeks: number): number {
+  // Spread vacation evenly across 12 months: vacationWeeks * 40h / 12
+  const vacationHoursPerMonth = (vacationWeeks * 40) / 12;
+  return Math.max(0, Math.round(baseCapacity - vacationHoursPerMonth));
+}
+
 // Get utilization percentage
 export function getUtilization(workload: number, capacity: number): number {
   if (capacity <= 0) return 0;
