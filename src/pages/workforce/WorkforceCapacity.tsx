@@ -57,14 +57,19 @@ export default function WorkforceCapacity() {
       name: newRole.name,
       assigned_person_name: newRole.assigned_person_name || null,
       monthly_capacity_hours: newRole.monthly_capacity_hours,
+      vacation_weeks_per_year: newRole.vacation_weeks_per_year,
       notes: newRole.notes || null,
       color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
     }, {
       onSuccess: () => {
         setNewRoleOpen(false);
-        setNewRole({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, notes: "" });
+        setNewRole({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
       }
     });
+  };
+
+  const handleUpdateVacation = (roleId: string, weeks: number) => {
+    updateRole.mutate({ id: roleId, updates: { vacation_weeks_per_year: weeks } });
   };
 
   return (
