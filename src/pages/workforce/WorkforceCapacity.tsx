@@ -99,6 +99,7 @@ export default function WorkforceCapacity() {
                 <div><Label>Role / Job Title</Label><Input value={newRole.name} onChange={e => setNewRole(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
                 <div><Label>Assigned Person (optional)</Label><Input value={newRole.assigned_person_name} onChange={e => setNewRole(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
                 <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={newRole.monthly_capacity_hours} onChange={e => setNewRole(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
+                <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={newRole.vacation_weeks_per_year} onChange={e => setNewRole(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
                 <div><Label>Notes</Label><Textarea value={newRole.notes} onChange={e => setNewRole(p => ({ ...p, notes: e.target.value }))} /></div>
                 <Button onClick={handleCreateRole} disabled={!newRole.name || createRole.isPending} className="w-full">Create Role</Button>
               </div>
