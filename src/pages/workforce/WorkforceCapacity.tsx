@@ -231,9 +231,10 @@ export default function WorkforceCapacity() {
           {/* Per-Role Detail Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {roles.map(role => {
+              const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
               const monthData = Array.from({ length: 12 }, (_, i) => {
                 const wl = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-                const pct = getUtilization(wl, role.monthly_capacity_hours);
+                const pct = getUtilization(wl, effCap);
                 return { month: MONTH_NAMES[i], workload: wl, pct };
               });
               const assignedTasks = tasks.filter(t => t.assigned_role_id === role.id);
@@ -256,10 +257,24 @@ export default function WorkforceCapacity() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Tasks: </span><span className="font-medium">{assignedTasks.length}</span>
-                      <span className="text-muted-foreground ml-4">Avg Util: </span><span className="font-medium">{avgPct}%</span>
-                      <span className="text-muted-foreground ml-4">Capacity: </span><span className="font-medium">{role.monthly_capacity_hours}h</span>
+                    <div className="text-sm flex flex-wrap gap-x-4">
+                      <span><span className="text-muted-foreground">Tasks: </span><span className="font-medium">{assignedTasks.length}</span></span>
+                      <span><span className="text-muted-foreground">Avg Util: </span><span className="font-medium">{avgPct}%</span></span>
+                      <span><span className="text-muted-foreground">Capacity: </span><span className="font-medium">{effCap}h/mo</span></span>
+                      {role.vacation_weeks_per_year > 0 && (
+                        <span><span className="text-muted-foreground">Vacation: </span><span className="font-medium">{role.vacation_weeks_per_year} wks</span></span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs whitespace-nowrap">Vacation wks:</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={52}
+                        className="w-20 h-7 text-xs"
+                        value={role.vacation_weeks_per_year}
+                        onChange={e => handleUpdateVacation(role.id, Number(e.target.value))}
+                      />
                     </div>
                     
                     {/* Mini monthly bars */}
