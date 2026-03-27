@@ -9,6 +9,7 @@ export interface WorkforceRole {
   assigned_person_name: string | null;
   ops_team_member_id: string | null;
   monthly_capacity_hours: number;
+  vacation_weeks_per_year: number;
   is_active: boolean;
   color: string | null;
   notes: string | null;
