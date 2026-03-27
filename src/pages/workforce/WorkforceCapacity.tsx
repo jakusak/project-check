@@ -40,13 +40,14 @@ export default function WorkforceCapacity() {
   const isLoading = rolesLoading || tasksLoading;
 
   // Summary stats
-  const overloadedMonths = roles.flatMap(role =>
-    Array.from({ length: 12 }, (_, i) => {
+  const overloadedMonths = roles.flatMap(role => {
+    const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
+    return Array.from({ length: 12 }, (_, i) => {
       const workload = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-      const pct = getUtilization(workload, role.monthly_capacity_hours);
+      const pct = getUtilization(workload, effCap);
       return pct > threshold ? { role: role.name, month: i + 1, pct } : null;
-    }).filter(Boolean)
-  );
+    }).filter(Boolean);
+  });
 
   const totalTasks = tasks.length;
   const unassignedTasks = tasks.filter(t => !t.assigned_role_id).length;
