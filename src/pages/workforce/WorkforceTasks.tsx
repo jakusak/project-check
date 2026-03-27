@@ -23,7 +23,6 @@ import {
   RECURRENCE_OPTIONS,
   PRIORITY_OPTIONS,
   CATEGORY_OPTIONS,
-  getTaskHoursForMonth,
 } from "@/hooks/useWorkforcePlanning";
 
 const EMPTY_TASK = {
