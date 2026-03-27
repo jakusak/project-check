@@ -180,9 +180,10 @@ export default function WorkforceCapacity() {
                   </thead>
                   <tbody>
                     {roles.map(role => {
+                      const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
                       const monthPcts = Array.from({ length: 12 }, (_, i) => {
                         const wl = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-                        return getUtilization(wl, role.monthly_capacity_hours);
+                        return getUtilization(wl, effCap);
                       });
                       const avgPct = Math.round(monthPcts.reduce((a, b) => a + b, 0) / 12);
 
@@ -193,7 +194,10 @@ export default function WorkforceCapacity() {
                             {role.assigned_person_name && (
                               <div className="text-xs text-muted-foreground">{role.assigned_person_name}</div>
                             )}
-                            <div className="text-xs text-muted-foreground">{role.monthly_capacity_hours}h/mo</div>
+                            <div className="text-xs text-muted-foreground">{effCap}h/mo (base {role.monthly_capacity_hours}h)</div>
+                            {role.vacation_weeks_per_year > 0 && (
+                              <div className="text-xs text-muted-foreground">{role.vacation_weeks_per_year}wk vacation</div>
+                            )}
                           </td>
                           {monthPcts.map((pct, i) => (
                             <td key={i} className="p-1 text-center">
