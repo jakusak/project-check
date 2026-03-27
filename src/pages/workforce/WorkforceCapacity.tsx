@@ -30,11 +30,12 @@ export default function WorkforceCapacity() {
   const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles();
   const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks();
   const createRole = useCreateWorkforceRole();
+  const updateRole = useUpdateWorkforceRole();
 
   const [selectedYear] = useState(new Date().getFullYear());
   const [threshold, setThreshold] = useState(85);
   const [newRoleOpen, setNewRoleOpen] = useState(false);
-  const [newRole, setNewRole] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, notes: "" });
+  const [newRole, setNewRole] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
 
   const isLoading = rolesLoading || tasksLoading;
 
