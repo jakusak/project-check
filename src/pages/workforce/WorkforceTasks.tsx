@@ -36,7 +36,7 @@ const EMPTY_TASK = {
 export default function WorkforceTasks() {
   const navigate = useNavigate();
   const { data: roles = [] } = useWorkforceRoles();
-  const { data: tasks = [], isLoading } = useWorkforceTasks();
+  const { data: tasks = [] } = useWorkforceTasks();
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
