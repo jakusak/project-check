@@ -1875,6 +1875,7 @@ export type Database = {
           notes: string | null
           ops_team_member_id: string | null
           updated_at: string
+          vacation_weeks_per_year: number
         }
         Insert: {
           assigned_person_name?: string | null
@@ -1888,6 +1889,7 @@ export type Database = {
           notes?: string | null
           ops_team_member_id?: string | null
           updated_at?: string
+          vacation_weeks_per_year?: number
         }
         Update: {
           assigned_person_name?: string | null
@@ -1901,6 +1903,7 @@ export type Database = {
           notes?: string | null
           ops_team_member_id?: string | null
           updated_at?: string
+          vacation_weeks_per_year?: number
         }
         Relationships: [
           {

@@ -14,11 +14,13 @@ import {
   useWorkforceRoles,
   useWorkforceTasks,
   useCreateWorkforceRole,
+  useUpdateWorkforceRole,
   MONTH_NAMES,
   getRoleMonthlyWorkload,
   getUtilization,
   getUtilizationColor,
   getUtilizationBadge,
+  getEffectiveMonthlyCapacity,
 } from "@/hooks/useWorkforcePlanning";
 
 const ROLE_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#84CC16"];
@@ -28,22 +30,24 @@ export default function WorkforceCapacity() {
   const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles();
   const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks();
   const createRole = useCreateWorkforceRole();
+  const updateRole = useUpdateWorkforceRole();
 
   const [selectedYear] = useState(new Date().getFullYear());
   const [threshold, setThreshold] = useState(85);
   const [newRoleOpen, setNewRoleOpen] = useState(false);
-  const [newRole, setNewRole] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, notes: "" });
+  const [newRole, setNewRole] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
 
   const isLoading = rolesLoading || tasksLoading;
 
   // Summary stats
-  const overloadedMonths = roles.flatMap(role =>
-    Array.from({ length: 12 }, (_, i) => {
+  const overloadedMonths = roles.flatMap(role => {
+    const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
+    return Array.from({ length: 12 }, (_, i) => {
       const workload = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-      const pct = getUtilization(workload, role.monthly_capacity_hours);
+      const pct = getUtilization(workload, effCap);
       return pct > threshold ? { role: role.name, month: i + 1, pct } : null;
-    }).filter(Boolean)
-  );
+    }).filter(Boolean);
+  });
 
   const totalTasks = tasks.length;
   const unassignedTasks = tasks.filter(t => !t.assigned_role_id).length;
@@ -53,14 +57,19 @@ export default function WorkforceCapacity() {
       name: newRole.name,
       assigned_person_name: newRole.assigned_person_name || null,
       monthly_capacity_hours: newRole.monthly_capacity_hours,
+      vacation_weeks_per_year: newRole.vacation_weeks_per_year,
       notes: newRole.notes || null,
       color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
     }, {
       onSuccess: () => {
         setNewRoleOpen(false);
-        setNewRole({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, notes: "" });
+        setNewRole({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
       }
     });
+  };
+
+  const handleUpdateVacation = (roleId: string, weeks: number) => {
+    updateRole.mutate({ id: roleId, updates: { vacation_weeks_per_year: weeks } });
   };
 
   return (
@@ -90,6 +99,7 @@ export default function WorkforceCapacity() {
                 <div><Label>Role / Job Title</Label><Input value={newRole.name} onChange={e => setNewRole(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
                 <div><Label>Assigned Person (optional)</Label><Input value={newRole.assigned_person_name} onChange={e => setNewRole(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
                 <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={newRole.monthly_capacity_hours} onChange={e => setNewRole(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
+                <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={newRole.vacation_weeks_per_year} onChange={e => setNewRole(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
                 <div><Label>Notes</Label><Textarea value={newRole.notes} onChange={e => setNewRole(p => ({ ...p, notes: e.target.value }))} /></div>
                 <Button onClick={handleCreateRole} disabled={!newRole.name || createRole.isPending} className="w-full">Create Role</Button>
               </div>
@@ -170,9 +180,10 @@ export default function WorkforceCapacity() {
                   </thead>
                   <tbody>
                     {roles.map(role => {
+                      const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
                       const monthPcts = Array.from({ length: 12 }, (_, i) => {
                         const wl = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-                        return getUtilization(wl, role.monthly_capacity_hours);
+                        return getUtilization(wl, effCap);
                       });
                       const avgPct = Math.round(monthPcts.reduce((a, b) => a + b, 0) / 12);
 
@@ -183,13 +194,16 @@ export default function WorkforceCapacity() {
                             {role.assigned_person_name && (
                               <div className="text-xs text-muted-foreground">{role.assigned_person_name}</div>
                             )}
-                            <div className="text-xs text-muted-foreground">{role.monthly_capacity_hours}h/mo</div>
+                            <div className="text-xs text-muted-foreground">{effCap}h/mo (base {role.monthly_capacity_hours}h)</div>
+                            {role.vacation_weeks_per_year > 0 && (
+                              <div className="text-xs text-muted-foreground">{role.vacation_weeks_per_year}wk vacation</div>
+                            )}
                           </td>
                           {monthPcts.map((pct, i) => (
                             <td key={i} className="p-1 text-center">
                               <div
                                 className={`rounded px-1 py-2 text-xs font-semibold text-white ${getUtilizationColor(pct)}`}
-                                title={`${getRoleMonthlyWorkload(role.id, tasks, i + 1)}h / ${role.monthly_capacity_hours}h`}
+                                title={`${getRoleMonthlyWorkload(role.id, tasks, i + 1)}h / ${effCap}h`}
                               >
                                 {pct}%
                               </div>
@@ -217,9 +231,10 @@ export default function WorkforceCapacity() {
           {/* Per-Role Detail Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {roles.map(role => {
+              const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
               const monthData = Array.from({ length: 12 }, (_, i) => {
                 const wl = getRoleMonthlyWorkload(role.id, tasks, i + 1);
-                const pct = getUtilization(wl, role.monthly_capacity_hours);
+                const pct = getUtilization(wl, effCap);
                 return { month: MONTH_NAMES[i], workload: wl, pct };
               });
               const assignedTasks = tasks.filter(t => t.assigned_role_id === role.id);
@@ -242,10 +257,24 @@ export default function WorkforceCapacity() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Tasks: </span><span className="font-medium">{assignedTasks.length}</span>
-                      <span className="text-muted-foreground ml-4">Avg Util: </span><span className="font-medium">{avgPct}%</span>
-                      <span className="text-muted-foreground ml-4">Capacity: </span><span className="font-medium">{role.monthly_capacity_hours}h</span>
+                    <div className="text-sm flex flex-wrap gap-x-4">
+                      <span><span className="text-muted-foreground">Tasks: </span><span className="font-medium">{assignedTasks.length}</span></span>
+                      <span><span className="text-muted-foreground">Avg Util: </span><span className="font-medium">{avgPct}%</span></span>
+                      <span><span className="text-muted-foreground">Capacity: </span><span className="font-medium">{effCap}h/mo</span></span>
+                      {role.vacation_weeks_per_year > 0 && (
+                        <span><span className="text-muted-foreground">Vacation: </span><span className="font-medium">{role.vacation_weeks_per_year} wks</span></span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs whitespace-nowrap">Vacation wks:</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={52}
+                        className="w-20 h-7 text-xs"
+                        value={role.vacation_weeks_per_year}
+                        onChange={e => handleUpdateVacation(role.id, Number(e.target.value))}
+                      />
                     </div>
                     
                     {/* Mini monthly bars */}
@@ -287,7 +316,8 @@ export default function WorkforceCapacity() {
               <CardContent>
                 <div className="space-y-2">
                   {roles.map(role => {
-                    const monthPcts = Array.from({ length: 12 }, (_, i) => getUtilization(getRoleMonthlyWorkload(role.id, tasks, i + 1), role.monthly_capacity_hours));
+                    const effCap = getEffectiveMonthlyCapacity(role.monthly_capacity_hours, role.vacation_weeks_per_year);
+                    const monthPcts = Array.from({ length: 12 }, (_, i) => getUtilization(getRoleMonthlyWorkload(role.id, tasks, i + 1), effCap));
                     const overMonths = monthPcts.filter(p => p > threshold).length;
                     if (overMonths === 0) return null;
                     

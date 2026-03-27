@@ -9,6 +9,7 @@ export interface WorkforceRole {
   assigned_person_name: string | null;
   ops_team_member_id: string | null;
   monthly_capacity_hours: number;
+  vacation_weeks_per_year: number;
   is_active: boolean;
   color: string | null;
   notes: string | null;
@@ -56,7 +57,7 @@ export const PRIORITY_OPTIONS = [
 
 export const CATEGORY_OPTIONS = [
   "general", "trailer_management", "facilities", "building_requests",
-  "supplies", "maintenance", "admin", "seasonal", "other"
+  "supplies", "maintenance", "admin", "seasonal", "it", "other"
 ];
 
 // Calculate task hours for a specific month
@@ -85,6 +86,13 @@ export function getRoleMonthlyWorkload(
   return tasks
     .filter(t => t.assigned_role_id === roleId)
     .reduce((sum, t) => sum + getTaskHoursForMonth(t, month), 0);
+}
+
+// Get effective monthly capacity after vacation adjustment
+export function getEffectiveMonthlyCapacity(baseCapacity: number, vacationWeeks: number): number {
+  // Spread vacation evenly across 12 months: vacationWeeks * 40h / 12
+  const vacationHoursPerMonth = (vacationWeeks * 40) / 12;
+  return Math.max(0, Math.round(baseCapacity - vacationHoursPerMonth));
 }
 
 // Get utilization percentage
