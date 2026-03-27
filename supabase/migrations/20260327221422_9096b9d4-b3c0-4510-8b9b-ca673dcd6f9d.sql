@@ -1,0 +1,1 @@
+ALTER TABLE public.workforce_roles ADD COLUMN vacation_weeks_per_year integer NOT NULL DEFAULT 0;
