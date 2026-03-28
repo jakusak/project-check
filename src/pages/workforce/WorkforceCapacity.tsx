@@ -211,7 +211,7 @@ export default function WorkforceCapacity() {
                         <tr key={role.id} className="border-t">
                           <td className="p-2">
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">{role.name}</span>
+                              <Link to={`/workforce/tasks?role=${role.id}`} className="font-medium hover:underline text-primary cursor-pointer">{role.name}</Link>
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
                                 <Edit2 className="h-3 w-3" />
                               </Button>
@@ -279,7 +279,7 @@ export default function WorkforceCapacity() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
-                          {role.name}
+                          <Link to={`/workforce/tasks?role=${role.id}`} className="hover:underline text-primary">{role.name}</Link>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
                             <Edit2 className="h-3 w-3" />
                           </Button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Plus, Search, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,8 +41,9 @@ export default function WorkforceTasks() {
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
 
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
+  const [filterRole, setFilterRole] = useState(searchParams.get("role") || "all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [filterReassignable, setFilterReassignable] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
