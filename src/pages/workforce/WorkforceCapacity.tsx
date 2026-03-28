@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Plus, Users, AlertTriangle, TrendingUp, BarChart3 } from "lucide-react";
+import { ArrowLeft, Plus, Users, AlertTriangle, TrendingUp, BarChart3, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +16,8 @@ import {
   useWorkforceTasks,
   useCreateWorkforceRole,
   useUpdateWorkforceRole,
+  useDeleteWorkforceRole,
+  WorkforceRole,
   MONTH_NAMES,
   getRoleMonthlyWorkload,
   getUtilization,
@@ -25,19 +28,71 @@ import {
 
 const ROLE_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#84CC16"];
 
+const EMPTY_ROLE = { name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" };
+
 export default function WorkforceCapacity() {
   const navigate = useNavigate();
   const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles();
   const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks();
   const createRole = useCreateWorkforceRole();
   const updateRole = useUpdateWorkforceRole();
+  const deleteRole = useDeleteWorkforceRole();
 
   const [selectedYear] = useState(new Date().getFullYear());
   const [threshold, setThreshold] = useState(85);
-  const [newRoleOpen, setNewRoleOpen] = useState(false);
-  const [newRole, setNewRole] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<WorkforceRole | null>(null);
+  const [form, setForm] = useState(EMPTY_ROLE);
+  const [deleteConfirm, setDeleteConfirm] = useState<WorkforceRole | null>(null);
 
   const isLoading = rolesLoading || tasksLoading;
+
+  const openCreate = () => {
+    setEditingRole(null);
+    setForm(EMPTY_ROLE);
+    setFormOpen(true);
+  };
+
+  const openEdit = (role: WorkforceRole) => {
+    setEditingRole(role);
+    setForm({
+      name: role.name,
+      assigned_person_name: role.assigned_person_name || "",
+      monthly_capacity_hours: role.monthly_capacity_hours,
+      vacation_weeks_per_year: role.vacation_weeks_per_year,
+      notes: role.notes || "",
+    });
+    setFormOpen(true);
+  };
+
+  const handleSave = () => {
+    const payload = {
+      name: form.name,
+      assigned_person_name: form.assigned_person_name || null,
+      monthly_capacity_hours: form.monthly_capacity_hours,
+      vacation_weeks_per_year: form.vacation_weeks_per_year,
+      notes: form.notes || null,
+    };
+    if (editingRole) {
+      updateRole.mutate({ id: editingRole.id, updates: payload }, { onSuccess: () => setFormOpen(false) });
+    } else {
+      createRole.mutate({
+        ...payload,
+        color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
+      }, { onSuccess: () => { setFormOpen(false); setForm(EMPTY_ROLE); } });
+    }
+  };
+
+  const handleDelete = (role: WorkforceRole) => {
+    setDeleteConfirm(role);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      deleteRole.mutate(deleteConfirm.id);
+      setDeleteConfirm(null);
+    }
+  };
 
   // Summary stats
   const overloadedMonths = roles.flatMap(role => {
@@ -51,26 +106,6 @@ export default function WorkforceCapacity() {
 
   const totalTasks = tasks.length;
   const unassignedTasks = tasks.filter(t => !t.assigned_role_id).length;
-
-  const handleCreateRole = () => {
-    createRole.mutate({
-      name: newRole.name,
-      assigned_person_name: newRole.assigned_person_name || null,
-      monthly_capacity_hours: newRole.monthly_capacity_hours,
-      vacation_weeks_per_year: newRole.vacation_weeks_per_year,
-      notes: newRole.notes || null,
-      color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
-    }, {
-      onSuccess: () => {
-        setNewRoleOpen(false);
-        setNewRole({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
-      }
-    });
-  };
-
-  const handleUpdateVacation = (roleId: string, weeks: number) => {
-    updateRole.mutate({ id: roleId, updates: { vacation_weeks_per_year: weeks } });
-  };
 
   return (
     <div className="space-y-6">
@@ -89,22 +124,7 @@ export default function WorkforceCapacity() {
           <Link to="/workforce/tasks">
             <Button variant="outline">Task Allocation Table</Button>
           </Link>
-          <Dialog open={newRoleOpen} onOpenChange={setNewRoleOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-1" /> Add Role</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Add New Role</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <div><Label>Role / Job Title</Label><Input value={newRole.name} onChange={e => setNewRole(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
-                <div><Label>Assigned Person (optional)</Label><Input value={newRole.assigned_person_name} onChange={e => setNewRole(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
-                <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={newRole.monthly_capacity_hours} onChange={e => setNewRole(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
-                <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={newRole.vacation_weeks_per_year} onChange={e => setNewRole(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
-                <div><Label>Notes</Label><Textarea value={newRole.notes} onChange={e => setNewRole(p => ({ ...p, notes: e.target.value }))} /></div>
-                <Button onClick={handleCreateRole} disabled={!newRole.name || createRole.isPending} className="w-full">Create Role</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Role</Button>
         </div>
       </div>
 
@@ -158,7 +178,7 @@ export default function WorkforceCapacity() {
             <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-medium mb-2">No roles defined yet</p>
             <p className="text-sm mb-4">Add roles to start planning workforce capacity</p>
-            <Button onClick={() => setNewRoleOpen(true)}><Plus className="h-4 w-4 mr-1" /> Add First Role</Button>
+            <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add First Role</Button>
           </CardContent>
         </Card>
       ) : (
@@ -190,7 +210,15 @@ export default function WorkforceCapacity() {
                       return (
                         <tr key={role.id} className="border-t">
                           <td className="p-2">
-                            <div className="font-medium">{role.name}</div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{role.name}</span>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleDelete(role)}>
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                             {role.assigned_person_name && (
                               <div className="text-xs text-muted-foreground">{role.assigned_person_name}</div>
                             )}
@@ -250,7 +278,15 @@ export default function WorkforceCapacity() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-base">{role.name}</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          {role.name}
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleDelete(role)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </CardTitle>
                         {role.assigned_person_name && <p className="text-sm text-muted-foreground">{role.assigned_person_name}</p>}
                       </div>
                       <Badge className={badge.className}>{badge.label}</Badge>
@@ -264,17 +300,6 @@ export default function WorkforceCapacity() {
                       {role.vacation_weeks_per_year > 0 && (
                         <span><span className="text-muted-foreground">Vacation: </span><span className="font-medium">{role.vacation_weeks_per_year} wks</span></span>
                       )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs whitespace-nowrap">Vacation wks:</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={52}
-                        className="w-20 h-7 text-xs"
-                        value={role.vacation_weeks_per_year}
-                        onChange={e => handleUpdateVacation(role.id, Number(e.target.value))}
-                      />
                     </div>
                     
                     {/* Mini monthly bars */}
@@ -337,7 +362,9 @@ export default function WorkforceCapacity() {
                         </div>
                         <div className="text-sm">
                           <Badge variant="outline">{recommendation}</Badge>
-                          {reassignable > 0 && <span className="text-xs text-muted-foreground ml-2">{reassignable} reassignable tasks</span>}
+                          {reassignable > 0 && (
+                            <span className="text-muted-foreground ml-2">{reassignable} reassignable tasks</span>
+                          )}
                         </div>
                       </div>
                     );
@@ -348,6 +375,39 @@ export default function WorkforceCapacity() {
           )}
         </>
       )}
+
+      {/* Role Form Dialog */}
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingRole ? "Edit Role" : "Add New Role"}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Role / Job Title *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
+            <div><Label>Assigned Person (optional)</Label><Input value={form.assigned_person_name} onChange={e => setForm(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
+            <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={form.monthly_capacity_hours} onChange={e => setForm(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
+            <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={form.vacation_weeks_per_year} onChange={e => setForm(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
+            <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
+            <Button onClick={handleSave} disabled={!form.name || createRole.isPending || updateRole.isPending} className="w-full">
+              {editingRole ? "Update Role" : "Create Role"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={open => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete role "{deleteConfirm?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will unassign all tasks currently linked to this role. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
