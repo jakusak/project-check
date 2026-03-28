@@ -184,6 +184,22 @@ export function useUpdateWorkforceRole() {
   });
 }
 
+export function useDeleteWorkforceRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("workforce_roles").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workforce-roles"] });
+      qc.invalidateQueries({ queryKey: ["workforce-tasks"] });
+      toast({ title: "Role deleted" });
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+}
+
 export function useCreateWorkforceTask() {
   const qc = useQueryClient();
   return useMutation({
