@@ -45,6 +45,9 @@ export default function Layout() {
   ];
 
   const futureProjectItems = [
+    { to: "/van-incidents", label: "Van Incidents" },
+    { to: "/analytics/ops", label: "Analytics" },
+    { to: "/supply/dashboard", label: "Supply Requests" },
     { to: "/unit-schedule", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
