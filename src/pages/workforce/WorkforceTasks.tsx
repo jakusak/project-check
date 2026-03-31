@@ -44,7 +44,6 @@ export default function WorkforceTasks() {
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
 
-  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState(searchParams.get("role") || "all");
   const [filterPriority, setFilterPriority] = useState("all");
