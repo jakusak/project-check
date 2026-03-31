@@ -109,11 +109,11 @@ export default function WorkforceTasks() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/workforce/capacity")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/workforce/capacity?hub=${hub}`)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Task Allocation Table</h1>
+            <h1 className="text-2xl font-bold">Task Allocation — {hubLabel}</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} of {tasks.length} tasks</p>
           </div>
         </div>
