@@ -119,18 +119,42 @@ export default function Layout() {
               801 FR Building & OPS
             </Link>
 
-            {/* Workforce Planning */}
-            <Link
-              to="/workforce/capacity"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/workforce")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Workforce Planning
-            </Link>
+            {/* Workforce Planning Dropdown */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  location.pathname.startsWith("/workforce")
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Workforce Planning
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+              <div className="absolute top-full left-0 mt-1 w-48 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="py-1">
+                  {[
+                    { hub: "pernes", label: "Pernes" },
+                    { hub: "tuscany", label: "Tuscany" },
+                    { hub: "czech", label: "Czech" },
+                  ].map(item => (
+                    <Link
+                      key={item.hub}
+                      to={`/workforce/capacity?hub=${item.hub}`}
+                      className={cn(
+                        "block px-4 py-2 text-sm hover:bg-accent transition-colors",
+                        location.pathname.startsWith("/workforce") && new URLSearchParams(location.search).get("hub") === item.hub
+                          ? "bg-accent font-medium"
+                          : ""
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             {/* Equipment & Inventory Mega-Dropdown */}
             <div className="relative group">
