@@ -124,7 +124,7 @@ export default function WorkforceCapacity() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to="/workforce/tasks">
+          <Link to={`/workforce/tasks?hub=${hub}`}>
             <Button variant="outline">Task Allocation Table</Button>
           </Link>
           <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Role</Button>
