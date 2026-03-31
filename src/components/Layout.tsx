@@ -93,34 +93,6 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1 flex-wrap">
-            {/* Analytics - OPX/Admin only */}
-            {(isOPX || isAdmin || isSuperAdmin) && (
-              <Link
-                to="/analytics/ops"
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === "/analytics/ops"
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                Analytics
-              </Link>
-            )}
-
-            {/* Van Incidents */}
-            <Link
-              to="/van-incidents"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/van-incidents")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Van Incidents
-            </Link>
-
             {/* Fleet Violations */}
             <Link
               to="/fleet"
