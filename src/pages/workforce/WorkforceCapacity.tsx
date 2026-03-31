@@ -283,7 +283,7 @@ export default function WorkforceCapacity() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Link to={`/workforce/tasks?role=${role.id}`} className="hover:underline text-primary">{role.name}</Link>
+                          <Link to={`/workforce/tasks?hub=${hub}&role=${role.id}`} className="hover:underline text-primary">{role.name}</Link>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
                             <Edit2 className="h-3 w-3" />
                           </Button>
