@@ -45,6 +45,9 @@ export default function Layout() {
   ];
 
   const futureProjectItems = [
+    { to: "/van-incidents", label: "Van Incidents" },
+    { to: "/analytics/ops", label: "Analytics" },
+    { to: "/supply/dashboard", label: "Supply Requests" },
     { to: "/unit-schedule", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
@@ -90,34 +93,6 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1 flex-wrap">
-            {/* Analytics - OPX/Admin only */}
-            {(isOPX || isAdmin || isSuperAdmin) && (
-              <Link
-                to="/analytics/ops"
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  location.pathname === "/analytics/ops"
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                Analytics
-              </Link>
-            )}
-
-            {/* Van Incidents */}
-            <Link
-              to="/van-incidents"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/van-incidents")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Van Incidents
-            </Link>
-
             {/* Fleet Violations */}
             <Link
               to="/fleet"
@@ -142,19 +117,6 @@ export default function Layout() {
               )}
             >
               801 FR Building & OPS
-            </Link>
-
-            {/* Supply Requests */}
-            <Link
-              to="/supply/dashboard"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/supply")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Supply Requests
             </Link>
 
             {/* Workforce Planning */}
