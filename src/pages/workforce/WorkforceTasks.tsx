@@ -35,8 +35,11 @@ const EMPTY_TASK = {
 
 export default function WorkforceTasks() {
   const navigate = useNavigate();
-  const { data: roles = [] } = useWorkforceRoles();
-  const { data: tasks = [] } = useWorkforceTasks();
+  const [searchParams] = useSearchParams();
+  const hub = searchParams.get("hub") || "pernes";
+  const hubLabel = hub === "pernes" ? "Pernes" : hub === "tuscany" ? "Tuscany" : hub === "czech" ? "Czech" : hub;
+  const { data: roles = [] } = useWorkforceRoles(hub);
+  const { data: tasks = [] } = useWorkforceTasks(hub);
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
