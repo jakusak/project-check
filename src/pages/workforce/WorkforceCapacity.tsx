@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Plus, Users, AlertTriangle, TrendingUp, BarChart3, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,8 +32,11 @@ const EMPTY_ROLE = { name: "", assigned_person_name: "", monthly_capacity_hours:
 
 export default function WorkforceCapacity() {
   const navigate = useNavigate();
-  const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles();
-  const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks();
+  const [searchParams] = useSearchParams();
+  const hub = searchParams.get("hub") || "pernes";
+  const hubLabel = hub === "pernes" ? "Pernes" : hub === "tuscany" ? "Tuscany" : hub === "czech" ? "Czech" : hub;
+  const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles(hub);
+  const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks(hub);
   const createRole = useCreateWorkforceRole();
   const updateRole = useUpdateWorkforceRole();
   const deleteRole = useDeleteWorkforceRole();
@@ -78,6 +81,7 @@ export default function WorkforceCapacity() {
     } else {
       createRole.mutate({
         ...payload,
+        department: hub,
         color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
       }, { onSuccess: () => { setFormOpen(false); setForm(EMPTY_ROLE); } });
     }
@@ -116,12 +120,12 @@ export default function WorkforceCapacity() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Workforce Capacity Dashboard</h1>
+            <h1 className="text-2xl font-bold">Workforce Capacity — {hubLabel}</h1>
             <p className="text-sm text-muted-foreground">Monthly workload vs. capacity by role — {selectedYear}</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to="/workforce/tasks">
+          <Link to={`/workforce/tasks?hub=${hub}`}>
             <Button variant="outline">Task Allocation Table</Button>
           </Link>
           <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Role</Button>
@@ -211,7 +215,7 @@ export default function WorkforceCapacity() {
                         <tr key={role.id} className="border-t">
                           <td className="p-2">
                             <div className="flex items-center gap-1">
-                              <Link to={`/workforce/tasks?role=${role.id}`} className="font-medium hover:underline text-primary cursor-pointer">{role.name}</Link>
+                              <Link to={`/workforce/tasks?hub=${hub}&role=${role.id}`} className="font-medium hover:underline text-primary cursor-pointer">{role.name}</Link>
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
                                 <Edit2 className="h-3 w-3" />
                               </Button>
@@ -279,7 +283,7 @@ export default function WorkforceCapacity() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Link to={`/workforce/tasks?role=${role.id}`} className="hover:underline text-primary">{role.name}</Link>
+                          <Link to={`/workforce/tasks?hub=${hub}&role=${role.id}`} className="hover:underline text-primary">{role.name}</Link>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(role)}>
                             <Edit2 className="h-3 w-3" />
                           </Button>

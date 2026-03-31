@@ -35,13 +35,15 @@ const EMPTY_TASK = {
 
 export default function WorkforceTasks() {
   const navigate = useNavigate();
-  const { data: roles = [] } = useWorkforceRoles();
-  const { data: tasks = [] } = useWorkforceTasks();
+  const [searchParams] = useSearchParams();
+  const hub = searchParams.get("hub") || "pernes";
+  const hubLabel = hub === "pernes" ? "Pernes" : hub === "tuscany" ? "Tuscany" : hub === "czech" ? "Czech" : hub;
+  const { data: roles = [] } = useWorkforceRoles(hub);
+  const { data: tasks = [] } = useWorkforceTasks(hub);
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
 
-  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState(searchParams.get("role") || "all");
   const [filterPriority, setFilterPriority] = useState("all");
@@ -84,7 +86,7 @@ export default function WorkforceTasks() {
     if (editingTask) {
       updateTask.mutate({ id: editingTask.id, updates: payload }, { onSuccess: () => setFormOpen(false) });
     } else {
-      createTask.mutate(payload, { onSuccess: () => setFormOpen(false) });
+      createTask.mutate({ ...payload, department: hub }, { onSuccess: () => setFormOpen(false) });
     }
   };
 
@@ -106,11 +108,11 @@ export default function WorkforceTasks() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/workforce/capacity")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/workforce/capacity?hub=${hub}`)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Task Allocation Table</h1>
+            <h1 className="text-2xl font-bold">Task Allocation — {hubLabel}</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} of {tasks.length} tasks</p>
           </div>
         </div>
