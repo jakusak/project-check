@@ -86,7 +86,7 @@ export default function WorkforceTasks() {
     if (editingTask) {
       updateTask.mutate({ id: editingTask.id, updates: payload }, { onSuccess: () => setFormOpen(false) });
     } else {
-      createTask.mutate(payload, { onSuccess: () => setFormOpen(false) });
+      createTask.mutate({ ...payload, department: hub }, { onSuccess: () => setFormOpen(false) });
     }
   };
 
