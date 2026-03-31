@@ -119,7 +119,7 @@ export default function WorkforceCapacity() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Workforce Capacity Dashboard</h1>
+            <h1 className="text-2xl font-bold">Workforce Capacity — {hubLabel}</h1>
             <p className="text-sm text-muted-foreground">Monthly workload vs. capacity by role — {selectedYear}</p>
           </div>
         </div>
