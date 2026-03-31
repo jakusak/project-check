@@ -81,6 +81,7 @@ export default function WorkforceCapacity() {
     } else {
       createRole.mutate({
         ...payload,
+        department: hub,
         color: ROLE_COLORS[roles.length % ROLE_COLORS.length],
       }, { onSuccess: () => { setFormOpen(false); setForm(EMPTY_ROLE); } });
     }
