@@ -119,19 +119,6 @@ export default function Layout() {
               801 FR Building & OPS
             </Link>
 
-            {/* Supply Requests */}
-            <Link
-              to="/supply/dashboard"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/supply")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Supply Requests
-            </Link>
-
             {/* Workforce Planning */}
             <Link
               to="/workforce/capacity"
