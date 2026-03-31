@@ -89,7 +89,7 @@ export default function Layout() {
           </Link>
 
           {/* Main Navigation */}
-          <nav className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
+          <nav className="flex items-center gap-1 flex-1 overflow-x-auto overflow-y-visible scrollbar-hide" style={{ overflow: 'visible', overflowX: 'auto' }}>
             {/* Analytics - OPX/Admin only */}
             {(isOPX || isAdmin || isSuperAdmin) && (
               <Link
