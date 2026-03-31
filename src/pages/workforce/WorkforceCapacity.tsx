@@ -32,8 +32,11 @@ const EMPTY_ROLE = { name: "", assigned_person_name: "", monthly_capacity_hours:
 
 export default function WorkforceCapacity() {
   const navigate = useNavigate();
-  const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles();
-  const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks();
+  const [searchParams] = useSearchParams();
+  const hub = searchParams.get("hub") || "pernes";
+  const hubLabel = hub === "pernes" ? "Pernes" : hub === "tuscany" ? "Tuscany" : hub === "czech" ? "Czech" : hub;
+  const { data: roles = [], isLoading: rolesLoading } = useWorkforceRoles(hub);
+  const { data: tasks = [], isLoading: tasksLoading } = useWorkforceTasks(hub);
   const createRole = useCreateWorkforceRole();
   const updateRole = useUpdateWorkforceRole();
   const deleteRole = useDeleteWorkforceRole();
