@@ -76,7 +76,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
       {/* Top Navigation Header - Backroads Style */}
-      <header className="bg-primary text-primary-foreground shadow-md">
+      <header className="bg-primary text-primary-foreground shadow-md relative z-50">
         <div className="flex items-center h-14 px-4 overflow-visible">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 mr-8">
