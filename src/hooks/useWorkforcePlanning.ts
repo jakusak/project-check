@@ -120,29 +120,33 @@ export function getUtilizationBadge(pct: number): { label: string; className: st
 
 // ─── Hooks ───
 
-export function useWorkforceRoles() {
+export function useWorkforceRoles(hub?: string) {
   return useQuery({
-    queryKey: ["workforce-roles"],
+    queryKey: ["workforce-roles", hub],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("workforce_roles")
         .select("*")
         .eq("is_active", true)
         .order("name");
+      if (hub) query = query.eq("department", hub);
+      const { data, error } = await query;
       if (error) throw error;
       return data as unknown as WorkforceRole[];
     },
   });
 }
 
-export function useWorkforceTasks() {
+export function useWorkforceTasks(hub?: string) {
   return useQuery({
-    queryKey: ["workforce-tasks"],
+    queryKey: ["workforce-tasks", hub],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("workforce_tasks")
         .select(`*, assigned_role:workforce_roles(*)`)
         .order("name");
+      if (hub) query = query.eq("department", hub);
+      const { data, error } = await query;
       if (error) throw error;
       return data as unknown as WorkforceTask[];
     },
