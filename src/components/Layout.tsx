@@ -132,7 +132,7 @@ export default function Layout() {
                 Workforce Planning
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              <div className="absolute top-full left-0 mt-1 w-48 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <div className="py-1">
                   {[
                     { hub: "pernes", label: "Pernes" },
@@ -143,9 +143,9 @@ export default function Layout() {
                       key={item.hub}
                       to={`/workforce/capacity?hub=${item.hub}`}
                       className={cn(
-                        "block px-4 py-2 text-sm hover:bg-accent transition-colors",
+                        "block px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors",
                         location.pathname.startsWith("/workforce") && new URLSearchParams(location.search).get("hub") === item.hub
-                          ? "bg-accent font-medium"
+                          ? "bg-accent text-accent-foreground font-medium"
                           : ""
                       )}
                     >
