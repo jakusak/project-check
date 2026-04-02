@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Plus, Search, Trash2, Edit2, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,13 +33,17 @@ const EMPTY_TASK = {
   deadline_sensitivity: "low", notes: "",
 };
 
+const ALL_HUBS = ["pernes", "tuscany", "czech"];
+const HUB_LABELS: Record<string, string> = { pernes: "Pernes", tuscany: "Tuscany", czech: "Czech" };
+
 export default function WorkforceTasks() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const hub = searchParams.get("hub") || "pernes";
-  const hubLabel = hub === "pernes" ? "Pernes" : hub === "tuscany" ? "Tuscany" : hub === "czech" ? "Czech" : hub;
+  const hubLabel = HUB_LABELS[hub] || hub;
   const { data: roles = [] } = useWorkforceRoles(hub);
   const { data: tasks = [] } = useWorkforceTasks(hub);
+  const { data: allTasks = [] } = useWorkforceTasks();
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
@@ -52,12 +56,24 @@ export default function WorkforceTasks() {
   const [editingTask, setEditingTask] = useState<WorkforceTask | null>(null);
   const [form, setForm] = useState(EMPTY_TASK);
 
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [libraryHubFilter, setLibraryHubFilter] = useState("all");
+
   const filtered = tasks.filter(t => {
     if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.description?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterRole !== "all" && t.assigned_role_id !== filterRole) return false;
     if (filterPriority !== "all" && t.priority !== filterPriority) return false;
     if (filterReassignable === "yes" && !t.is_reassignable) return false;
     if (filterReassignable === "no" && t.is_reassignable) return false;
+    return true;
+  });
+
+  const otherHubs = ALL_HUBS.filter(h => h !== hub);
+  const libraryTasks = allTasks.filter(t => {
+    if (!otherHubs.includes(t.department)) return false;
+    if (libraryHubFilter !== "all" && t.department !== libraryHubFilter) return false;
+    if (librarySearch && !t.name.toLowerCase().includes(librarySearch.toLowerCase()) && !t.description?.toLowerCase().includes(librarySearch.toLowerCase())) return false;
     return true;
   });
 
@@ -71,6 +87,27 @@ export default function WorkforceTasks() {
       active_months: t.active_months, priority: t.priority,
       skill_tags: t.skill_tags || [], is_reassignable: t.is_reassignable,
       deadline_sensitivity: t.deadline_sensitivity || "low", notes: t.notes || "",
+    });
+    setFormOpen(true);
+  };
+
+  const importFromLibrary = (t: WorkforceTask) => {
+    setLibraryOpen(false);
+    setEditingTask(null);
+    setForm({
+      name: t.name,
+      description: t.description || "",
+      category: t.category || "general",
+      department: hub,
+      assigned_role_id: "",
+      estimated_hours_per_month: t.estimated_hours_per_month,
+      recurrence_type: t.recurrence_type,
+      active_months: [...t.active_months],
+      priority: t.priority,
+      skill_tags: t.skill_tags || [],
+      is_reassignable: t.is_reassignable,
+      deadline_sensitivity: t.deadline_sensitivity || "low",
+      notes: t.notes || "",
     });
     setFormOpen(true);
   };
@@ -116,7 +153,12 @@ export default function WorkforceTasks() {
             <p className="text-sm text-muted-foreground">{filtered.length} of {tasks.length} tasks</p>
           </div>
         </div>
-        <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Task</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { setLibrarySearch(""); setLibraryHubFilter("all"); setLibraryOpen(true); }}>
+            <Library className="h-4 w-4 mr-1" /> Add from Library
+          </Button>
+          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Task</Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -220,6 +262,59 @@ export default function WorkforceTasks() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Library Dialog */}
+      <Dialog open={libraryOpen} onOpenChange={setLibraryOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Task Library — Import to {hubLabel}</DialogTitle>
+            <p className="text-sm text-muted-foreground">Browse tasks from other hubs and add them to {hubLabel} with custom hours and role assignments.</p>
+          </DialogHeader>
+          <div className="flex gap-3 items-end">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search library..." value={librarySearch} onChange={e => setLibrarySearch(e.target.value)} className="pl-9" />
+            </div>
+            <Select value={libraryHubFilter} onValueChange={setLibraryHubFilter}>
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Hubs</SelectItem>
+                {otherHubs.map(h => <SelectItem key={h} value={h}>{HUB_LABELS[h] || h}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          {libraryTasks.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No tasks found in other hubs. Tasks created in other hubs will appear here.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {libraryTasks.map(t => (
+                <Card key={t.id} className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => importFromLibrary(t)}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{t.name}</span>
+                        <Badge variant="secondary" className="text-xs">{HUB_LABELS[t.department] || t.department}</Badge>
+                        <Badge className={`text-xs ${priorityColor[t.priority] || ""}`}>{t.priority}</Badge>
+                      </div>
+                      {t.description && <p className="text-xs text-muted-foreground line-clamp-1">{t.description}</p>}
+                      <div className="flex gap-3 text-xs text-muted-foreground">
+                        <span>{t.estimated_hours_per_month}h/mo</span>
+                        <span className="capitalize">{t.recurrence_type.replace(/_/g, " ")}</span>
+                        <span className="capitalize">{t.category?.replace(/_/g, " ")}</span>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); importFromLibrary(t); }}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Use
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Task Form Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
