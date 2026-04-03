@@ -18,6 +18,7 @@ import {
   useCreateWorkforceTask,
   useUpdateWorkforceTask,
   useDeleteWorkforceTask,
+  useCreateWorkforceRole,
   WorkforceTask,
   MONTH_NAMES,
   RECURRENCE_OPTIONS,
@@ -47,6 +48,17 @@ export default function WorkforceTasks() {
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
+  const createRole = useCreateWorkforceRole();
+
+  const [roleFormOpen, setRoleFormOpen] = useState(false);
+  const [roleForm, setRoleForm] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
+
+  const handleSaveRole = () => {
+    createRole.mutate(
+      { ...roleForm, department: hub, notes: roleForm.notes || null, assigned_person_name: roleForm.assigned_person_name || null },
+      { onSuccess: () => { setRoleFormOpen(false); setRoleForm({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" }); } }
+    );
+  };
 
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState(searchParams.get("role") || "all");
@@ -156,6 +168,9 @@ export default function WorkforceTasks() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => { setLibrarySearch(""); setLibraryHubFilter("all"); setLibraryOpen(true); }}>
             <Library className="h-4 w-4 mr-1" /> Add from Library
+          </Button>
+          <Button variant="outline" onClick={() => { setRoleForm({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" }); setRoleFormOpen(true); }}>
+            <Plus className="h-4 w-4 mr-1" /> Add Role
           </Button>
           <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Task</Button>
         </div>
@@ -412,6 +427,20 @@ export default function WorkforceTasks() {
             <Button onClick={handleSave} disabled={!form.name || createTask.isPending || updateTask.isPending} className="w-full">
               {editingTask ? "Update Task" : "Create Task"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Add Role Dialog */}
+      <Dialog open={roleFormOpen} onOpenChange={setRoleFormOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add New Role</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Role / Job Title *</Label><Input value={roleForm.name} onChange={e => setRoleForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
+            <div><Label>Assigned Person (optional)</Label><Input value={roleForm.assigned_person_name} onChange={e => setRoleForm(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
+            <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={roleForm.monthly_capacity_hours} onChange={e => setRoleForm(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
+            <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={roleForm.vacation_weeks_per_year} onChange={e => setRoleForm(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
+            <div><Label>Notes</Label><Textarea value={roleForm.notes} onChange={e => setRoleForm(p => ({ ...p, notes: e.target.value }))} /></div>
+            <Button onClick={handleSaveRole} disabled={!roleForm.name || createRole.isPending} className="w-full">Create Role</Button>
           </div>
         </DialogContent>
       </Dialog>
