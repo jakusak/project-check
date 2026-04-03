@@ -154,6 +154,26 @@ export default function WorkforceTasks() {
     high: "bg-orange-100 text-orange-700", critical: "bg-red-100 text-red-700",
   };
 
+  const CATEGORY_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#84CC16"];
+
+  const rolePieData = useMemo(() => {
+    return roles.map(role => {
+      const roleTasks = tasks.filter(t => t.assigned_role_id === role.id);
+      const categoryMap: Record<string, number> = {};
+      roleTasks.forEach(t => {
+        const cat = t.category || "general";
+        categoryMap[cat] = (categoryMap[cat] || 0) + t.estimated_hours_per_month;
+      });
+      const data = Object.entries(categoryMap).map(([name, value]) => ({
+        name: name.replace(/_/g, " "),
+        value,
+      }));
+      return { role, data, totalHours: roleTasks.reduce((s, t) => s + t.estimated_hours_per_month, 0), taskCount: roleTasks.length };
+    });
+  }, [roles, tasks]);
+
+  const activeRoleName = filterRole !== "all" ? roles.find(r => r.id === filterRole)?.name : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -163,6 +183,9 @@ export default function WorkforceTasks() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Task Allocation — {hubLabel}</h1>
+            {activeRoleName && (
+              <p className="text-lg font-semibold text-primary">{activeRoleName}</p>
+            )}
             <p className="text-sm text-muted-foreground">{filtered.length} of {tasks.length} tasks</p>
           </div>
         </div>
@@ -177,14 +200,48 @@ export default function WorkforceTasks() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-          </div>
+      {/* Role Category Pie Charts */}
+      {rolePieData.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {rolePieData.map(({ role, data, totalHours, taskCount }) => (
+            <Card
+              key={role.id}
+              className={`cursor-pointer transition-all hover:shadow-md ${filterRole === role.id ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setFilterRole(filterRole === role.id ? "all" : role.id)}
+            >
+              <CardContent className="p-3 flex flex-col items-center">
+                <p className="text-sm font-semibold truncate w-full text-center">{role.name}</p>
+                {role.assigned_person_name && (
+                  <p className="text-xs text-muted-foreground">{role.assigned_person_name}</p>
+                )}
+                {data.length > 0 ? (
+                  <div className="w-full h-[100px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={40} innerRadius={20} paddingAngle={2}>
+                          {data.map((_, idx) => (
+                            <Cell key={idx} fill={CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number, name: string) => [`${value}h`, name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[100px] flex items-center justify-center text-xs text-muted-foreground">No tasks</div>
+                )}
+                <div className="flex gap-3 text-xs text-muted-foreground mt-1">
+                  <span>{taskCount} tasks</span>
+                  <span>{totalHours}h/mo</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      )}
+
+      {/* Filters — role dropdown left, search right */}
+      <div className="flex flex-wrap gap-3 items-end">
         <Select value={filterRole} onValueChange={setFilterRole}>
           <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Roles" /></SelectTrigger>
           <SelectContent>
@@ -207,6 +264,12 @@ export default function WorkforceTasks() {
             <SelectItem value="no">Not Reassignable</SelectItem>
           </SelectContent>
         </Select>
+        <div className="ml-auto w-[220px]">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          </div>
+        </div>
       </div>
 
       {/* Table */}
