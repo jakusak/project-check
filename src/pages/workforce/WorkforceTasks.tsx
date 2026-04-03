@@ -18,6 +18,7 @@ import {
   useCreateWorkforceTask,
   useUpdateWorkforceTask,
   useDeleteWorkforceTask,
+  useCreateWorkforceRole,
   WorkforceTask,
   MONTH_NAMES,
   RECURRENCE_OPTIONS,
