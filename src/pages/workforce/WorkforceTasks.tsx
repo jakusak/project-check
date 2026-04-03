@@ -48,6 +48,17 @@ export default function WorkforceTasks() {
   const createTask = useCreateWorkforceTask();
   const updateTask = useUpdateWorkforceTask();
   const deleteTask = useDeleteWorkforceTask();
+  const createRole = useCreateWorkforceRole();
+
+  const [roleFormOpen, setRoleFormOpen] = useState(false);
+  const [roleForm, setRoleForm] = useState({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" });
+
+  const handleSaveRole = () => {
+    createRole.mutate(
+      { ...roleForm, department: hub, notes: roleForm.notes || null, assigned_person_name: roleForm.assigned_person_name || null },
+      { onSuccess: () => { setRoleFormOpen(false); setRoleForm({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" }); } }
+    );
+  };
 
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState(searchParams.get("role") || "all");
