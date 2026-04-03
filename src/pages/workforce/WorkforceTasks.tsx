@@ -169,6 +169,9 @@ export default function WorkforceTasks() {
           <Button variant="outline" onClick={() => { setLibrarySearch(""); setLibraryHubFilter("all"); setLibraryOpen(true); }}>
             <Library className="h-4 w-4 mr-1" /> Add from Library
           </Button>
+          <Button variant="outline" onClick={() => { setRoleForm({ name: "", assigned_person_name: "", monthly_capacity_hours: 160, vacation_weeks_per_year: 0, notes: "" }); setRoleFormOpen(true); }}>
+            <Plus className="h-4 w-4 mr-1" /> Add Role
+          </Button>
           <Button onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> Add Task</Button>
         </div>
       </div>
