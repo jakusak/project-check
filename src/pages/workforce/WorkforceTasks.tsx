@@ -430,6 +430,20 @@ export default function WorkforceTasks() {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Add Role Dialog */}
+      <Dialog open={roleFormOpen} onOpenChange={setRoleFormOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add New Role</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Role / Job Title *</Label><Input value={roleForm.name} onChange={e => setRoleForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ops Coordinator" /></div>
+            <div><Label>Assigned Person (optional)</Label><Input value={roleForm.assigned_person_name} onChange={e => setRoleForm(p => ({ ...p, assigned_person_name: e.target.value }))} placeholder="e.g. Steve" /></div>
+            <div><Label>Monthly Capacity (hours)</Label><Input type="number" value={roleForm.monthly_capacity_hours} onChange={e => setRoleForm(p => ({ ...p, monthly_capacity_hours: Number(e.target.value) }))} /></div>
+            <div><Label>Vacation Weeks / Year</Label><Input type="number" min={0} max={52} value={roleForm.vacation_weeks_per_year} onChange={e => setRoleForm(p => ({ ...p, vacation_weeks_per_year: Number(e.target.value) }))} placeholder="e.g. 6" /></div>
+            <div><Label>Notes</Label><Textarea value={roleForm.notes} onChange={e => setRoleForm(p => ({ ...p, notes: e.target.value }))} /></div>
+            <Button onClick={handleSaveRole} disabled={!roleForm.name || createRole.isPending} className="w-full">Create Role</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
