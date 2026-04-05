@@ -200,40 +200,64 @@ export default function WorkforceTasks() {
         </div>
       </div>
 
-      {/* Role Category Pie Charts */}
+      {/* Role Category Breakdown */}
       {rolePieData.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="space-y-3">
           {rolePieData.map(({ role, data, totalHours, taskCount }) => (
             <Card
               key={role.id}
               className={`cursor-pointer transition-all hover:shadow-md ${filterRole === role.id ? "ring-2 ring-primary" : ""}`}
               onClick={() => setFilterRole(filterRole === role.id ? "all" : role.id)}
             >
-              <CardContent className="p-3 flex flex-col items-center">
-                <p className="text-sm font-semibold truncate w-full text-center">{role.name}</p>
-                {role.assigned_person_name && (
-                  <p className="text-xs text-muted-foreground">{role.assigned_person_name}</p>
-                )}
-                {data.length > 0 ? (
-                  <div className="w-full h-[100px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={40} innerRadius={20} paddingAngle={2}>
-                          {data.map((_, idx) => (
-                            <Cell key={idx} fill={CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value: number, name: string) => [`${value}h`, name]} />
-                      </PieChart>
-                    </ResponsiveContainer>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">{role.name}</span>
+                    {role.assigned_person_name && (
+                      <span className="text-xs text-muted-foreground">({role.assigned_person_name})</span>
+                    )}
                   </div>
-                ) : (
-                  <div className="h-[100px] flex items-center justify-center text-xs text-muted-foreground">No tasks</div>
-                )}
-                <div className="flex gap-3 text-xs text-muted-foreground mt-1">
-                  <span>{taskCount} tasks</span>
-                  <span>{totalHours}h/mo</span>
+                  <div className="flex gap-3 text-xs text-muted-foreground">
+                    <span>{taskCount} tasks</span>
+                    <span className="font-mono font-medium">{totalHours}h/mo</span>
+                  </div>
                 </div>
+                {data.length > 0 ? (
+                  <>
+                    {/* Stacked bar */}
+                    <div className="w-full h-6 rounded-md overflow-hidden flex">
+                      {data.map((seg, idx) => {
+                        const pct = totalHours > 0 ? (seg.value / totalHours) * 100 : 0;
+                        return (
+                          <div
+                            key={seg.name}
+                            className="h-full flex items-center justify-center text-[10px] font-medium text-white overflow-hidden"
+                            style={{ width: `${pct}%`, backgroundColor: CATEGORY_COLORS[idx % CATEGORY_COLORS.length], minWidth: pct > 0 ? '2px' : '0' }}
+                            title={`${seg.name}: ${seg.value}h (${Math.round(pct)}%)`}
+                          >
+                            {pct > 12 ? `${Math.round(pct)}%` : ""}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Legend */}
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                      {data.map((seg, idx) => {
+                        const pct = totalHours > 0 ? Math.round((seg.value / totalHours) * 100) : 0;
+                        return (
+                          <div key={seg.name} className="flex items-center gap-1.5 text-xs">
+                            <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: CATEGORY_COLORS[idx % CATEGORY_COLORS.length] }} />
+                            <span className="capitalize text-muted-foreground">{seg.name}</span>
+                            <span className="font-mono font-medium">{seg.value}h</span>
+                            <span className="text-muted-foreground">({pct}%)</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-6 flex items-center text-xs text-muted-foreground">No tasks assigned</div>
+                )}
               </CardContent>
             </Card>
           ))}
