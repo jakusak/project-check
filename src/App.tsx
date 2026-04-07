@@ -71,6 +71,8 @@ import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
 import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
 import WorkforceTasks from "./pages/workforce/WorkforceTasks";
+import PublicSupplyRequestForm from "./pages/public/PublicSupplyRequestForm";
+import PublicFacilitiesRequestForm from "./pages/public/PublicFacilitiesRequestForm";
 
 const queryClient = new QueryClient();
 
@@ -153,6 +155,9 @@ const App = () => (
               <Route path="broken-items/new" element={<ReportBrokenItem />} />
               <Route path="tps/assign-bikes" element={<MobileAssignBike />} />
             </Route>
+            {/* Public forms - no auth required */}
+            <Route path="/public/supply-request" element={<PublicSupplyRequestForm />} />
+            <Route path="/public/facilities-request" element={<PublicFacilitiesRequestForm />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </BrowserRouter>
