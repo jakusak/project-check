@@ -155,6 +155,9 @@ const App = () => (
               <Route path="broken-items/new" element={<ReportBrokenItem />} />
               <Route path="tps/assign-bikes" element={<MobileAssignBike />} />
             </Route>
+            {/* Public forms - no auth required */}
+            <Route path="/public/supply-request" element={<PublicSupplyRequestForm />} />
+            <Route path="/public/facilities-request" element={<PublicFacilitiesRequestForm />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </BrowserRouter>
