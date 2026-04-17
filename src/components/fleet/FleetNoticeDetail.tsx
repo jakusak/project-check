@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import {
   useUploadFleetNoticeFile,
   FleetNoticeStatus 
 } from "@/hooks/useFleetNotices";
+import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { 
@@ -34,9 +36,13 @@ import {
   Upload,
   Loader2,
   ExternalLink,
-  Mail
+  Mail,
+  PlayCircle,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { FleetNoticeEmailDialog } from "./FleetNoticeEmailDialog";
+import { FleetWorkflowStepper } from "./FleetWorkflowStepper";
 
 interface FleetNoticeDetailProps {
   noticeId: string;
@@ -45,26 +51,30 @@ interface FleetNoticeDetailProps {
 
 const STATUS_OPTIONS: { value: FleetNoticeStatus; label: string }[] = [
   { value: "new", label: "New" },
-  { value: "needs_review", label: "Needs Review" },
-  { value: "ready_to_assign", label: "Ready to Assign" },
-  { value: "assigned", label: "Assigned" },
-  { value: "in_payment", label: "In Payment" },
-  { value: "paid", label: "Paid" },
-  { value: "in_dispute", label: "In Dispute" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "email_sent", label: "Email Sent" },
+  { value: "awaiting_payment", label: "Awaiting Payment" },
+  { value: "finance_verified", label: "Finance Verified" },
   { value: "closed", label: "Closed" },
+  { value: "in_dispute", label: "In Dispute" },
   { value: "exception", label: "Exception" },
+  // Legacy values (kept for older notices)
+  { value: "needs_review", label: "Needs Review (legacy)" },
+  { value: "ready_to_assign", label: "Ready to Assign (legacy)" },
+  { value: "assigned", label: "Assigned (legacy)" },
+  { value: "in_payment", label: "In Payment (legacy)" },
+  { value: "paid", label: "Paid (legacy)" },
 ];
 
-export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDetailProps) {
+export default function FleetNoticeDetail({ noticeId, onClose: _onClose }: FleetNoticeDetailProps) {
   const { data: notice, isLoading } = useFleetNotice(noticeId);
   const { data: files } = useFleetNoticeFiles(noticeId);
   const { data: drivers } = useFleetDrivers();
   const { data: vehicles } = useFleetVehicles();
   const updateNotice = useUpdateFleetNotice();
   const uploadFile = useUploadFleetNoticeFile();
+  const { user, isFinance } = useAuth();
 
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState<Record<string, any>>({});
   const [driverName, setDriverName] = useState("");
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
@@ -167,6 +177,121 @@ export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDeta
         onOpenChange={setEmailDialogOpen}
         notice={notice}
       />
+
+      {/* Workflow Stepper + Actions */}
+      <Card>
+        <CardContent className="pt-6 space-y-5">
+          <FleetWorkflowStepper status={notice.status} />
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {(notice.status === "new" || notice.status === "needs_review" || notice.status === "ready_to_assign") && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("in_progress")}
+                disabled={updateNotice.isPending}
+              >
+                <PlayCircle className="h-4 w-4 mr-2" />
+                Start (mark In Progress)
+              </Button>
+            )}
+
+            {notice.status === "in_progress" && (
+              <Button size="sm" onClick={() => setEmailDialogOpen(true)}>
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email to Driver
+              </Button>
+            )}
+
+            {notice.status === "email_sent" && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("awaiting_payment")}
+                disabled={updateNotice.isPending}
+              >
+                Move to Awaiting Payment
+              </Button>
+            )}
+
+            {notice.status === "awaiting_payment" && (
+              <>
+                {isFinance ? (
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      await updateNotice.mutateAsync({
+                        id: noticeId,
+                        status: "finance_verified",
+                        finance_verified_at: new Date().toISOString(),
+                        finance_verified_by: user?.id ?? null,
+                        paid_date: notice.paid_date ?? new Date().toISOString().split("T")[0],
+                        paid_amount: notice.paid_amount ?? notice.fine_amount,
+                      } as any);
+                    }}
+                    disabled={updateNotice.isPending}
+                  >
+                    <ShieldCheck className="h-4 w-4 mr-2" />
+                    Mark Finance Verified
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md">
+                    <ShieldCheck className="h-3 w-3" />
+                    Finance role required to verify payment.
+                  </div>
+                )}
+              </>
+            )}
+
+            {notice.status === "finance_verified" && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("closed")}
+                disabled={updateNotice.isPending}
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                Close Case
+              </Button>
+            )}
+          </div>
+
+          {/* Driver claims paid checkbox — visible from Email Sent onward, until Finance Verified */}
+          {(notice.status === "email_sent" || notice.status === "awaiting_payment") && (
+            <div className="flex items-start gap-3 border rounded-lg p-3 bg-muted/30">
+              <Checkbox
+                id="driver-claims-paid"
+                checked={notice.driver_claims_paid}
+                onCheckedChange={async (checked) => {
+                  await updateNotice.mutateAsync({
+                    id: noticeId,
+                    driver_claims_paid: !!checked,
+                    driver_claims_paid_at: checked ? new Date().toISOString() : null,
+                  } as any);
+                }}
+              />
+              <div className="flex-1 space-y-1">
+                <Label htmlFor="driver-claims-paid" className="cursor-pointer">
+                  Driver claims they've paid
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Tick this if the driver says payment was made but Finance hasn't confirmed it yet.
+                  The case stays in <strong>Awaiting Payment</strong> until Finance verifies.
+                </p>
+                {notice.driver_claims_paid && notice.driver_claims_paid_at && (
+                  <p className="text-xs text-foreground">
+                    Claimed on {format(new Date(notice.driver_claims_paid_at), "MMM d, yyyy")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {notice.status === "finance_verified" && notice.finance_verified_at && (
+            <div className="flex items-center gap-2 text-sm text-foreground bg-muted/30 border rounded-lg p-3">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Verified by Finance on {format(new Date(notice.finance_verified_at), "MMM d, yyyy")}.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="details">
         <TabsList>

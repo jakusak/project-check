@@ -24,6 +24,7 @@ interface AuthContextType {
   isHubAdmin: boolean;
   isFieldStaff: boolean;
   isTPS: boolean;
+  isFinance: boolean;
   
   // Actions
   signIn: (email: string, password: string) => Promise<{ error: any }>;

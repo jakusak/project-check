@@ -1,7 +1,7 @@
 // Auth types - centralized type definitions
 // These can be extended when integrating Azure AD SSO
 
-export type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user' | 'tps';
+export type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user' | 'tps' | 'finance';
 
 export interface AuthUser {
   id: string;
@@ -26,6 +26,7 @@ export interface AuthState {
   isHubAdmin: boolean;
   isFieldStaff: boolean;
   isTPS: boolean;
+  isFinance: boolean;
 }
 
 export interface SignInCredentials {
