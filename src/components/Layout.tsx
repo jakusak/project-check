@@ -7,12 +7,14 @@ import backroadsLogo from "@/assets/backroads-logo.png";
 import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
 import { useMobileRedirect } from "@/hooks/useMobileRedirect";
+import { useFleetAccess } from "@/lib/auth/useFleetAccess";
 
 export default function Layout() {
   const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, isTPS, signOut, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
+  const { hasAccess: hasFleetAccess } = useFleetAccess();
 
   // Auto-redirect mobile users to mobile routes - only when not loading and user exists
   const shouldRedirect = !loading && !!user;
@@ -93,18 +95,20 @@ export default function Layout() {
 
           {/* Main Navigation */}
           <nav className="flex items-center gap-1 flex-1 flex-wrap">
-            {/* Fleet Violations */}
-            <Link
-              to="/fleet"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/fleet")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              Fleet Violations
-            </Link>
+            {/* Fleet Violations - restricted */}
+            {hasFleetAccess && (
+              <Link
+                to="/fleet"
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname.startsWith("/fleet")
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Fleet Violations
+              </Link>
+            )}
 
             {/* Ops Control */}
             <Link

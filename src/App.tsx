@@ -51,6 +51,7 @@ import FleetNoticesList from "./pages/fleet/FleetNoticesList";
 import NewFleetNotice from "./pages/fleet/NewFleetNotice";
 import FleetDriversList from "./pages/fleet/FleetDriversList";
 import FleetVehiclesList from "./pages/fleet/FleetVehiclesList";
+import { FleetAccessGuard } from "./components/fleet/FleetAccessGuard";
 import MobileLayout from "./components/MobileLayout";
 import MobileHome from "./pages/mobile/MobileHome";
 import MobileNewIncident from "./pages/mobile/MobileNewIncident";
@@ -125,11 +126,11 @@ const App = () => (
               <Route path="/inventory/moves" element={<InventoryMovesList />} />
               <Route path="/inventory/moves/new" element={<NewInventoryMove />} />
               <Route path="/inventory/moves/:id" element={<InventoryMoveDetail />} />
-              <Route path="/fleet" element={<FleetDashboard />} />
-              <Route path="/fleet/notices" element={<FleetNoticesList />} />
-              <Route path="/fleet/notices/new" element={<NewFleetNotice />} />
-              <Route path="/fleet/drivers" element={<FleetDriversList />} />
-              <Route path="/fleet/vehicles" element={<FleetVehiclesList />} />
+              <Route path="/fleet" element={<FleetAccessGuard><FleetDashboard /></FleetAccessGuard>} />
+              <Route path="/fleet/notices" element={<FleetAccessGuard><FleetNoticesList /></FleetAccessGuard>} />
+              <Route path="/fleet/notices/new" element={<FleetAccessGuard><NewFleetNotice /></FleetAccessGuard>} />
+              <Route path="/fleet/drivers" element={<FleetAccessGuard><FleetDriversList /></FleetAccessGuard>} />
+              <Route path="/fleet/vehicles" element={<FleetAccessGuard><FleetVehiclesList /></FleetAccessGuard>} />
               <Route path="/docs/prd" element={<PRDViewer />} />
               <Route path="/ops-tasks/dashboard" element={<OpsTasksDashboard />} />
               <Route path="/ops-tasks" element={<OpsTasksList />} />
