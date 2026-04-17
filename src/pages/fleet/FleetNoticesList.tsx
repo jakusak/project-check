@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Plus, Search, Eye, AlertTriangle, CalendarIcon, X } from "lucide-react";
+import { Plus, Search, Eye, AlertTriangle, CalendarIcon, X, ArrowLeft } from "lucide-react";
 import { useFleetNotices, FleetNoticeStatus, FleetNoticeType } from "@/hooks/useFleetNotices";
 import { format, differenceInDays, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -179,9 +179,16 @@ export default function FleetNoticesList() {
     <div className="p-6 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Fleet Notices</h1>
-          <p className="text-muted-foreground">Manage all violation notices and fines</p>
+        <div className="flex items-center gap-3">
+          <Button asChild variant="ghost" size="icon" aria-label="Back to Fleet Dashboard">
+            <Link to="/fleet">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Fleet Notices</h1>
+            <p className="text-muted-foreground">Manage all violation notices and fines</p>
+          </div>
         </div>
         <Dialog open={showNewForm} onOpenChange={setShowNewForm}>
           <DialogTrigger asChild>
@@ -310,6 +317,7 @@ export default function FleetNoticesList() {
                 <TableHead>Type</TableHead>
                 <TableHead>Country</TableHead>
                 <TableHead>Plate</TableHead>
+                <TableHead>Van #</TableHead>
                 <TableHead>Driver</TableHead>
                 <TableHead className="text-right">Fine</TableHead>
                 <TableHead>Status</TableHead>
@@ -319,13 +327,13 @@ export default function FleetNoticesList() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : filteredNotices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     No notices found
                   </TableCell>
                 </TableRow>
@@ -356,6 +364,13 @@ export default function FleetNoticesList() {
                       </TableCell>
                       <TableCell>{notice.country || "—"}</TableCell>
                       <TableCell className="font-mono text-sm">{notice.license_plate || "—"}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {notice.vehicle?.backroads_van_number ? (
+                          <Badge variant="secondary">#{notice.vehicle.backroads_van_number}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell>{notice.driver?.name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                       <TableCell className="text-right font-medium">
                         {notice.fine_amount ? `${notice.currency || "€"}${notice.fine_amount.toLocaleString()}` : "—"}
