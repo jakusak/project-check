@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
 
 export type FleetNoticeType = 'speeding' | 'parking' | 'restricted_zone' | 'toll_fine' | 'unknown';
-export type FleetNoticeStatus = 'new' | 'needs_review' | 'ready_to_assign' | 'assigned' | 'in_payment' | 'paid' | 'in_dispute' | 'closed' | 'exception';
+export type FleetNoticeStatus = 'new' | 'in_progress' | 'email_sent' | 'awaiting_payment' | 'finance_verified' | 'needs_review' | 'ready_to_assign' | 'assigned' | 'in_payment' | 'paid' | 'in_dispute' | 'closed' | 'exception';
 
 export interface FleetNotice {
   id: string;
@@ -36,6 +36,11 @@ export interface FleetNotice {
   dispute_date: string | null;
   dispute_reason: string | null;
   dispute_notes: string | null;
+  driver_claims_paid: boolean;
+  driver_claims_paid_at: string | null;
+  driver_claims_paid_note: string | null;
+  finance_verified_at: string | null;
+  finance_verified_by: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -447,7 +452,7 @@ export function useFleetDashboardStats() {
       const now = new Date();
       const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-      const openStatuses: FleetNoticeStatus[] = ['new', 'needs_review', 'ready_to_assign', 'assigned', 'in_payment', 'in_dispute'];
+      const openStatuses: FleetNoticeStatus[] = ['new', 'in_progress', 'email_sent', 'awaiting_payment', 'needs_review', 'ready_to_assign', 'assigned', 'in_payment', 'in_dispute'];
       
       const openNotices = notices.filter(n => openStatuses.includes(n.status as FleetNoticeStatus));
       const dueSoon = openNotices.filter(n => n.deadline_date && new Date(n.deadline_date) <= in7Days);
