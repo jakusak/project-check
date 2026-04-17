@@ -178,6 +178,121 @@ export default function FleetNoticeDetail({ noticeId, onClose: _onClose }: Fleet
         notice={notice}
       />
 
+      {/* Workflow Stepper + Actions */}
+      <Card>
+        <CardContent className="pt-6 space-y-5">
+          <FleetWorkflowStepper status={notice.status} />
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {(notice.status === "new" || notice.status === "needs_review" || notice.status === "ready_to_assign") && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("in_progress")}
+                disabled={updateNotice.isPending}
+              >
+                <PlayCircle className="h-4 w-4 mr-2" />
+                Start (mark In Progress)
+              </Button>
+            )}
+
+            {notice.status === "in_progress" && (
+              <Button size="sm" onClick={() => setEmailDialogOpen(true)}>
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email to Driver
+              </Button>
+            )}
+
+            {notice.status === "email_sent" && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("awaiting_payment")}
+                disabled={updateNotice.isPending}
+              >
+                Move to Awaiting Payment
+              </Button>
+            )}
+
+            {notice.status === "awaiting_payment" && (
+              <>
+                {isFinance ? (
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      await updateNotice.mutateAsync({
+                        id: noticeId,
+                        status: "finance_verified",
+                        finance_verified_at: new Date().toISOString(),
+                        finance_verified_by: user?.id ?? null,
+                        paid_date: notice.paid_date ?? new Date().toISOString().split("T")[0],
+                        paid_amount: notice.paid_amount ?? notice.fine_amount,
+                      } as any);
+                    }}
+                    disabled={updateNotice.isPending}
+                  >
+                    <ShieldCheck className="h-4 w-4 mr-2" />
+                    Mark Finance Verified
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md">
+                    <ShieldCheck className="h-3 w-3" />
+                    Finance role required to verify payment.
+                  </div>
+                )}
+              </>
+            )}
+
+            {notice.status === "finance_verified" && (
+              <Button
+                size="sm"
+                onClick={() => handleStatusChange("closed")}
+                disabled={updateNotice.isPending}
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                Close Case
+              </Button>
+            )}
+          </div>
+
+          {/* Driver claims paid checkbox — visible from Email Sent onward, until Finance Verified */}
+          {(notice.status === "email_sent" || notice.status === "awaiting_payment") && (
+            <div className="flex items-start gap-3 border rounded-lg p-3 bg-muted/30">
+              <Checkbox
+                id="driver-claims-paid"
+                checked={notice.driver_claims_paid}
+                onCheckedChange={async (checked) => {
+                  await updateNotice.mutateAsync({
+                    id: noticeId,
+                    driver_claims_paid: !!checked,
+                    driver_claims_paid_at: checked ? new Date().toISOString() : null,
+                  } as any);
+                }}
+              />
+              <div className="flex-1 space-y-1">
+                <Label htmlFor="driver-claims-paid" className="cursor-pointer">
+                  Driver claims they've paid
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Tick this if the driver says payment was made but Finance hasn't confirmed it yet.
+                  The case stays in <strong>Awaiting Payment</strong> until Finance verifies.
+                </p>
+                {notice.driver_claims_paid && notice.driver_claims_paid_at && (
+                  <p className="text-xs text-foreground">
+                    Claimed on {format(new Date(notice.driver_claims_paid_at), "MMM d, yyyy")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {notice.status === "finance_verified" && notice.finance_verified_at && (
+            <div className="flex items-center gap-2 text-sm text-foreground bg-muted/30 border rounded-lg p-3">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Verified by Finance on {format(new Date(notice.finance_verified_at), "MMM d, yyyy")}.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
