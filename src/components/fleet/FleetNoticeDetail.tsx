@@ -66,16 +66,15 @@ const STATUS_OPTIONS: { value: FleetNoticeStatus; label: string }[] = [
   { value: "paid", label: "Paid (legacy)" },
 ];
 
-export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDetailProps) {
+export default function FleetNoticeDetail({ noticeId, onClose: _onClose }: FleetNoticeDetailProps) {
   const { data: notice, isLoading } = useFleetNotice(noticeId);
   const { data: files } = useFleetNoticeFiles(noticeId);
   const { data: drivers } = useFleetDrivers();
   const { data: vehicles } = useFleetVehicles();
   const updateNotice = useUpdateFleetNotice();
   const uploadFile = useUploadFleetNoticeFile();
+  const { user, isFinance } = useAuth();
 
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState<Record<string, any>>({});
   const [driverName, setDriverName] = useState("");
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
