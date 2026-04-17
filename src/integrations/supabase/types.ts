@@ -468,6 +468,30 @@ export type Database = {
         }
         Relationships: []
       }
+      fleet_access_allowlist: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       fleet_audit_log: {
         Row: {
           action: string
@@ -2013,6 +2037,7 @@ export type Database = {
         }
         Returns: string
       }
+      has_fleet_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
