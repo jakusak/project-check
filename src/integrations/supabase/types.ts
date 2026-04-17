@@ -646,8 +646,13 @@ export type Database = {
           dispute_notes: string | null
           dispute_reason: string | null
           document_source: string | null
+          driver_claims_paid: boolean
+          driver_claims_paid_at: string | null
+          driver_claims_paid_note: string | null
           driver_id: string | null
           field_confidence_map: Json | null
+          finance_verified_at: string | null
+          finance_verified_by: string | null
           fine_amount: number | null
           id: string
           issuing_authority: string | null
@@ -680,8 +685,13 @@ export type Database = {
           dispute_notes?: string | null
           dispute_reason?: string | null
           document_source?: string | null
+          driver_claims_paid?: boolean
+          driver_claims_paid_at?: string | null
+          driver_claims_paid_note?: string | null
           driver_id?: string | null
           field_confidence_map?: Json | null
+          finance_verified_at?: string | null
+          finance_verified_by?: string | null
           fine_amount?: number | null
           id?: string
           issuing_authority?: string | null
@@ -714,8 +724,13 @@ export type Database = {
           dispute_notes?: string | null
           dispute_reason?: string | null
           document_source?: string | null
+          driver_claims_paid?: boolean
+          driver_claims_paid_at?: string | null
+          driver_claims_paid_note?: string | null
           driver_id?: string | null
           field_confidence_map?: Json | null
+          finance_verified_at?: string | null
+          finance_verified_by?: string | null
           fine_amount?: number | null
           id?: string
           issuing_authority?: string | null
