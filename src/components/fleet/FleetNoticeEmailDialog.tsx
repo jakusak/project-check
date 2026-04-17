@@ -131,6 +131,11 @@ Thank you for your prompt attention to this matter.
       }
 
       if (data?.success) {
+        // Advance the workflow to "Email Sent" so the dashboard reflects the action
+        await supabase
+          .from("fleet_notices")
+          .update({ status: "email_sent" })
+          .eq("id", notice.id);
         toast.success("Email sent successfully!");
         onOpenChange(false);
       } else {
