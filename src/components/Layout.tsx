@@ -7,12 +7,14 @@ import backroadsLogo from "@/assets/backroads-logo.png";
 import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
 import { useMobileRedirect } from "@/hooks/useMobileRedirect";
+import { useFleetAccess } from "@/lib/auth/useFleetAccess";
 
 export default function Layout() {
   const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, isTPS, signOut, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
+  const { hasAccess: hasFleetAccess } = useFleetAccess();
 
   // Auto-redirect mobile users to mobile routes - only when not loading and user exists
   const shouldRedirect = !loading && !!user;
