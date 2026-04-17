@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import {
   useUploadFleetNoticeFile,
   FleetNoticeStatus 
 } from "@/hooks/useFleetNotices";
+import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { 
@@ -34,9 +36,13 @@ import {
   Upload,
   Loader2,
   ExternalLink,
-  Mail
+  Mail,
+  PlayCircle,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { FleetNoticeEmailDialog } from "./FleetNoticeEmailDialog";
+import { FleetWorkflowStepper } from "./FleetWorkflowStepper";
 
 interface FleetNoticeDetailProps {
   noticeId: string;
@@ -45,14 +51,19 @@ interface FleetNoticeDetailProps {
 
 const STATUS_OPTIONS: { value: FleetNoticeStatus; label: string }[] = [
   { value: "new", label: "New" },
-  { value: "needs_review", label: "Needs Review" },
-  { value: "ready_to_assign", label: "Ready to Assign" },
-  { value: "assigned", label: "Assigned" },
-  { value: "in_payment", label: "In Payment" },
-  { value: "paid", label: "Paid" },
-  { value: "in_dispute", label: "In Dispute" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "email_sent", label: "Email Sent" },
+  { value: "awaiting_payment", label: "Awaiting Payment" },
+  { value: "finance_verified", label: "Finance Verified" },
   { value: "closed", label: "Closed" },
+  { value: "in_dispute", label: "In Dispute" },
   { value: "exception", label: "Exception" },
+  // Legacy values (kept for older notices)
+  { value: "needs_review", label: "Needs Review (legacy)" },
+  { value: "ready_to_assign", label: "Ready to Assign (legacy)" },
+  { value: "assigned", label: "Assigned (legacy)" },
+  { value: "in_payment", label: "In Payment (legacy)" },
+  { value: "paid", label: "Paid (legacy)" },
 ];
 
 export default function FleetNoticeDetail({ noticeId, onClose }: FleetNoticeDetailProps) {
