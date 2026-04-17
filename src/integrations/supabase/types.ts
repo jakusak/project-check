@@ -2015,6 +2015,7 @@ export type Database = {
         | "hub_admin"
         | "super_admin"
         | "tps"
+        | "finance"
       broken_item_severity: "low" | "medium" | "high"
       broken_item_status: "open" | "in_maintenance" | "resolved"
       cycle_count_status: "submitted" | "validated" | "rejected"
@@ -2028,6 +2029,10 @@ export type Database = {
         | "in_dispute"
         | "closed"
         | "exception"
+        | "in_progress"
+        | "email_sent"
+        | "awaiting_payment"
+        | "finance_verified"
       fleet_notice_type:
         | "speeding"
         | "parking"
@@ -2203,6 +2208,7 @@ export const Constants = {
         "hub_admin",
         "super_admin",
         "tps",
+        "finance",
       ],
       broken_item_severity: ["low", "medium", "high"],
       broken_item_status: ["open", "in_maintenance", "resolved"],
@@ -2217,6 +2223,10 @@ export const Constants = {
         "in_dispute",
         "closed",
         "exception",
+        "in_progress",
+        "email_sent",
+        "awaiting_payment",
+        "finance_verified",
       ],
       fleet_notice_type: [
         "speeding",
