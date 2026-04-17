@@ -219,6 +219,7 @@ export function deriveRoleFlags(roles: AppRole[]) {
   const isHubAdmin = roles.includes('hub_admin') || isSuperAdmin;
   const isFieldStaff = roles.includes('field_staff');
   const isTPS = roles.includes('tps') || isSuperAdmin || isAdmin;
+  const isFinance = roles.includes('finance') || isSuperAdmin || isAdmin;
   
-  return { isSuperAdmin, isAdmin, isOPX, isHubAdmin, isFieldStaff, isTPS };
+  return { isSuperAdmin, isAdmin, isOPX, isHubAdmin, isFieldStaff, isTPS, isFinance };
 }
