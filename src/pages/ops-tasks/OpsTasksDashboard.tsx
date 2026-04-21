@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
-import { useSupplyRequests, SupplyRequest } from "@/hooks/useSupplyRequests";
+import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown, Pencil } from "lucide-react";
 import { FacilityTaskEditDialog } from "@/components/ops-tasks/FacilityTaskEditDialog";
 import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEditDialog";
