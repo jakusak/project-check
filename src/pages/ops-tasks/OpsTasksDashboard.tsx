@@ -19,6 +19,7 @@ type UnifiedItem = {
   owner?: string;
   ownerId?: string | null;
   dueDate?: string | null;
+  createdAt: string;
   planning_horizon: string | null;
 };
 
