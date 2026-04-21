@@ -189,6 +189,9 @@ export default function OpsTasksDashboard() {
         {sourceIcon(item.source)}
         <span className="font-medium truncate">{item.title}</span>
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
+        <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline" title={`Submitted ${new Date(item.createdAt).toLocaleString()}`}>
+          {new Date(item.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+        </span>
       </div>
       <div className="flex items-center gap-2 shrink-0 ml-2">
         {item.source === "supply" ? (
