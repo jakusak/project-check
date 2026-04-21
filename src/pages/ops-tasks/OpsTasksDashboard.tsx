@@ -61,6 +61,7 @@ export default function OpsTasksDashboard() {
       owner: t.main_owner?.name || undefined,
       ownerId: t.main_owner_id,
       dueDate: t.target_end_date,
+      createdAt: t.created_at,
       planning_horizon: t.planning_horizon,
     }));
     const fromSupply = supplyRequests.filter(r => r.status !== "closed").map((r): UnifiedItem => ({
@@ -72,6 +73,7 @@ export default function OpsTasksDashboard() {
       owner: r.requested_by,
       ownerId: null,
       dueDate: null,
+      createdAt: r.created_at,
       planning_horizon: r.planning_horizon,
     }));
     return [...fromTasks, ...fromSupply];
