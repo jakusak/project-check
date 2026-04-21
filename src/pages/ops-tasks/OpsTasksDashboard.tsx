@@ -433,7 +433,15 @@ export default function OpsTasksDashboard() {
                     <Badge variant="outline" className="text-[10px] shrink-0">{item.planning_horizon === "weekly" ? "Weekly" : "Long-Term"}</Badge>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
-                    {item.owner && <span className="text-xs text-muted-foreground">{item.owner}</span>}
+                    {item.completedAt && (
+                      <span
+                        className="text-[10px] text-emerald-700 font-medium whitespace-nowrap"
+                        title={`Completed ${new Date(item.completedAt).toLocaleString()}`}
+                      >
+                        ✓ {new Date(item.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                    )}
+                    {item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>}
                     <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => resurface(item)} title="Re-open and move back to board">
                       <ArrowRight className="h-3 w-3 mr-1 rotate-[-90deg]" />Re-open
                     </Button>
