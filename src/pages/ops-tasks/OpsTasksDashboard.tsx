@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
-import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown } from "lucide-react";
+import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown, Pencil } from "lucide-react";
+import { FacilityTaskEditDialog } from "@/components/ops-tasks/FacilityTaskEditDialog";
+import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEditDialog";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
@@ -30,6 +32,8 @@ export default function OpsTasksDashboard() {
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingSupplyId, setEditingSupplyId] = useState<string | null>(null);
 
   const isLoading = tasksLoading || supplyLoading;
 
@@ -194,6 +198,18 @@ export default function OpsTasksDashboard() {
         </span>
       </div>
       <div className="flex items-center gap-2 shrink-0 ml-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 px-1.5"
+          title="View / edit details"
+          onClick={() => {
+            if (item.source === "supply") setEditingSupplyId(item.id);
+            else setEditingTaskId(item.id);
+          }}
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
         {item.source === "supply" ? (
           item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>
         ) : (
@@ -434,6 +450,17 @@ export default function OpsTasksDashboard() {
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/annual">Annual Plan</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/capacity">Team Capacity</Link></Button>
       </div>
+
+      <FacilityTaskEditDialog
+        task={allTasks.find(t => t.id === editingTaskId) ?? null}
+        open={!!editingTaskId}
+        onOpenChange={(o) => !o && setEditingTaskId(null)}
+      />
+      <SupplyRequestEditDialog
+        request={supplyRequests.find(r => r.id === editingSupplyId) ?? null}
+        open={!!editingSupplyId}
+        onOpenChange={(o) => !o && setEditingSupplyId(null)}
+      />
     </div>
   );
 }
