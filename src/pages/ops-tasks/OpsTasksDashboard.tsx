@@ -132,7 +132,7 @@ export default function OpsTasksDashboard() {
         source: t.task_mode === "facility_request" ? "facility" : "ops_task",
         priority: t.priority, status: t.status,
         owner: t.main_owner?.name, ownerId: t.main_owner_id,
-        dueDate: t.target_end_date, planning_horizon: t.planning_horizon,
+        dueDate: t.target_end_date, createdAt: t.created_at, planning_horizon: t.planning_horizon,
       }));
     const completedSupply = supplyRequests
       .filter(r => r.status === "closed" && r.planning_horizon && new Date(r.updated_at) >= twoWeeksAgo)
@@ -140,7 +140,7 @@ export default function OpsTasksDashboard() {
         id: r.id, title: r.title, source: "supply",
         priority: r.priority, status: r.status,
         owner: r.requested_by, ownerId: null,
-        dueDate: null, planning_horizon: r.planning_horizon,
+        dueDate: null, createdAt: r.created_at, planning_horizon: r.planning_horizon,
       }));
     return [...completedTasks, ...completedSupply];
   }, [allTasks, supplyRequests]);
