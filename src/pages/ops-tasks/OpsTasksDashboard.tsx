@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
+import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, PRIORITY_COLORS } from "@/hooks/useOpsTasks";
 import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown } from "lucide-react";
-import { format, parseISO, isPast } from "date-fns";
+
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
 type UnifiedItem = {
@@ -94,9 +94,6 @@ export default function OpsTasksDashboard() {
     return items;
   }, [allUnified, ownerFilter]);
 
-  const overdue = useMemo(() =>
-    allTasks.filter(t => t.target_end_date && isPast(parseISO(t.target_end_date)) && !TERMINAL.includes(t.status)),
-  [allTasks]);
 
   const assignHorizon = (item: UnifiedItem, horizon: string | null) => {
     if (item.source === "supply") {
@@ -358,27 +355,6 @@ export default function OpsTasksDashboard() {
         </CardContent>
       </Card>
 
-      {/* Overdue alert */}
-      {overdue.length > 0 && (
-        <Card className="border-red-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">⚠️ Overdue ({overdue.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {overdue.slice(0, 5).map(t => (
-              <div key={t.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-red-50">
-                <div>
-                  <div className="font-medium">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.main_owner?.name || "Unassigned"}
-                  </div>
-                </div>
-                <Badge className={`${STATUS_COLORS[t.status]} text-xs`}>{STATUS_LABELS[t.status]}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Recently Completed */}
       {recentlyCompleted.length > 0 && (
