@@ -358,27 +358,6 @@ export default function OpsTasksDashboard() {
         </CardContent>
       </Card>
 
-      {/* Overdue alert */}
-      {overdue.length > 0 && (
-        <Card className="border-red-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">⚠️ Overdue ({overdue.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {overdue.slice(0, 5).map(t => (
-              <div key={t.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-red-50">
-                <div>
-                  <div className="font-medium">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Due: {t.target_end_date && format(parseISO(t.target_end_date), "MMM d")} • {t.main_owner?.name || "Unassigned"}
-                  </div>
-                </div>
-                <Badge className={`${STATUS_COLORS[t.status]} text-xs`}>{STATUS_LABELS[t.status]}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Recently Completed */}
       {recentlyCompleted.length > 0 && (
