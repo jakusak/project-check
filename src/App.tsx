@@ -70,6 +70,7 @@ import OpsTeamCapacity from "./pages/ops-tasks/OpsTeamCapacity";
 import OpsFacilitiesDashboard from "./pages/ops-tasks/OpsFacilitiesDashboard";
 import OpsFacilitiesPlanning from "./pages/ops-tasks/OpsFacilitiesPlanning";
 import ShoppingListDashboard from "./pages/shopping/ShoppingListDashboard";
+import AccomplishedTasks from "./pages/accomplished/AccomplishedTasks";
 import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
 import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
@@ -144,6 +145,7 @@ const App = () => (
               <Route path="/ops-tasks/facilities" element={<OpsFacilitiesDashboard />} />
               <Route path="/ops-tasks/facilities/planning" element={<OpsFacilitiesPlanning />} />
               <Route path="/shopping-list" element={<ShoppingListDashboard />} />
+              <Route path="/accomplished" element={<AccomplishedTasks />} />
               <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
               <Route path="/supply/dashboard" element={<SupplyDashboard />} />
               <Route path="/supply/new" element={<SupplyRequestForm />} />
