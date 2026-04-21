@@ -18,6 +18,10 @@ import NewFleetNoticeForm from "@/components/fleet/NewFleetNoticeForm";
 
 const STATUS_COLORS: Record<FleetNoticeStatus, string> = {
   new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  in_progress: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+  email_sent: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+  awaiting_payment: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  finance_verified: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300",
   needs_review: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
   ready_to_assign: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   assigned: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
@@ -30,6 +34,10 @@ const STATUS_COLORS: Record<FleetNoticeStatus, string> = {
 
 const STATUS_LABELS: Record<FleetNoticeStatus, string> = {
   new: "New",
+  in_progress: "In Progress",
+  email_sent: "Email Sent",
+  awaiting_payment: "Awaiting Payment",
+  finance_verified: "Finance Verified",
   needs_review: "Needs Review",
   ready_to_assign: "Ready to Assign",
   assigned: "Assigned",

@@ -50,6 +50,8 @@ export default function Layout() {
     { to: "/van-incidents", label: "Van Incidents" },
     { to: "/analytics/ops", label: "Analytics" },
     { to: "/supply/dashboard", label: "Supply Requests" },
+    { to: "/shopping-list", label: "Shopping List" },
+    { to: "/ops-tasks/facilities/planning", label: "Facilities Planning" },
     { to: "/unit-schedule", label: "Unit Schedule" },
     { to: "/van-module", label: "Van Module" },
     { to: "/unit-loads", label: "Unit Loads" },
