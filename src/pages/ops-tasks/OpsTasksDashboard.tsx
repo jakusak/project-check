@@ -19,6 +19,7 @@ type UnifiedItem = {
   owner?: string;
   ownerId?: string | null;
   dueDate?: string | null;
+  createdAt: string;
   planning_horizon: string | null;
 };
 
@@ -60,6 +61,7 @@ export default function OpsTasksDashboard() {
       owner: t.main_owner?.name || undefined,
       ownerId: t.main_owner_id,
       dueDate: t.target_end_date,
+      createdAt: t.created_at,
       planning_horizon: t.planning_horizon,
     }));
     const fromSupply = supplyRequests.filter(r => r.status !== "closed").map((r): UnifiedItem => ({
@@ -71,6 +73,7 @@ export default function OpsTasksDashboard() {
       owner: r.requested_by,
       ownerId: null,
       dueDate: null,
+      createdAt: r.created_at,
       planning_horizon: r.planning_horizon,
     }));
     return [...fromTasks, ...fromSupply];
@@ -129,7 +132,7 @@ export default function OpsTasksDashboard() {
         source: t.task_mode === "facility_request" ? "facility" : "ops_task",
         priority: t.priority, status: t.status,
         owner: t.main_owner?.name, ownerId: t.main_owner_id,
-        dueDate: t.target_end_date, planning_horizon: t.planning_horizon,
+        dueDate: t.target_end_date, createdAt: t.created_at, planning_horizon: t.planning_horizon,
       }));
     const completedSupply = supplyRequests
       .filter(r => r.status === "closed" && r.planning_horizon && new Date(r.updated_at) >= twoWeeksAgo)
@@ -137,7 +140,7 @@ export default function OpsTasksDashboard() {
         id: r.id, title: r.title, source: "supply",
         priority: r.priority, status: r.status,
         owner: r.requested_by, ownerId: null,
-        dueDate: null, planning_horizon: r.planning_horizon,
+        dueDate: null, createdAt: r.created_at, planning_horizon: r.planning_horizon,
       }));
     return [...completedTasks, ...completedSupply];
   }, [allTasks, supplyRequests]);
@@ -186,6 +189,9 @@ export default function OpsTasksDashboard() {
         {sourceIcon(item.source)}
         <span className="font-medium truncate">{item.title}</span>
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
+        <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline" title={`Submitted ${new Date(item.createdAt).toLocaleString()}`}>
+          {new Date(item.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+        </span>
       </div>
       <div className="flex items-center gap-2 shrink-0 ml-2">
         {item.source === "supply" ? (
