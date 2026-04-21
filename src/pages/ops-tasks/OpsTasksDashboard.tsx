@@ -168,6 +168,18 @@ export default function OpsTasksDashboard() {
     }
   };
 
+  const reassignOwner = (item: UnifiedItem, newOwnerId: string) => {
+    if (item.source === "supply") return;
+    const value = newOwnerId === "unassigned" ? null : newOwnerId;
+    const oldName = item.owner || "Unassigned";
+    const newName = members.find(m => m.id === value)?.name || "Unassigned";
+    updateTask.mutate({
+      id: item.id,
+      updates: { main_owner_id: value } as any,
+      historyEntry: { field_changed: "main_owner", old_value: oldName, new_value: newName },
+    });
+  };
+
   const PlanningRow = ({ item, showAssignButtons, showDoneButton }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -176,7 +188,21 @@ export default function OpsTasksDashboard() {
         <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(item.source)}</Badge>
       </div>
       <div className="flex items-center gap-2 shrink-0 ml-2">
-        {item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>}
+        {item.source === "supply" ? (
+          item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>
+        ) : (
+          <Select value={item.ownerId || "unassigned"} onValueChange={(v) => reassignOwner(item, v)}>
+            <SelectTrigger className="h-6 w-[110px] text-[11px] px-2">
+              <SelectValue placeholder="Assign…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {members.map(m => (
+                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
         {item.planning_horizon === "weekly" && (
           <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from weekly">
@@ -217,7 +243,7 @@ export default function OpsTasksDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">801 FR Building & OPS Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Steve • Fabian • Ops Coordinator</p>
+          <p className="text-muted-foreground text-sm">Steve • Fabian • Sasha</p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
