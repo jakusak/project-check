@@ -151,10 +151,6 @@ export default function OpsTasksDashboard() {
         completedAt: r.updated_at,
         planning_horizon: r.planning_horizon,
       }));
-        priority: r.priority, status: r.status,
-        owner: r.requested_by, ownerId: null,
-        dueDate: null, createdAt: r.created_at, planning_horizon: r.planning_horizon,
-      }));
     return [...completedTasks, ...completedSupply];
   }, [allTasks, supplyRequests]);
 
