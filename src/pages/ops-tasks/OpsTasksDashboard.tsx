@@ -32,6 +32,8 @@ export default function OpsTasksDashboard() {
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingSupplyId, setEditingSupplyId] = useState<string | null>(null);
 
   const isLoading = tasksLoading || supplyLoading;
 
