@@ -450,6 +450,17 @@ export default function OpsTasksDashboard() {
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/annual">Annual Plan</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/capacity">Team Capacity</Link></Button>
       </div>
+
+      <FacilityTaskEditDialog
+        task={allTasks.find(t => t.id === editingTaskId) ?? null}
+        open={!!editingTaskId}
+        onOpenChange={(o) => !o && setEditingTaskId(null)}
+      />
+      <SupplyRequestEditDialog
+        request={supplyRequests.find(r => r.id === editingSupplyId) ?? null}
+        open={!!editingSupplyId}
+        onOpenChange={(o) => !o && setEditingSupplyId(null)}
+      />
     </div>
   );
 }
