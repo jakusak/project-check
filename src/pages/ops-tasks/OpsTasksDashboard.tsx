@@ -198,6 +198,18 @@ export default function OpsTasksDashboard() {
         </span>
       </div>
       <div className="flex items-center gap-2 shrink-0 ml-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 px-1.5"
+          title="View / edit details"
+          onClick={() => {
+            if (item.source === "supply") setEditingSupplyId(item.id);
+            else setEditingTaskId(item.id);
+          }}
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
         {item.source === "supply" ? (
           item.owner && <span className="text-xs text-muted-foreground hidden md:inline">{item.owner}</span>
         ) : (
