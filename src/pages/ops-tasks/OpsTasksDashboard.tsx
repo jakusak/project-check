@@ -114,6 +114,20 @@ export default function OpsTasksDashboard() {
     }
   };
 
+  const cancelItem = (item: UnifiedItem) => {
+    const ok = window.confirm(`Permanently remove "${item.title}" from the dashboard?\n\nThis will cancel the task and hide it from all active boards.`);
+    if (!ok) return;
+    if (item.source === "supply") {
+      updateSupplyStatus.mutate({ id: item.id, status: "closed" });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { status: "cancelled", planning_horizon: null } as any,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: "cancelled" },
+      });
+    }
+  };
+
   const markDone = (item: UnifiedItem) => {
     if (item.source === "supply") {
       updateSupplyStatus.mutate({ id: item.id, status: "closed" });
