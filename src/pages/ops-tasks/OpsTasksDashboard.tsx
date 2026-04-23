@@ -114,6 +114,20 @@ export default function OpsTasksDashboard() {
     }
   };
 
+  const cancelItem = (item: UnifiedItem) => {
+    const ok = window.confirm(`Permanently remove "${item.title}" from the dashboard?\n\nThis will cancel the task and hide it from all active boards.`);
+    if (!ok) return;
+    if (item.source === "supply") {
+      updateSupplyStatus.mutate({ id: item.id, status: "closed" });
+    } else {
+      updateTask.mutate({
+        id: item.id,
+        updates: { status: "cancelled", planning_horizon: null } as any,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: "cancelled" },
+      });
+    }
+  };
+
   const markDone = (item: UnifiedItem) => {
     if (item.source === "supply") {
       updateSupplyStatus.mutate({ id: item.id, status: "closed" });
@@ -232,12 +246,12 @@ export default function OpsTasksDashboard() {
         )}
         <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
         {item.planning_horizon === "weekly" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from weekly">
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
         )}
         {item.planning_horizon === "long_term" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from long-term">
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
         )}
