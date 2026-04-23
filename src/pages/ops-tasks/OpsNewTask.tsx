@@ -90,7 +90,7 @@ export default function OpsNewTask() {
             <div className="space-y-4">
               <div className="space-y-2"><Label>Title *</Label><Input value={form.title} onChange={e => set("title", e.target.value)} required /></div>
               <div className="space-y-2"><Label>Description</Label><Textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} /></div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Category</Label>
                   <Select value={form.category} onValueChange={v => set("category", v)}>
@@ -106,13 +106,6 @@ export default function OpsNewTask() {
                       <SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={form.status} onValueChange={v => set("status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
