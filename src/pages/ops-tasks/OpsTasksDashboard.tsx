@@ -206,7 +206,35 @@ export default function OpsTasksDashboard() {
     });
   };
 
-  const PlanningRow = ({ item, showAssignButtons, showDoneButton }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean }) => (
+  const changeStatus = (item: UnifiedItem, newStatus: string) => {
+    if (item.source === "supply") {
+      // map supply: in_progress => open, done => closed, new_request => open
+      const supplyStatus = newStatus === "done" ? "closed" : "open";
+      updateSupplyStatus.mutate({ id: item.id, status: supplyStatus });
+    } else {
+      const updates: any = { status: newStatus };
+      if (newStatus === "done") updates.actual_completion_date = new Date().toISOString().split("T")[0];
+      else updates.actual_completion_date = null;
+      updateTask.mutate({
+        id: item.id,
+        updates,
+        historyEntry: { field_changed: "status", old_value: item.status, new_value: newStatus },
+      });
+    }
+  };
+
+  const displayStatus = (item: UnifiedItem): string => {
+    if (item.source === "supply") {
+      if (item.status === "closed") return "done";
+      if (item.status === "in_progress") return "in_progress";
+      return "new_request";
+    }
+    if (item.status === "done" || item.status === "cannot_complete" || item.status === "cancelled") return "done";
+    if (item.status === "new_request" || item.status === "triaged") return "new_request";
+    return "in_progress";
+  };
+
+  const PlanningRow = ({ item, showAssignButtons, showDoneButton, showStatusSelect }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean; showStatusSelect?: boolean }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {sourceIcon(item.source)}
@@ -241,6 +269,18 @@ export default function OpsTasksDashboard() {
               {members.map(m => (
                 <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        )}
+        {showStatusSelect && (
+          <Select value={displayStatus(item)} onValueChange={(v) => changeStatus(item, v)}>
+            <SelectTrigger className="h-6 w-[120px] text-[11px] px-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new_request">New Request</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="done">Completed</SelectItem>
             </SelectContent>
           </Select>
         )}
