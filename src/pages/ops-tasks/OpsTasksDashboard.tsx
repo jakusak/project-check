@@ -406,8 +406,8 @@ export default function OpsTasksDashboard() {
         </Select>
       </div>
 
-      {/* Weekly & Long-Term Planning Boards */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      {/* Weekly & Long-Term Planning Boards — stacked full-width for better readability */}
+      <div className="space-y-6">
         {/* This Week */}
         <Card className="border-blue-200">
           <CardHeader className="pb-2">
