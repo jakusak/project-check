@@ -246,12 +246,12 @@ export default function OpsTasksDashboard() {
         )}
         <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
         {item.planning_horizon === "weekly" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from weekly">
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
         )}
         {item.planning_horizon === "long_term" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => assignHorizon(item, null)} title="Remove from long-term">
+          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
         )}
