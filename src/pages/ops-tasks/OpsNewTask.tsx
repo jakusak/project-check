@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTaskCategory, OpsTaskPriority, OpsTaskStatus, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
+import { useCreateOpsTask, useOpsTeamMembers, CATEGORY_LABELS, OpsTaskCategory, OpsTaskPriority, OpsRecurringFrequency } from "@/hooks/useOpsTasks";
 import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ArrowLeft } from "lucide-react";
 
@@ -17,7 +17,7 @@ export default function OpsNewTask() {
 
   const [form, setForm] = useState({
     title: "", description: "", category: "other" as OpsTaskCategory, priority: "medium" as OpsTaskPriority,
-    status: "new_request" as OpsTaskStatus, requested_by: "", main_owner_id: "",
+    requested_by: "", main_owner_id: "",
     other_owner_id: "", location: "", requested_due_date: "", start_date: "",
     target_end_date: "", planned_week: "", planned_month: "", estimated_hours: "",
     recurring_frequency: "none" as OpsRecurringFrequency, definition_of_done: "", work_type: "manual",
@@ -90,7 +90,7 @@ export default function OpsNewTask() {
             <div className="space-y-4">
               <div className="space-y-2"><Label>Title *</Label><Input value={form.title} onChange={e => set("title", e.target.value)} required /></div>
               <div className="space-y-2"><Label>Description</Label><Textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} /></div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Category</Label>
                   <Select value={form.category} onValueChange={v => set("category", v)}>
@@ -106,13 +106,6 @@ export default function OpsNewTask() {
                       <SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={form.status} onValueChange={v => set("status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{UI_STATUSES.map(s => <SelectItem key={s} value={s}>{UI_STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
