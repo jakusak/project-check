@@ -421,7 +421,7 @@ export default function OpsTasksDashboard() {
             {weeklyItems.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No tasks assigned to this week yet.<br />Use the Inbox below to assign tasks.</p>
             ) : (
-              weeklyItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
+              weeklyItems.map(item => <PlanningRow key={item.id} item={item} showStatusSelect statusMode="active" showDoneButton />)
             )}
           </CardContent>
         </Card>
