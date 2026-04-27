@@ -234,7 +234,7 @@ export default function OpsTasksDashboard() {
     return "in_progress";
   };
 
-  const PlanningRow = ({ item, showAssignButtons, showDoneButton, showStatusSelect }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean; showStatusSelect?: boolean }) => (
+  const PlanningRow = ({ item, showAssignButtons, showDoneButton, showStatusSelect, statusMode = "full" }: { item: UnifiedItem; showAssignButtons?: boolean; showDoneButton?: boolean; showStatusSelect?: boolean; statusMode?: "full" | "active" }) => (
     <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 text-sm border border-border/50 bg-background">
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {sourceIcon(item.source)}
@@ -280,7 +280,7 @@ export default function OpsTasksDashboard() {
             <SelectContent>
               <SelectItem value="new_request">New Request</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="done">Completed</SelectItem>
+              {statusMode === "full" && <SelectItem value="done">Completed</SelectItem>}
             </SelectContent>
           </Select>
         )}
@@ -421,7 +421,7 @@ export default function OpsTasksDashboard() {
             {weeklyItems.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No tasks assigned to this week yet.<br />Use the Inbox below to assign tasks.</p>
             ) : (
-              weeklyItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
+              weeklyItems.map(item => <PlanningRow key={item.id} item={item} showStatusSelect statusMode="active" showDoneButton />)
             )}
           </CardContent>
         </Card>
