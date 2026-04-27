@@ -280,7 +280,7 @@ export default function OpsTasksDashboard() {
             <SelectContent>
               <SelectItem value="new_request">New Request</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="done">Completed</SelectItem>
+              {statusMode === "full" && <SelectItem value="done">Completed</SelectItem>}
             </SelectContent>
           </Select>
         )}
