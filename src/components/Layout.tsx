@@ -71,6 +71,7 @@ export default function Layout() {
     { to: "/admin/users", label: "Manage Users" },
     { to: "/admin/assignments", label: "Manage Assignments" },
     { to: "/admin/bulk-opx", label: "Bulk OPX Onboarding" },
+    { to: "/admin/workforce-access", label: "Workforce Planning Access" },
   ];
 
   // Check if current path is in Equipment & Inventory section
