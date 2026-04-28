@@ -75,6 +75,8 @@ import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
 import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
 import WorkforceTasks from "./pages/workforce/WorkforceTasks";
+import { WorkforceAccessGuard } from "./components/workforce/WorkforceAccessGuard";
+import ManageWorkforceAccess from "./pages/admin/ManageWorkforceAccess";
 import PublicSupplyRequestForm from "./pages/public/PublicSupplyRequestForm";
 import PublicFacilitiesRequestForm from "./pages/public/PublicFacilitiesRequestForm";
 
@@ -149,8 +151,9 @@ const App = () => (
               <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
               <Route path="/supply/dashboard" element={<SupplyDashboard />} />
               <Route path="/supply/new" element={<SupplyRequestForm />} />
-              <Route path="/workforce/capacity" element={<WorkforceCapacity />} />
-              <Route path="/workforce/tasks" element={<WorkforceTasks />} />
+              <Route path="/workforce/capacity" element={<WorkforceAccessGuard><WorkforceCapacity /></WorkforceAccessGuard>} />
+              <Route path="/workforce/tasks" element={<WorkforceAccessGuard><WorkforceTasks /></WorkforceAccessGuard>} />
+              <Route path="/admin/workforce-access" element={<ManageWorkforceAccess />} />
             </Route>
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>

@@ -8,6 +8,7 @@ import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
 import { useMobileRedirect } from "@/hooks/useMobileRedirect";
 import { useFleetAccess } from "@/lib/auth/useFleetAccess";
+import { useWorkforceAccess } from "@/lib/auth/useWorkforceAccess";
 
 export default function Layout() {
   const { user, isAdmin, isOPX, isHubAdmin, isSuperAdmin, isTPS, signOut, loading } = useAuth();
@@ -15,6 +16,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const { setSelectedRegion } = useRegion();
   const { hasAccess: hasFleetAccess } = useFleetAccess();
+  const { hasAccess: hasWorkforceAccess } = useWorkforceAccess();
 
   // Auto-redirect mobile users to mobile routes - only when not loading and user exists
   const shouldRedirect = !loading && !!user;
@@ -69,6 +71,7 @@ export default function Layout() {
     { to: "/admin/users", label: "Manage Users" },
     { to: "/admin/assignments", label: "Manage Assignments" },
     { to: "/admin/bulk-opx", label: "Bulk OPX Onboarding" },
+    { to: "/admin/workforce-access", label: "Workforce Planning Access" },
   ];
 
   // Check if current path is in Equipment & Inventory section
@@ -126,42 +129,44 @@ export default function Layout() {
               801 FR Building & OPS
             </Link>
 
-            {/* Workforce Planning Dropdown */}
-            <div className="relative group">
-              <button
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
-                  location.pathname.startsWith("/workforce")
-                    ? "bg-sidebar-accent text-primary-foreground"
-                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-                )}
-              >
-                Workforce Planning
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-              <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="py-1">
-                  {[
-                    { hub: "pernes", label: "Pernes" },
-                    { hub: "tuscany", label: "Tuscany" },
-                    { hub: "czech", label: "Czech" },
-                  ].map(item => (
-                    <Link
-                      key={item.hub}
-                      to={`/workforce/capacity?hub=${item.hub}`}
-                      className={cn(
-                        "block px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors",
-                        location.pathname.startsWith("/workforce") && new URLSearchParams(location.search).get("hub") === item.hub
-                          ? "bg-accent text-accent-foreground font-medium"
-                          : ""
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+            {/* Workforce Planning Dropdown — allowlist gated */}
+            {hasWorkforceAccess && (
+              <div className="relative group">
+                <button
+                  className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                    location.pathname.startsWith("/workforce")
+                      ? "bg-sidebar-accent text-primary-foreground"
+                      : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                  )}
+                >
+                  Workforce Planning
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <div className="py-1">
+                    {[
+                      { hub: "pernes", label: "Pernes" },
+                      { hub: "tuscany", label: "Tuscany" },
+                      { hub: "czech", label: "Czech" },
+                    ].map(item => (
+                      <Link
+                        key={item.hub}
+                        to={`/workforce/capacity?hub=${item.hub}`}
+                        className={cn(
+                          "block px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors",
+                          location.pathname.startsWith("/workforce") && new URLSearchParams(location.search).get("hub") === item.hub
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : ""
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Equipment & Inventory Mega-Dropdown */}
             <div className="relative group">
