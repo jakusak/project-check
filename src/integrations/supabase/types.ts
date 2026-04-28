@@ -1901,6 +1901,30 @@ export type Database = {
           },
         ]
       }
+      workforce_access_allowlist: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       workforce_roles: {
         Row: {
           assigned_person_name: string | null
@@ -2045,6 +2069,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_workforce_access: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
