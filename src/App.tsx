@@ -75,6 +75,8 @@ import SupplyDashboard from "./pages/supply/SupplyDashboard";
 import SupplyRequestForm from "./pages/supply/SupplyRequestForm";
 import WorkforceCapacity from "./pages/workforce/WorkforceCapacity";
 import WorkforceTasks from "./pages/workforce/WorkforceTasks";
+import { WorkforceAccessGuard } from "./components/workforce/WorkforceAccessGuard";
+import ManageWorkforceAccess from "./pages/admin/ManageWorkforceAccess";
 import PublicSupplyRequestForm from "./pages/public/PublicSupplyRequestForm";
 import PublicFacilitiesRequestForm from "./pages/public/PublicFacilitiesRequestForm";
 
