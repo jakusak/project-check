@@ -149,8 +149,9 @@ const App = () => (
               <Route path="/ops-tasks/capacity" element={<OpsTeamCapacity />} />
               <Route path="/supply/dashboard" element={<SupplyDashboard />} />
               <Route path="/supply/new" element={<SupplyRequestForm />} />
-              <Route path="/workforce/capacity" element={<WorkforceCapacity />} />
-              <Route path="/workforce/tasks" element={<WorkforceTasks />} />
+              <Route path="/workforce/capacity" element={<WorkforceAccessGuard><WorkforceCapacity /></WorkforceAccessGuard>} />
+              <Route path="/workforce/tasks" element={<WorkforceAccessGuard><WorkforceTasks /></WorkforceAccessGuard>} />
+              <Route path="/admin/workforce-access" element={<ManageWorkforceAccess />} />
             </Route>
             {/* Mobile Field App Routes */}
             <Route path="/m" element={<MobileLayout />}>
