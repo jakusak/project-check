@@ -8,25 +8,23 @@ import { useAuth } from "./useAuth";
  * public.workforce_access_allowlist.
  */
 export function useWorkforceAccess() {
-  const { user, isSuperAdmin, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["workforce-access", user?.id],
-    enabled: !!user && !isSuperAdmin,
+    enabled: !!user && !authLoading,
     queryFn: async () => {
       if (!user) return false;
-      const { data, error } = await supabase
-        .from("workforce_access_allowlist")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("has_workforce_access", {
+        _user_id: user.id,
+      });
       if (error) throw error;
-      return !!data;
+      return data === true;
     },
   });
 
-  const hasAccess = isSuperAdmin || !!data;
-  const loading = authLoading || (!!user && !isSuperAdmin && isLoading);
+  const hasAccess = data === true;
+  const loading = authLoading || (!!user && isLoading);
 
   return { hasAccess, loading };
 }
