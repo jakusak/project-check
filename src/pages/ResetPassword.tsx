@@ -64,10 +64,9 @@ export default function ResetPassword() {
 
     toast({
       title: "Password updated",
-      description: "You can now sign in with your new password.",
+      description: "Taking you to the dashboard now.",
     });
-    await supabase.auth.signOut();
-    navigate("/auth", { replace: true });
+    navigate("/analytics/ops", { replace: true });
   };
 
   return (
