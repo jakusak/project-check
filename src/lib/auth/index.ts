@@ -53,6 +53,7 @@ export {
   signIn,
   signUp,
   signOut,
+  updatePassword,
   signInWithSSO,
   onAuthStateChange,
   hasRole,

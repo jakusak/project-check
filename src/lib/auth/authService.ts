@@ -120,7 +120,7 @@ export async function signOut(): Promise<void> {
  * Send password reset email
  */
 export async function resetPassword(email: string): Promise<{ error: Error | null }> {
-  const redirectUrl = `${window.location.origin}/auth`;
+  const redirectUrl = `${window.location.origin}/reset-password`;
   
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: redirectUrl,
@@ -130,6 +130,19 @@ export async function resetPassword(email: string): Promise<{ error: Error | nul
     return { error: new Error(error.message) };
   }
   
+  return { error: null };
+}
+
+/**
+ * Update password for the currently authenticated recovery session
+ */
+export async function updatePassword(password: string): Promise<{ error: Error | null }> {
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: new Error(error.message) };
+  }
+
   return { error: null };
 }
 

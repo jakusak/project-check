@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth";
 import { RegionProvider } from "@/contexts/RegionContext";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Layout from "./components/Layout";
 import UnitSchedule from "./pages/UnitSchedule";
 import VanModule from "./pages/VanModule";
@@ -92,6 +93,7 @@ const App = () => (
           <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/analytics/ops" replace />} />
               <Route path="/unit-schedule" element={<UnitSchedule />} />
