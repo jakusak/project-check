@@ -54,6 +54,7 @@ export {
   signUp,
   signOut,
   updatePassword,
+  sendSignInLink,
   signInWithSSO,
   onAuthStateChange,
   hasRole,
