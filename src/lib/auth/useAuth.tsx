@@ -32,6 +32,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signInWithSSO: (provider: 'azure' | 'google') => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  sendSignInLink: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -154,6 +155,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: result.error };
   };
 
+  const handleSendSignInLink = async (email: string) => {
+    const result = await authService.sendSignInLink(email);
+    
+    if (result.error) {
+      toast({
+        title: "Sign-in link failed",
+        description: result.error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Sign-in link sent",
+        description: "Check your email and open the link to access the dashboard.",
+      });
+    }
+    
+    return { error: result.error };
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -166,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: handleSignOut,
       signInWithSSO: handleSignInWithSSO,
       resetPassword: handleResetPassword,
+      sendSignInLink: handleSendSignInLink,
     }}>
       {children}
     </AuthContext.Provider>

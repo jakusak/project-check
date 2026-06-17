@@ -134,6 +134,27 @@ export async function resetPassword(email: string): Promise<{ error: Error | nul
 }
 
 /**
+ * Send a one-time sign-in link for existing users who are blocked by password issues
+ */
+export async function sendSignInLink(email: string): Promise<{ error: Error | null }> {
+  const redirectUrl = `${window.location.origin}/analytics/ops`;
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectUrl,
+      shouldCreateUser: false,
+    },
+  });
+
+  if (error) {
+    return { error: new Error(error.message) };
+  }
+
+  return { error: null };
+}
+
+/**
  * Update password for the currently authenticated recovery session
  */
 export async function updatePassword(password: string): Promise<{ error: Error | null }> {

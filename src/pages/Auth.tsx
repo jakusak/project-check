@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import backroadsLogo from "@/assets/backroads-logo.png";
 
@@ -16,8 +15,9 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [linkLoading, setLinkLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const { signIn, signUp, signInWithSSO, resetPassword, user, loading: authLoading } = useAuth();
+  const { signIn, signInWithSSO, resetPassword, sendSignInLink, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,13 +51,6 @@ export default function Auth() {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    await signUp(email, password);
-    setLoading(false);
-  };
-
   const handleSSOSignIn = async () => {
     setSsoLoading(true);
     await signInWithSSO('azure');
@@ -76,6 +69,15 @@ export default function Auth() {
       setShowForgotPassword(false);
       setResetEmail("");
     }
+  };
+
+  const handleEmailLink = async () => {
+    const targetEmail = email.trim();
+    if (!targetEmail) return;
+
+    setLinkLoading(true);
+    await sendSignInLink(targetEmail);
+    setLinkLoading(false);
   };
 
   if (showForgotPassword) {
@@ -157,76 +159,50 @@ export default function Auth() {
             </div>
           </div>
 
-          {/* Email/Password Tabs */}
-          <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="w-full text-sm text-muted-foreground"
-                  onClick={() => setShowForgotPassword(true)}
-                >
-                  Forgot your password?
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Sign Up"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signin-email">Email</Label>
+              <Input
+                id="signin-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signin-password">Password</Label>
+              <Input
+                id="signin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleEmailLink}
+              disabled={!email.trim() || linkLoading}
+            >
+              {linkLoading ? "Sending link..." : "Email me a sign-in link"}
+            </Button>
+            <Button
+              type="button"
+              variant="link"
+              className="w-full text-sm text-muted-foreground"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot your password?
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
