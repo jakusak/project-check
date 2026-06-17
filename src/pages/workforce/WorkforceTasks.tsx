@@ -384,7 +384,7 @@ export default function WorkforceTasks() {
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Hubs</SelectItem>
-                {otherHubs.map(h => <SelectItem key={h} value={h}>{HUB_LABELS[h] || h}</SelectItem>)}
+                {ALL_HUBS.map(h => <SelectItem key={h} value={h}>{HUB_LABELS[h] || h}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
