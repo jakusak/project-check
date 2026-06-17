@@ -372,8 +372,10 @@ export default function WorkforceTasks() {
       <Dialog open={libraryOpen} onOpenChange={setLibraryOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Task Library — Import to {hubLabel}</DialogTitle>
-            <p className="text-sm text-muted-foreground">Browse tasks from other hubs and add them to {hubLabel} with custom hours and role assignments.</p>
+            <DialogTitle>Task Library — Add to {hubLabel}{filterRole !== "all" ? ` · ${activeRoleName}` : ""}</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Pick any existing task to add a copy to {hubLabel}{filterRole !== "all" ? ` and assign it to ${activeRoleName}` : ""}. You can adjust hours, role, and months before saving.
+            </p>
           </DialogHeader>
           <div className="flex gap-3 items-end">
             <div className="flex-1 relative">
