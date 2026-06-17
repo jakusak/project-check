@@ -517,7 +517,7 @@ export default function WorkforceTasks() {
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
 
             <Button onClick={handleSave} disabled={!form.name || createTask.isPending || updateTask.isPending} className="w-full">
-              {editingTask ? "Update Task" : "Create Task"}
+              {editingTask ? "Update Task" : importingFromLibrary ? "Add to " + hubLabel : "Create Task"}
             </Button>
           </div>
         </DialogContent>
