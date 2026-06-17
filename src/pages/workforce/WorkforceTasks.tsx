@@ -83,9 +83,7 @@ export default function WorkforceTasks() {
     return true;
   });
 
-  const otherHubs = ALL_HUBS.filter(h => h !== hub);
   const libraryTasks = allTasks.filter(t => {
-    if (!otherHubs.includes(t.department)) return false;
     if (libraryHubFilter !== "all" && t.department !== libraryHubFilter) return false;
     if (librarySearch && !t.name.toLowerCase().includes(librarySearch.toLowerCase()) && !t.description?.toLowerCase().includes(librarySearch.toLowerCase())) return false;
     return true;
