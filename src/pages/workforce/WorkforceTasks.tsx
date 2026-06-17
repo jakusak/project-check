@@ -91,9 +91,10 @@ export default function WorkforceTasks() {
     return true;
   });
 
-  const openCreate = () => { setEditingTask(null); setForm(EMPTY_TASK); setFormOpen(true); };
+  const openCreate = () => { setEditingTask(null); setImportingFromLibrary(false); setForm(EMPTY_TASK); setFormOpen(true); };
   const openEdit = (t: WorkforceTask) => {
     setEditingTask(t);
+    setImportingFromLibrary(false);
     setForm({
       name: t.name, description: t.description || "", category: t.category || "general",
       department: t.department, assigned_role_id: t.assigned_role_id || "",
@@ -108,12 +109,14 @@ export default function WorkforceTasks() {
   const importFromLibrary = (t: WorkforceTask) => {
     setLibraryOpen(false);
     setEditingTask(null);
+    setImportingFromLibrary(true);
     setForm({
       name: t.name,
       description: t.description || "",
       category: t.category || "general",
       department: hub,
-      assigned_role_id: "",
+      // Auto-assign to currently filtered role if any
+      assigned_role_id: filterRole !== "all" ? filterRole : "",
       estimated_hours_per_month: t.estimated_hours_per_month,
       recurrence_type: t.recurrence_type,
       active_months: [...t.active_months],
