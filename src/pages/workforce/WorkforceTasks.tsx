@@ -67,6 +67,7 @@ export default function WorkforceTasks() {
   const [filterReassignable, setFilterReassignable] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<WorkforceTask | null>(null);
+  const [importingFromLibrary, setImportingFromLibrary] = useState(false);
   const [form, setForm] = useState(EMPTY_TASK);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
