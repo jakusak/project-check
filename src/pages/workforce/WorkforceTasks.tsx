@@ -67,6 +67,7 @@ export default function WorkforceTasks() {
   const [filterReassignable, setFilterReassignable] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<WorkforceTask | null>(null);
+  const [importingFromLibrary, setImportingFromLibrary] = useState(false);
   const [form, setForm] = useState(EMPTY_TASK);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -82,17 +83,16 @@ export default function WorkforceTasks() {
     return true;
   });
 
-  const otherHubs = ALL_HUBS.filter(h => h !== hub);
   const libraryTasks = allTasks.filter(t => {
-    if (!otherHubs.includes(t.department)) return false;
     if (libraryHubFilter !== "all" && t.department !== libraryHubFilter) return false;
     if (librarySearch && !t.name.toLowerCase().includes(librarySearch.toLowerCase()) && !t.description?.toLowerCase().includes(librarySearch.toLowerCase())) return false;
     return true;
   });
 
-  const openCreate = () => { setEditingTask(null); setForm(EMPTY_TASK); setFormOpen(true); };
+  const openCreate = () => { setEditingTask(null); setImportingFromLibrary(false); setForm(EMPTY_TASK); setFormOpen(true); };
   const openEdit = (t: WorkforceTask) => {
     setEditingTask(t);
+    setImportingFromLibrary(false);
     setForm({
       name: t.name, description: t.description || "", category: t.category || "general",
       department: t.department, assigned_role_id: t.assigned_role_id || "",
@@ -107,12 +107,14 @@ export default function WorkforceTasks() {
   const importFromLibrary = (t: WorkforceTask) => {
     setLibraryOpen(false);
     setEditingTask(null);
+    setImportingFromLibrary(true);
     setForm({
       name: t.name,
       description: t.description || "",
       category: t.category || "general",
       department: hub,
-      assigned_role_id: "",
+      // Auto-assign to currently filtered role if any
+      assigned_role_id: filterRole !== "all" ? filterRole : "",
       estimated_hours_per_month: t.estimated_hours_per_month,
       recurrence_type: t.recurrence_type,
       active_months: [...t.active_months],
@@ -370,8 +372,10 @@ export default function WorkforceTasks() {
       <Dialog open={libraryOpen} onOpenChange={setLibraryOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Task Library — Import to {hubLabel}</DialogTitle>
-            <p className="text-sm text-muted-foreground">Browse tasks from other hubs and add them to {hubLabel} with custom hours and role assignments.</p>
+            <DialogTitle>Task Library — Add to {hubLabel}{filterRole !== "all" ? ` · ${activeRoleName}` : ""}</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Pick any existing task to add a copy to {hubLabel}{filterRole !== "all" ? ` and assign it to ${activeRoleName}` : ""}. You can adjust hours, role, and months before saving.
+            </p>
           </DialogHeader>
           <div className="flex gap-3 items-end">
             <div className="flex-1 relative">
@@ -382,7 +386,7 @@ export default function WorkforceTasks() {
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Hubs</SelectItem>
-                {otherHubs.map(h => <SelectItem key={h} value={h}>{HUB_LABELS[h] || h}</SelectItem>)}
+                {ALL_HUBS.map(h => <SelectItem key={h} value={h}>{HUB_LABELS[h] || h}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -422,7 +426,7 @@ export default function WorkforceTasks() {
       {/* Task Form Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editingTask ? "Edit Task" : "Add New Task"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingTask ? "Edit Task" : importingFromLibrary ? "Add Task from Library" : "Add New Task"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2"><Label>Task Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
@@ -513,7 +517,7 @@ export default function WorkforceTasks() {
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
 
             <Button onClick={handleSave} disabled={!form.name || createTask.isPending || updateTask.isPending} className="w-full">
-              {editingTask ? "Update Task" : "Create Task"}
+              {editingTask ? "Update Task" : importingFromLibrary ? "Add to " + hubLabel : "Create Task"}
             </Button>
           </div>
         </DialogContent>
