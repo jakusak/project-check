@@ -114,16 +114,11 @@ export default function OpsQuickRequest() {
               <Input id="requestedBy" value={requestedBy} onChange={e => setRequestedBy(e.target.value)} placeholder="Your name" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Pernes Hub" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Requested Due Date</Label>
-                <Input id="dueDate" type="date" value={requestedDueDate} onChange={e => setRequestedDueDate(e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Requested Due Date</Label>
+              <Input id="dueDate" type="date" value={requestedDueDate} onChange={e => setRequestedDueDate(e.target.value)} />
             </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
