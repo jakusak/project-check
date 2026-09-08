@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { normalizeHub, hubLabel, FACILITY_HUBS } from "@/lib/facilityHubs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,9 +28,11 @@ type UnifiedItem = {
 };
 
 export default function OpsTasksDashboard() {
-  const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
-  const { data: members = [] } = useOpsTeamMembers();
-  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests();
+  const { hub: hubParam } = useParams();
+  const hub = normalizeHub(hubParam);
+  const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks(hub);
+  const { data: members = [] } = useOpsTeamMembers(hub);
+  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests(hub);
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
