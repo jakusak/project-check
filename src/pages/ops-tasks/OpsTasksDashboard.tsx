@@ -99,6 +99,17 @@ export default function OpsTasksDashboard() {
     return items;
   }, [allUnified, ownerFilter]);
 
+  const stageItems = useMemo(() => {
+    const byStage: Record<string, UnifiedItem[]> = { stage_1: [], stage_2: [], stage_3: [] };
+    allUnified.forEach(i => {
+      if (i.planning_horizon && byStage[i.planning_horizon]) {
+        if (ownerFilter !== "all" && !(i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId))) return;
+        byStage[i.planning_horizon].push(i);
+      }
+    });
+    return byStage;
+  }, [allUnified, ownerFilter]);
+
   const unassignedItems = useMemo(() => {
     let items = allUnified.filter(i => !i.planning_horizon);
     if (ownerFilter !== "all") items = items.filter(i => i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId));
