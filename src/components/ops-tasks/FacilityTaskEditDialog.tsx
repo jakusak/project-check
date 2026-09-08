@@ -17,6 +17,9 @@ const HORIZONS = [
   { value: "unassigned", label: "Inbox (Unassigned)" },
   { value: "weekly", label: "This Week" },
   { value: "long_term", label: "Long-Term Project" },
+  { value: "stage_1", label: "Stage 1 — Annex (Jan–Apr 2027)" },
+  { value: "stage_2", label: "Stage 2 — Bike shop (Summer 2027)" },
+  { value: "stage_3", label: "Stage 3 — Kitchen & office (Winter 2027/28)" },
 ];
 
 export function FacilityTaskEditDialog({ task, open, onOpenChange }: Props) {
