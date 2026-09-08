@@ -13,6 +13,32 @@ import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEdi
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
+// Czech warehouse remodel — staged programme
+const STAGES = [
+  {
+    key: "stage_1",
+    short: "S1",
+    title: "Stage 1 — Set up the Annex",
+    period: "January – April 2027",
+    description:
+      "New building across the street: haul equipment in place, bikes stored, building secured and fully operational for the early 2027 season.",
+  },
+  {
+    key: "stage_2",
+    short: "S2",
+    title: "Stage 2 — New bike shop in Czech Bay",
+    period: "Summer 2027",
+    description: "Build a new, larger bike shop inside the Czech Bay to match the current volume of work.",
+  },
+  {
+    key: "stage_3",
+    short: "S3",
+    title: "Stage 3 — Remodel kitchen & expand office",
+    period: "Winter 2027 / 2028",
+    description: "With the landlord: remodel the kitchen and add office space in the Claude building for the OPS team and visitors.",
+  },
+];
+
 type UnifiedItem = {
   id: string;
   title: string;
@@ -30,6 +56,7 @@ type UnifiedItem = {
 export default function OpsTasksDashboard() {
   const { hub: hubParam } = useParams();
   const hub = normalizeHub(hubParam);
+  const isStaged = hub === "czech";
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks(hub);
   const { data: members = [] } = useOpsTeamMembers(hub);
   const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests(hub);
@@ -97,6 +124,17 @@ export default function OpsTasksDashboard() {
     let items = allUnified.filter(i => i.planning_horizon === "long_term");
     if (ownerFilter !== "all") items = items.filter(i => i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId));
     return items;
+  }, [allUnified, ownerFilter]);
+
+  const stageItems = useMemo(() => {
+    const byStage: Record<string, UnifiedItem[]> = { stage_1: [], stage_2: [], stage_3: [] };
+    allUnified.forEach(i => {
+      if (i.planning_horizon && byStage[i.planning_horizon]) {
+        if (ownerFilter !== "all" && !(i.ownerId === ownerFilter || (ownerFilter === "unassigned" && !i.ownerId))) return;
+        byStage[i.planning_horizon].push(i);
+      }
+    });
+    return byStage;
   }, [allUnified, ownerFilter]);
 
   const unassignedItems = useMemo(() => {
@@ -288,12 +326,7 @@ export default function OpsTasksDashboard() {
           </Select>
         )}
         <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
-        {item.planning_horizon === "weekly" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
-            <X className="h-3 w-3" />
-          </Button>
-        )}
-        {item.planning_horizon === "long_term" && (
+        {item.planning_horizon && (
           <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
@@ -303,9 +336,17 @@ export default function OpsTasksDashboard() {
             <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "weekly")}>
               <CalendarDays className="h-3 w-3 mr-1" />Week
             </Button>
-            <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "long_term")}>
-              <Landmark className="h-3 w-3 mr-1" />Long
-            </Button>
+            {isStaged ? (
+              STAGES.map(s => (
+                <Button key={s.key} variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, s.key)}>
+                  {s.short}
+                </Button>
+              ))
+            ) : (
+              <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "long_term")}>
+                <Landmark className="h-3 w-3 mr-1" />Long
+              </Button>
+            )}
           </>
         )}
         {showDoneButton && (
@@ -440,23 +481,52 @@ export default function OpsTasksDashboard() {
           </CardContent>
         </Card>
 
-        {/* Long-Term Projects */}
-        <Card className="border-amber-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Landmark className="h-4 w-4 text-amber-600" />
-              Long-Term Projects
-              <Badge variant="outline" className="ml-auto">{longTermItems.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            {longTermItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
-            ) : (
-              longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
-            )}
-          </CardContent>
-        </Card>
+        {isStaged ? (
+          STAGES.map((s, idx) => {
+            const items = stageItems[s.key] ?? [];
+            const done = items.filter(i => displayStatus(i) === "done").length;
+            return (
+              <Card key={s.key} className={idx === 0 ? "border-amber-300" : "border-border"}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-start gap-2">
+                    <Landmark className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <span className="flex-1">
+                      {s.title}
+                      <span className="block text-xs font-normal text-muted-foreground">{s.period}</span>
+                      <span className="block text-xs font-normal text-muted-foreground mt-1">{s.description}</span>
+                    </span>
+                    <Badge variant="outline" className="shrink-0">{done}/{items.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {items.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No tasks in this stage yet.<br />Use the Inbox below to assign tasks.</p>
+                  ) : (
+                    items.map(item => <PlanningRow key={item.id} item={item} showStatusSelect showDoneButton />)
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          /* Long-Term Projects */
+          <Card className="border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Landmark className="h-4 w-4 text-amber-600" />
+                Long-Term Projects
+                <Badge variant="outline" className="ml-auto">{longTermItems.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1.5">
+              {longTermItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
+              ) : (
+                longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Inbox: Unassigned items */}
