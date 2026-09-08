@@ -56,6 +56,7 @@ type UnifiedItem = {
 export default function OpsTasksDashboard() {
   const { hub: hubParam } = useParams();
   const hub = normalizeHub(hubParam);
+  const isStaged = hub === "czech";
   const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks(hub);
   const { data: members = [] } = useOpsTeamMembers(hub);
   const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests(hub);
