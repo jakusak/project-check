@@ -12,6 +12,7 @@ export interface OpsTeamMember {
   name: string;
   role: string;
   is_active: boolean;
+  hub?: string;
 }
 
 export interface OpsTask {
@@ -25,6 +26,7 @@ export interface OpsTask {
   main_owner_id: string | null;
   other_owner_id: string | null;
   location: string | null;
+  hub?: string;
   requested_due_date: string | null;
   start_date: string | null;
   target_end_date: string | null;
@@ -59,26 +61,28 @@ export interface OpsTaskHistory {
   created_at: string;
 }
 
-export function useOpsTeamMembers() {
+export function useOpsTeamMembers(hub?: string) {
   return useQuery({
-    queryKey: ["ops-team-members"],
+    queryKey: ["ops-team-members", hub ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("ops_team_members")
         .select("*")
         .eq("is_active", true)
         .order("name");
+      if (hub) q = q.eq("hub", hub);
+      const { data, error } = await q;
       if (error) throw error;
       return data as OpsTeamMember[];
     },
   });
 }
 
-export function useOpsTasks() {
+export function useOpsTasks(hub?: string) {
   return useQuery({
-    queryKey: ["ops-tasks"],
+    queryKey: ["ops-tasks", hub ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("ops_tasks")
         .select(`
           *,
@@ -86,6 +90,8 @@ export function useOpsTasks() {
           other_owner:ops_team_members!ops_tasks_other_owner_id_fkey(id, name, role)
         `)
         .order("created_at", { ascending: false });
+      if (hub) q = q.eq("hub", hub);
+      const { data, error } = await q;
       if (error) throw error;
       return data as unknown as OpsTask[];
     },

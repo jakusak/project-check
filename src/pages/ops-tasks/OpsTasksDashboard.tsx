@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { normalizeHub, hubLabel, FACILITY_HUBS } from "@/lib/facilityHubs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,9 +28,11 @@ type UnifiedItem = {
 };
 
 export default function OpsTasksDashboard() {
-  const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks();
-  const { data: members = [] } = useOpsTeamMembers();
-  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests();
+  const { hub: hubParam } = useParams();
+  const hub = normalizeHub(hubParam);
+  const { data: allTasks = [], isLoading: tasksLoading } = useOpsTasks(hub);
+  const { data: members = [] } = useOpsTeamMembers(hub);
+  const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests(hub);
   const updateTask = useUpdateOpsTask();
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
@@ -323,20 +326,31 @@ export default function OpsTasksDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">801 FR Building & OPS Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Steve • Fabian • Sasha</p>
+          <h1 className="text-2xl font-bold text-foreground">{hubLabel(hub)} Facilities Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            {members.length > 0 ? members.map(m => m.name).join(" • ") : "No team members assigned to this hub yet"}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/supply/new"><ShoppingCart className="h-4 w-4 mr-1" />Shopping</Link>
+            <Link to={`/supply/new?hub=${hub}`}><ShoppingCart className="h-4 w-4 mr-1" />Shopping</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link to="/ops-tasks/request"><Building2 className="h-4 w-4 mr-1" />Facilities</Link>
+            <Link to={`/ops-tasks/request?hub=${hub}`}><Building2 className="h-4 w-4 mr-1" />Facilities</Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/ops-tasks/new"><Plus className="h-4 w-4 mr-1" />Ops Task</Link>
+            <Link to={`/ops-tasks/new?hub=${hub}`}><Plus className="h-4 w-4 mr-1" />Ops Task</Link>
           </Button>
         </div>
+      </div>
+
+      {/* Hub switcher */}
+      <div className="flex gap-1.5 flex-wrap">
+        {FACILITY_HUBS.map(h => (
+          <Button key={h.key} asChild variant={h.key === hub ? "default" : "outline"} size="sm">
+            <Link to={`/facilities/${h.key}`}>{h.label}</Link>
+          </Button>
+        ))}
       </div>
 
       {/* 3 Category Overview Cards (compact) */}
@@ -353,7 +367,7 @@ export default function OpsTasksDashboard() {
               <span><span className="font-bold text-emerald-600">{categories.facilityDone}</span> <span className="text-xs text-muted-foreground">done</span></span>
             </div>
             <Button asChild variant="link" size="sm" className="px-0 mt-1 h-6 text-xs">
-              <Link to="/ops-tasks/facilities">View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              <Link to={`/ops-tasks/facilities?hub=${hub}`}>View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -510,7 +524,7 @@ export default function OpsTasksDashboard() {
       {/* Quick Nav */}
       <div className="flex gap-2 flex-wrap">
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks">All Ops Tasks</Link></Button>
-        <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/facilities">Facilities</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to={`/ops-tasks/facilities?hub=${hub}`}>Facilities</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/supply/dashboard">Supply Requests</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/weekly">Weekly View</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/monthly">Monthly View</Link></Button>

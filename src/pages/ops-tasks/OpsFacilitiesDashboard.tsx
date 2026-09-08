@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { normalizeHub, hubLabel } from "@/lib/facilityHubs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +14,10 @@ import { format, parseISO, isPast } from "date-fns";
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
 export default function OpsFacilitiesDashboard() {
-  const { data: allTasks = [], isLoading } = useOpsTasks();
-  const { data: _members = [] } = useOpsTeamMembers();
+  const [searchParams] = useSearchParams();
+  const hub = normalizeHub(searchParams.get("hub"));
+  const { data: allTasks = [], isLoading } = useOpsTasks(hub);
+  const { data: _members = [] } = useOpsTeamMembers(hub);
   const updateTask = useUpdateOpsTask();
 
   // Only facility requests
@@ -58,13 +61,13 @@ export default function OpsFacilitiesDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/ops-tasks/dashboard"><ArrowLeft className="h-4 w-4 mr-1" />Dashboard</Link>
+            <Link to={`/facilities/${hub}`}><ArrowLeft className="h-4 w-4 mr-1" />Dashboard</Link>
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight mt-1">Facilities & Building Requests</h1>
+          <h1 className="text-2xl font-bold tracking-tight mt-1">{hubLabel(hub)} — Facilities & Building Requests</h1>
           <p className="text-sm text-muted-foreground">Renovations, defects, plumbing, electrical, safety issues</p>
         </div>
         <Button asChild>
-          <Link to="/ops-tasks/request"><Plus className="h-4 w-4 mr-1.5" />New Request</Link>
+          <Link to={`/ops-tasks/request?hub=${hub}`}><Plus className="h-4 w-4 mr-1.5" />New Request</Link>
         </Button>
       </div>
 
@@ -121,7 +124,7 @@ export default function OpsFacilitiesDashboard() {
               <Building2 className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground">No facility requests found</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/ops-tasks/request">Submit a request</Link>
+                <Link to={`/ops-tasks/request?hub=${hub}`}>Submit a request</Link>
               </Button>
             </div>
           ) : (
