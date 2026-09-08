@@ -480,23 +480,52 @@ export default function OpsTasksDashboard() {
           </CardContent>
         </Card>
 
-        {/* Long-Term Projects */}
-        <Card className="border-amber-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Landmark className="h-4 w-4 text-amber-600" />
-              Long-Term Projects
-              <Badge variant="outline" className="ml-auto">{longTermItems.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            {longTermItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
-            ) : (
-              longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
-            )}
-          </CardContent>
-        </Card>
+        {isStaged ? (
+          STAGES.map((s, idx) => {
+            const items = stageItems[s.key] ?? [];
+            const done = items.filter(i => displayStatus(i) === "done").length;
+            return (
+              <Card key={s.key} className={idx === 0 ? "border-amber-300" : "border-border"}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-start gap-2">
+                    <Landmark className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <span className="flex-1">
+                      {s.title}
+                      <span className="block text-xs font-normal text-muted-foreground">{s.period}</span>
+                      <span className="block text-xs font-normal text-muted-foreground mt-1">{s.description}</span>
+                    </span>
+                    <Badge variant="outline" className="shrink-0">{done}/{items.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {items.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No tasks in this stage yet.<br />Use the Inbox below to assign tasks.</p>
+                  ) : (
+                    items.map(item => <PlanningRow key={item.id} item={item} showStatusSelect showDoneButton />)
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          /* Long-Term Projects */
+          <Card className="border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Landmark className="h-4 w-4 text-amber-600" />
+                Long-Term Projects
+                <Badge variant="outline" className="ml-auto">{longTermItems.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1.5">
+              {longTermItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">No long-term projects assigned yet.<br />Use the Inbox below to assign projects.</p>
+              ) : (
+                longTermItems.map(item => <PlanningRow key={item.id} item={item} showDoneButton />)
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Inbox: Unassigned items */}
