@@ -116,18 +116,36 @@ export default function Layout() {
               </Link>
             )}
 
-            {/* Ops Control */}
-            <Link
-              to="/ops-tasks/dashboard"
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname.startsWith("/ops-tasks")
-                  ? "bg-sidebar-accent text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
-              )}
-            >
-              801 FR Building & OPS
-            </Link>
+            {/* Facilities — per country dashboards */}
+            <div className="relative group">
+              <button
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  location.pathname.startsWith("/facilities") || location.pathname.startsWith("/ops-tasks")
+                    ? "bg-sidebar-accent text-primary-foreground"
+                    : "text-primary-foreground/80 hover:bg-sidebar-accent/50 hover:text-primary-foreground"
+                )}
+              >
+                Facilities
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+              <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="py-1">
+                  {FACILITY_HUBS.map(item => (
+                    <Link
+                      key={item.key}
+                      to={`/facilities/${item.key}`}
+                      className={cn(
+                        "block px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors",
+                        location.pathname === `/facilities/${item.key}` ? "bg-accent text-accent-foreground font-medium" : ""
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             {/* Workforce Planning Dropdown — allowlist gated */}
             {hasWorkforceAccess && (
