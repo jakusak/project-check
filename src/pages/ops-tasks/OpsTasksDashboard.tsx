@@ -367,7 +367,7 @@ export default function OpsTasksDashboard() {
               <span><span className="font-bold text-emerald-600">{categories.facilityDone}</span> <span className="text-xs text-muted-foreground">done</span></span>
             </div>
             <Button asChild variant="link" size="sm" className="px-0 mt-1 h-6 text-xs">
-              <Link to="/ops-tasks/facilities">View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              <Link to={`/ops-tasks/facilities?hub=${hub}`}>View All <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -524,7 +524,7 @@ export default function OpsTasksDashboard() {
       {/* Quick Nav */}
       <div className="flex gap-2 flex-wrap">
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks">All Ops Tasks</Link></Button>
-        <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/facilities">Facilities</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to={`/ops-tasks/facilities?hub=${hub}`}>Facilities</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/supply/dashboard">Supply Requests</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/weekly">Weekly View</Link></Button>
         <Button asChild variant="outline" size="sm"><Link to="/ops-tasks/monthly">Monthly View</Link></Button>
