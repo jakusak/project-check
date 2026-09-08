@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FACILITY_HUBS } from "@/lib/facilityHubs";
 import backroadsLogo from "@/assets/backroads-logo.png";
 import { useRegion, Region } from "@/contexts/RegionContext";
 import NotificationBell from "@/components/NotificationBell";
