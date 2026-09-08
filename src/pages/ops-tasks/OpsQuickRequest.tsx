@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { normalizeHub } from "@/lib/facilityHubs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +21,8 @@ export default function OpsQuickRequest() {
   const [category, setCategory] = useState<OpsTaskCategory>("other");
   const [priority, setPriority] = useState<OpsTaskPriority>("medium");
   const [requestedBy, setRequestedBy] = useState("");
+  const [searchParams] = useSearchParams();
+  const hub = normalizeHub(searchParams.get("hub"));
   const [location, setLocation] = useState("");
   const [requestedDueDate, setRequestedDueDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -35,6 +39,7 @@ export default function OpsQuickRequest() {
       status: "new_request",
       requested_by: requestedBy,
       location: location || null,
+      hub,
       requested_due_date: requestedDueDate || null,
       notes: notes || null,
       task_mode: "facility_request",
@@ -48,7 +53,7 @@ export default function OpsQuickRequest() {
           description: description || undefined,
           category: CATEGORY_LABELS[category],
         });
-        navigate("/ops-tasks/facilities");
+        navigate(`/ops-tasks/facilities?hub=${hub}`);
       },
     });
   };

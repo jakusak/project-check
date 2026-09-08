@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { normalizeHub } from "@/lib/facilityHubs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,7 @@ export default function OpsNewTask() {
       definition_of_done: form.definition_of_done || null,
       description: form.description || null,
       location: form.location || null,
+      hub,
       notes: form.notes || null,
       requested_by: form.requested_by || null,
     };
