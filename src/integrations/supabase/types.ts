@@ -1329,6 +1329,7 @@ export type Database = {
           definition_of_done: string | null
           description: string | null
           estimated_hours: number | null
+          hub: string
           id: string
           location: string | null
           main_owner_id: string | null
@@ -1360,6 +1361,7 @@ export type Database = {
           definition_of_done?: string | null
           description?: string | null
           estimated_hours?: number | null
+          hub?: string
           id?: string
           location?: string | null
           main_owner_id?: string | null
@@ -1391,6 +1393,7 @@ export type Database = {
           definition_of_done?: string | null
           description?: string | null
           estimated_hours?: number | null
+          hub?: string
           id?: string
           location?: string | null
           main_owner_id?: string | null
@@ -1433,6 +1436,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string | null
+          hub: string
           id: string
           is_active: boolean
           name: string
@@ -1442,6 +1446,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string | null
+          hub?: string
           id?: string
           is_active?: boolean
           name: string
@@ -1451,6 +1456,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string | null
+          hub?: string
           id?: string
           is_active?: boolean
           name?: string
@@ -1512,6 +1518,7 @@ export type Database = {
           category: Database["public"]["Enums"]["supply_request_category"]
           created_at: string
           created_by_user_id: string | null
+          hub: string
           id: string
           items: string
           notes: string | null
@@ -1527,6 +1534,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["supply_request_category"]
           created_at?: string
           created_by_user_id?: string | null
+          hub?: string
           id?: string
           items: string
           notes?: string | null
@@ -1542,6 +1550,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["supply_request_category"]
           created_at?: string
           created_by_user_id?: string | null
+          hub?: string
           id?: string
           items?: string
           notes?: string | null
