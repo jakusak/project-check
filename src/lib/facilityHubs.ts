@@ -3,7 +3,7 @@ export type FacilityHub = "provence" | "czech" | "tuscany" | "croatia";
 export const FACILITY_HUBS: { key: FacilityHub; label: string }[] = [
   { key: "czech", label: "Czech" },
   { key: "tuscany", label: "Tuscany" },
-  { key: "provence", label: "Provence" },
+  { key: "provence", label: "801 FR Campus" },
   { key: "croatia", label: "Croatia" },
 ];
 
@@ -18,5 +18,5 @@ export function normalizeHub(value: string | undefined | null): FacilityHub {
 }
 
 export function hubLabel(value: string | undefined | null): string {
-  return FACILITY_HUBS.find(h => h.key === normalizeHub(value))?.label ?? "Provence";
+  return FACILITY_HUBS.find(h => h.key === normalizeHub(value))?.label ?? "801 FR Campus";
 }
