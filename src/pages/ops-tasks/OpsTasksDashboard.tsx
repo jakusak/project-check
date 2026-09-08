@@ -299,12 +299,7 @@ export default function OpsTasksDashboard() {
           </Select>
         )}
         <Badge className={`${PRIORITY_COLORS[item.priority as keyof typeof PRIORITY_COLORS] || "bg-muted text-muted-foreground"} text-[10px] capitalize`}>{item.priority}</Badge>
-        {item.planning_horizon === "weekly" && (
-          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
-            <X className="h-3 w-3" />
-          </Button>
-        )}
-        {item.planning_horizon === "long_term" && (
+        {item.planning_horizon && (
           <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive" onClick={() => cancelItem(item)} title="Permanently remove from dashboard">
             <X className="h-3 w-3" />
           </Button>
@@ -314,9 +309,17 @@ export default function OpsTasksDashboard() {
             <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "weekly")}>
               <CalendarDays className="h-3 w-3 mr-1" />Week
             </Button>
-            <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "long_term")}>
-              <Landmark className="h-3 w-3 mr-1" />Long
-            </Button>
+            {isStaged ? (
+              STAGES.map(s => (
+                <Button key={s.key} variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, s.key)}>
+                  {s.short}
+                </Button>
+              ))
+            ) : (
+              <Button variant="outline" size="sm" className="h-6 px-2 text-[10px]" onClick={() => assignHorizon(item, "long_term")}>
+                <Landmark className="h-3 w-3 mr-1" />Long
+              </Button>
+            )}
           </>
         )}
         {showDoneButton && (
