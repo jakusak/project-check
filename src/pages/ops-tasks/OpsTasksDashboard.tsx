@@ -326,20 +326,31 @@ export default function OpsTasksDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">801 FR Building & OPS Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Steve • Fabian • Sasha</p>
+          <h1 className="text-2xl font-bold text-foreground">{hubLabel(hub)} Facilities Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            {members.length > 0 ? members.map(m => m.name).join(" • ") : "No team members assigned to this hub yet"}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/supply/new"><ShoppingCart className="h-4 w-4 mr-1" />Shopping</Link>
+            <Link to={`/supply/new?hub=${hub}`}><ShoppingCart className="h-4 w-4 mr-1" />Shopping</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link to="/ops-tasks/request"><Building2 className="h-4 w-4 mr-1" />Facilities</Link>
+            <Link to={`/ops-tasks/request?hub=${hub}`}><Building2 className="h-4 w-4 mr-1" />Facilities</Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/ops-tasks/new"><Plus className="h-4 w-4 mr-1" />Ops Task</Link>
+            <Link to={`/ops-tasks/new?hub=${hub}`}><Plus className="h-4 w-4 mr-1" />Ops Task</Link>
           </Button>
         </div>
+      </div>
+
+      {/* Hub switcher */}
+      <div className="flex gap-1.5 flex-wrap">
+        {FACILITY_HUBS.map(h => (
+          <Button key={h.key} asChild variant={h.key === hub ? "default" : "outline"} size="sm">
+            <Link to={`/facilities/${h.key}`}>{h.label}</Link>
+          </Button>
+        ))}
       </div>
 
       {/* 3 Category Overview Cards (compact) */}
