@@ -15,7 +15,9 @@ import { ArrowLeft } from "lucide-react";
 export default function OpsNewTask() {
   const navigate = useNavigate();
   const createTask = useCreateOpsTask();
-  const { data: members = [] } = useOpsTeamMembers();
+  const [searchParams] = useSearchParams();
+  const hub = normalizeHub(searchParams.get("hub"));
+  const { data: members = [] } = useOpsTeamMembers(hub);
 
   const [form, setForm] = useState({
     title: "", description: "", category: "other" as OpsTaskCategory, priority: "medium" as OpsTaskPriority,
@@ -60,7 +62,7 @@ export default function OpsNewTask() {
           description: form.description || undefined,
           category: CATEGORY_LABELS[form.category],
         });
-        navigate("/ops-tasks");
+        navigate(`/facilities/${hub}`);
       },
     });
   };
