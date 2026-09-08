@@ -127,26 +127,11 @@ export default function OpsNewTask() {
             {/* Scheduling */}
             <div>
               <h3 className="text-sm font-semibold mb-3">Scheduling</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => set("start_date", e.target.value)} /></div>
                 <div className="space-y-2"><Label>Requested Due Date</Label><Input type="date" value={form.requested_due_date} onChange={e => set("requested_due_date", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Planned Week</Label><Input value={form.planned_week} onChange={e => set("planned_week", e.target.value)} placeholder="e.g. 2026-W12" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Select value={form.location || "none"} onValueChange={v => set("location", v === "none" ? "" : v)}>
-                    <SelectTrigger><SelectValue placeholder="Select location..." /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">— None —</SelectItem>
-                      <SelectItem value="Tuscany">Tuscany</SelectItem>
-                      <SelectItem value="Czech">Czech</SelectItem>
-                      <SelectItem value="Pernes">Pernes</SelectItem>
-                      <SelectItem value="Croatia">Croatia</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+
             </div>
 
             {/* Classification */}
