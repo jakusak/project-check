@@ -13,6 +13,32 @@ import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEdi
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
+// Czech warehouse remodel — staged programme
+const STAGES = [
+  {
+    key: "stage_1",
+    short: "S1",
+    title: "Stage 1 — Set up the Annex",
+    period: "January – April 2027",
+    description:
+      "New building across the street: haul equipment in place, bikes stored, building secured and fully operational for the early 2027 season.",
+  },
+  {
+    key: "stage_2",
+    short: "S2",
+    title: "Stage 2 — New bike shop in Czech Bay",
+    period: "Summer 2027",
+    description: "Build a new, larger bike shop inside the Czech Bay to match the current volume of work.",
+  },
+  {
+    key: "stage_3",
+    short: "S3",
+    title: "Stage 3 — Remodel kitchen & expand office",
+    period: "Winter 2027 / 2028",
+    description: "With the landlord: remodel the kitchen and add office space in the Claude building for the OPS team and visitors.",
+  },
+];
+
 type UnifiedItem = {
   id: string;
   title: string;
