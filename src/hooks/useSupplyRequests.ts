@@ -14,21 +14,24 @@ export type SupplyRequest = {
   status: "open" | "in_progress" | "closed";
   created_by_user_id: string | null;
   planning_horizon: string | null;
+  hub?: string;
   created_at: string;
   updated_at: string;
 };
 
-export function useSupplyRequests() {
+export function useSupplyRequests(hub?: string) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const query = useQuery({
-    queryKey: ["supply-requests"],
+    queryKey: ["supply-requests", hub ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("supply_requests")
         .select("*")
         .order("created_at", { ascending: false });
+      if (hub) q = q.eq("hub", hub);
+      const { data, error } = await q;
       if (error) throw error;
       return data as SupplyRequest[];
     },
