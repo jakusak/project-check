@@ -16,6 +16,8 @@ import { ShoppingCart } from "lucide-react";
 
 export default function SupplyRequestForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const hub = normalizeHub(searchParams.get("hub"));
   const { createRequest } = useSupplyRequests();
   const { user } = useAuth();
 
@@ -43,6 +45,7 @@ export default function SupplyRequestForm() {
         priority,
         notes: notes.trim() || null,
         requested_by: requestedBy.trim(),
+        hub,
       },
       {
         onSuccess: () => {
@@ -55,7 +58,7 @@ export default function SupplyRequestForm() {
             description: items.trim(),
             category,
           });
-          navigate("/supply/dashboard");
+          navigate(`/facilities/${hub}`);
         },
         onError: () => toast.error("Failed to submit request"),
       }
