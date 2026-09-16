@@ -7,11 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTask, OpsTaskStatus } from "@/hooks/useOpsTasks";
 import { ArrowLeft, Plus, Search, Building2, Clock, CheckCircle2, Package } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
+
+function DetailRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  if (value === null || value === undefined || value === "") return null;
+  return (
+    <div>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+      <div className="text-sm mt-0.5 whitespace-pre-wrap">{value}</div>
+    </div>
+  );
+}
 
 export default function OpsFacilitiesDashboard() {
   const [searchParams] = useSearchParams();
@@ -25,6 +36,7 @@ export default function OpsFacilitiesDashboard() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedTask, setSelectedTask] = useState<OpsTask | null>(null);
 
   const filtered = useMemo(() => {
     let list = tasks;
@@ -146,7 +158,7 @@ export default function OpsFacilitiesDashboard() {
                   const next = r.status === "new_request" ? "in_progress" as OpsTaskStatus : r.status === "in_progress" ? "done" as OpsTaskStatus : null;
                   const isOverdue = r.target_end_date && isPast(parseISO(r.target_end_date)) && !TERMINAL.includes(r.status);
                   return (
-                    <TableRow key={r.id} className={isOverdue ? "bg-red-50/50" : ""}>
+                    <TableRow key={r.id} className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? "bg-red-50/50" : ""}`} onClick={() => setSelectedTask(r)}>
                       <TableCell className="font-medium max-w-[200px] truncate">
                         {r.title}
                         {r.description && <div className="text-xs text-muted-foreground truncate">{r.description}</div>}
@@ -159,7 +171,7 @@ export default function OpsFacilitiesDashboard() {
                         {format(new Date(r.created_at), "MMM d, yyyy")}
                       </TableCell>
                       <TableCell><Badge className={`${STATUS_COLORS[r.status]} text-xs`}>{STATUS_LABELS[r.status]}</Badge></TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         {next ? (
                           <Button size="sm" variant="outline" onClick={() => handleStatusChange(r, next)} disabled={updateTask.isPending}>
                             → {UI_STATUS_LABELS[next]}
@@ -176,6 +188,53 @@ export default function OpsFacilitiesDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Request detail dialog */}
+      <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedTask && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="pr-6">{selectedTask.title}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-wrap gap-2">
+                <Badge className={`${STATUS_COLORS[selectedTask.status]} text-xs`}>{STATUS_LABELS[selectedTask.status]}</Badge>
+                <Badge className={`${PRIORITY_COLORS[selectedTask.priority]} text-xs capitalize`}>{selectedTask.priority}</Badge>
+                <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[selectedTask.category]}</Badge>
+              </div>
+              <div className="space-y-4 mt-2">
+                <DetailRow label="Description" value={selectedTask.description} />
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailRow label="Requested By" value={selectedTask.requested_by} />
+                  <DetailRow label="Location" value={selectedTask.location} />
+                  <DetailRow label="Submitted" value={format(new Date(selectedTask.created_at), "PPP")} />
+                  <DetailRow label="Requested Due Date" value={selectedTask.requested_due_date ? format(parseISO(selectedTask.requested_due_date), "PPP") : null} />
+                  <DetailRow label="Target End Date" value={selectedTask.target_end_date ? format(parseISO(selectedTask.target_end_date), "PPP") : null} />
+                  <DetailRow label="Completed" value={selectedTask.actual_completion_date ? format(parseISO(selectedTask.actual_completion_date), "PPP") : null} />
+                  <DetailRow label="Main Owner" value={selectedTask.main_owner?.name} />
+                  <DetailRow label="Other Owner" value={selectedTask.other_owner?.name} />
+                </div>
+                <DetailRow label="Notes" value={selectedTask.notes} />
+                <DetailRow label="Blocker Reason" value={selectedTask.blocker_reason} />
+                <DetailRow label="Completion Evidence" value={selectedTask.completion_evidence} />
+              </div>
+              <DialogFooter className="mt-4">
+                {selectedTask.status === "new_request" && (
+                  <Button onClick={() => { handleStatusChange(selectedTask, "in_progress"); setSelectedTask(null); }} disabled={updateTask.isPending}>
+                    Start Progress
+                  </Button>
+                )}
+                {selectedTask.status === "in_progress" && (
+                  <Button onClick={() => { handleStatusChange(selectedTask, "done"); setSelectedTask(null); }} disabled={updateTask.isPending}>
+                    Mark Done
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setSelectedTask(null)}>Close</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
