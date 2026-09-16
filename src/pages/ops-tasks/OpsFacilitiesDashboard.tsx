@@ -158,7 +158,7 @@ export default function OpsFacilitiesDashboard() {
                   const next = r.status === "new_request" ? "in_progress" as OpsTaskStatus : r.status === "in_progress" ? "done" as OpsTaskStatus : null;
                   const isOverdue = r.target_end_date && isPast(parseISO(r.target_end_date)) && !TERMINAL.includes(r.status);
                   return (
-                    <TableRow key={r.id} className={isOverdue ? "bg-red-50/50" : ""}>
+                    <TableRow key={r.id} className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? "bg-red-50/50" : ""}`} onClick={() => setSelectedTask(r)}>
                       <TableCell className="font-medium max-w-[200px] truncate">
                         {r.title}
                         {r.description && <div className="text-xs text-muted-foreground truncate">{r.description}</div>}
@@ -171,7 +171,7 @@ export default function OpsFacilitiesDashboard() {
                         {format(new Date(r.created_at), "MMM d, yyyy")}
                       </TableCell>
                       <TableCell><Badge className={`${STATUS_COLORS[r.status]} text-xs`}>{STATUS_LABELS[r.status]}</Badge></TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         {next ? (
                           <Button size="sm" variant="outline" onClick={() => handleStatusChange(r, next)} disabled={updateTask.isPending}>
                             → {UI_STATUS_LABELS[next]}
