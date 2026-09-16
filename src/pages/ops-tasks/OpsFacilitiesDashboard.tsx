@@ -36,6 +36,7 @@ export default function OpsFacilitiesDashboard() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedTask, setSelectedTask] = useState<OpsTask | null>(null);
 
   const filtered = useMemo(() => {
     let list = tasks;
