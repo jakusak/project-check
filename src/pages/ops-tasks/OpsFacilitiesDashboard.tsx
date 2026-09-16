@@ -188,6 +188,53 @@ export default function OpsFacilitiesDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Request detail dialog */}
+      <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedTask && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="pr-6">{selectedTask.title}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-wrap gap-2">
+                <Badge className={`${STATUS_COLORS[selectedTask.status]} text-xs`}>{STATUS_LABELS[selectedTask.status]}</Badge>
+                <Badge className={`${PRIORITY_COLORS[selectedTask.priority]} text-xs capitalize`}>{selectedTask.priority}</Badge>
+                <Badge variant="outline" className="text-xs">{CATEGORY_LABELS[selectedTask.category]}</Badge>
+              </div>
+              <div className="space-y-4 mt-2">
+                <DetailRow label="Description" value={selectedTask.description} />
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailRow label="Requested By" value={selectedTask.requested_by} />
+                  <DetailRow label="Location" value={selectedTask.location} />
+                  <DetailRow label="Submitted" value={format(new Date(selectedTask.created_at), "PPP")} />
+                  <DetailRow label="Requested Due Date" value={selectedTask.requested_due_date ? format(parseISO(selectedTask.requested_due_date), "PPP") : null} />
+                  <DetailRow label="Target End Date" value={selectedTask.target_end_date ? format(parseISO(selectedTask.target_end_date), "PPP") : null} />
+                  <DetailRow label="Completed" value={selectedTask.actual_completion_date ? format(parseISO(selectedTask.actual_completion_date), "PPP") : null} />
+                  <DetailRow label="Main Owner" value={selectedTask.main_owner?.name} />
+                  <DetailRow label="Other Owner" value={selectedTask.other_owner?.name} />
+                </div>
+                <DetailRow label="Notes" value={selectedTask.notes} />
+                <DetailRow label="Blocker Reason" value={selectedTask.blocker_reason} />
+                <DetailRow label="Completion Evidence" value={selectedTask.completion_evidence} />
+              </div>
+              <DialogFooter className="mt-4">
+                {selectedTask.status === "new_request" && (
+                  <Button onClick={() => { handleStatusChange(selectedTask, "in_progress"); setSelectedTask(null); }} disabled={updateTask.isPending}>
+                    Start Progress
+                  </Button>
+                )}
+                {selectedTask.status === "in_progress" && (
+                  <Button onClick={() => { handleStatusChange(selectedTask, "done"); setSelectedTask(null); }} disabled={updateTask.isPending}>
+                    Mark Done
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setSelectedTask(null)}>Close</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
