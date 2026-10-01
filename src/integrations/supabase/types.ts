@@ -2404,6 +2404,10 @@ export type Database = {
     }
     Functions: {
       can_edit_facility: { Args: { _hub: string }; Returns: boolean }
+      can_edit_facility_task: {
+        Args: { _hub: string; _task_id: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           _link?: string
