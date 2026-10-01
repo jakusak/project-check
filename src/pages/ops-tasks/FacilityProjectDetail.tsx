@@ -65,6 +65,27 @@ export default function FacilityProjectDetail() {
   const mutation = useFacilityMutation();
   const qc = useQueryClient();
   const { data: updates = [] } = useQuery({ queryKey: ['facility-updates', id], enabled: !!id && id !== 'new', queryFn: async () => { const { data, error } = await supabase.from('facility_project_updates').select('*').eq('project_id', id || '').order('created_at', { ascending: false }); if (error) throw error; return data; } });
+  const { data: files = [] } = useQuery({ queryKey: ['facility-files', id], enabled: !!id && id !== 'new', queryFn: async () => { const { data, error } = await supabase.from('facility_project_files').select('*').eq('project_id', id || '').order('created_at', { ascending: false }); if (error) throw error; return data; } });
+  const [uploading, setUploading] = useState(false);
+  const uploadFile = async (file: File) => {
+    if (!p || !user || !canEdit) return;
+    setUploading(true);
+    const path = `${p.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    try {
+      const uploaded = await supabase.storage.from('facility-project-files').upload(path, file);
+      if (uploaded.error) throw uploaded.error;
+      const { error } = await supabase.from('facility_project_files').insert({ project_id: p.id, file_path: path, label: file.name, uploaded_by: user.id });
+      if (error) { await supabase.storage.from('facility-project-files').remove([path]); throw error; }
+      await qc.invalidateQueries({ queryKey: ['facility-files', id] });
+      toast.success('File uploaded');
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not upload file'); }
+    finally { setUploading(false); }
+  };
+  const openFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from('facility-project-files').createSignedUrl(path, 60);
+    if (error) toast.error(error.message);
+    else window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+  };
   const [newMilestone, setNewMilestone] = useState('');
   const [due, setDue] = useState('');
   const [kind, setKind] = useState('Milestone');
@@ -78,7 +99,7 @@ export default function FacilityProjectDetail() {
   if (id === 'new') return <FacilityShell title="New project"><ProjectForm onSaved={() => navigate('/facilities/projects')} /></FacilityShell>;
   if (loading) return <FacilityShell title="Project"><p>Loading…</p></FacilityShell>;
   if (!p) return <FacilityShell title="Project not found"><p>This project is not available.</p></FacilityShell>;
-  const linkTask = async () => { if (!linkId) return; const { error } = await supabase.from('ops_tasks').update({ project_id: p.id }).eq('id', linkId).eq('hub', HUBS.find(h => h.key === p.hub)?.legacy || ''); if (error) toast.error(error.message); else { qc.invalidateQueries({ queryKey: ['ops-tasks'] }); setLinkId(''); toast.success('Request linked'); } };
+   const linkTask = async () => { if (!linkId || !canEdit) return; const { error } = await supabase.from('ops_tasks').update({ project_id: p.id }).eq('id', linkId).eq('hub', HUBS.find(h => h.key === p.hub)?.legacy || ''); if (error) toast.error(error.message); else { qc.invalidateQueries({ queryKey: ['ops-tasks'] }); setLinkId(''); toast.success('Request linked'); } };
   return <FacilityShell title={p.title} actions={<Button variant="outline" onClick={copy}>Copy summary</Button>}>
     <ProjectForm project={p} onSaved={() => {}} />
     <Tabs defaultValue="milestones" className="mt-8"><TabsList className="flex flex-wrap h-auto justify-start">{['Milestones','Tasks','Dependencies','Updates','Files'].map(t => <TabsTrigger key={t} value={t.toLowerCase()}>{t}</TabsTrigger>)}</TabsList>
@@ -88,7 +109,7 @@ export default function FacilityProjectDetail() {
       <TabsContent value="tasks" className="space-y-4"><h2 className="text-xl font-semibold">Linked requests</h2>{tasks.filter(t => t.project_id === p.id).map(t => <div key={t.id} className="border-b py-2">{t.title} · {t.status} · {dateLabel(t.target_end_date)}</div>)}{!tasks.some(t => t.project_id === p.id) && <p className="text-muted-foreground">No linked requests. Link a request below.</p>}{canEdit && <div className="flex gap-2 flex-wrap"><Select value={linkId} onValueChange={setLinkId}><SelectTrigger aria-label="Choose request" className="w-72"><SelectValue placeholder="Choose existing request" /></SelectTrigger><SelectContent>{tasks.filter(t => t.hub === HUBS.find(h => h.key === p.hub)?.legacy && !t.project_id).map(t => <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>)}</SelectContent></Select><Button disabled={!linkId} onClick={linkTask}>Link request</Button><Button variant="outline" asChild><Link to={`/ops-tasks/request?hub=${HUBS.find(h => h.key === p.hub)?.legacy}`}>New request</Link></Button></div>}</TabsContent>
       <TabsContent value="dependencies" className="space-y-4"><h2 className="text-xl font-semibold">Depends on</h2>{dependencies.filter(d => d.project_id === p.id).map(d => { const other = projects.find(x => x.id === d.depends_on_project_id); const m = milestones.find(x => x.id === d.depends_on_milestone_id); return <p key={d.id} className="border-b py-2">↖ {other ? <Link className="text-accent hover:underline" to={`/facilities/projects/${other.id}`}>{other.title}</Link> : m?.title} {d.note && `· ${d.note}`}</p>; })}{canEdit && <div className="flex gap-2"><Select value={depId} onValueChange={setDepId}><SelectTrigger aria-label="Depends on project" className="w-72"><SelectValue placeholder="Choose project" /></SelectTrigger><SelectContent>{projects.filter(x => x.id !== p.id).map(x => <SelectItem key={x.id} value={x.id}>{x.title}</SelectItem>)}</SelectContent></Select><Button disabled={!depId} onClick={() => { mutation.mutate({ table: 'facility_dependencies', values: { project_id: p.id, depends_on_project_id: depId } }); setDepId(''); }}>Add dependency</Button></div>}<h2 className="text-xl font-semibold">Blocks</h2>{dependencies.filter(d => d.depends_on_project_id === p.id).map(d => <p key={d.id}>→ <Link className="text-accent hover:underline" to={`/facilities/projects/${d.project_id}`}>{projects.find(x => x.id === d.project_id)?.title}</Link></p>)}</TabsContent>
       <TabsContent value="updates" className="space-y-4"><div className="flex justify-between"><h2 className="text-xl font-semibold">Updates</h2><Select value={filter} onValueChange={setFilter}><SelectTrigger aria-label="Update kind" className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All updates</SelectItem>{['Update','Decision','Risk','Meeting note'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>{updates.filter(u => filter === 'all' || u.kind === filter).map(u => <div className="border-b py-2" key={u.id}><span className="text-sm text-muted-foreground">{u.kind} · {dateLabel(u.created_at)}</span><p>{u.text}</p></div>)}{!updates.length && <p className="text-muted-foreground">No updates yet. Record the latest progress below.</p>}{canEdit && <div className="space-y-2"><Select value={updateKind} onValueChange={setUpdateKind}><SelectTrigger aria-label="New update type" className="w-40"><SelectValue /></SelectTrigger><SelectContent>{['Update','Decision','Risk','Meeting note'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select><Textarea aria-label="Update text" value={updateText} onChange={e => setUpdateText(e.target.value)} placeholder="What changed?" /><Button disabled={!updateText.trim()} onClick={() => { mutation.mutate({ table: 'facility_project_updates', values: { project_id: p.id, text: updateText, kind: updateKind, author_id: user?.id } }); setUpdateText(''); }}>Post update</Button></div>}</TabsContent>
-      <TabsContent value="files"><h2 className="text-xl font-semibold">Files</h2><p className="text-muted-foreground">File uploads are not available yet.</p></TabsContent>
+       <TabsContent value="files" className="space-y-4"><h2 className="text-xl font-semibold">Files</h2>{files.map(file => <div className="flex items-center justify-between border-b py-2 gap-3" key={file.id}><button className="text-accent hover:underline text-left break-all" onClick={() => openFile(file.file_path)}>{file.label}</button><span className="text-muted-foreground shrink-0 text-sm">{dateLabel(file.created_at)}</span></div>)}{!files.length && <p className="text-muted-foreground">No project files yet. Upload a plan, quote or other document.</p>}{canEdit && <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border px-4 py-2 hover:bg-muted">{uploading ? 'Uploading…' : 'Upload file'}<Input className="sr-only" type="file" disabled={uploading} onChange={e => { const file = e.target.files?.[0]; if (file) void uploadFile(file); e.target.value = ''; }} /></label>}</TabsContent>
     </Tabs>
   </FacilityShell>;
 }
