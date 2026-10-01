@@ -1,4 +1,5 @@
 - [x] Add project tables, permissions and seed ten projects with milestones and dependencies.
 - [x] Build portfolio, timeline, weekly review, project detail, list and contractors pages.
 - [x] Integrate project links into request detail and hub dashboards.
-- [ ] Verify permissions, seed data and desktop/mobile views.
+- [x] Verify seed data, filters, deadlines, project tabs, and desktop/mobile views in the live preview.
+- [ ] Verify hub-editor restrictions with a signed-in non-admin hub account (database policies and UI guards are installed; only admin preview session available for this check).

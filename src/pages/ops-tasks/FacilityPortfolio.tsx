@@ -92,7 +92,7 @@ export function FacilityTimeline() {
   const [zoom, setZoom] = useState('18 months');
   const [offset, setOffset] = useState(0);
   const start = zoom === '18 months' ? addMonths(new Date(2026, 9, 1), offset * 6) : zoom === '6 months' ? addMonths(new Date(new Date().getFullYear(), new Date().getMonth(), 1), offset * 6) : addMonths(startOfQuarter(new Date()), offset * 3);
-  const months = zoom === '18 months' ? 21 : zoom === '6 months' ? 6 : 3;
+   const months = zoom === '18 months' ? 21 : zoom === '6 months' ? 6 : 3;
   const end = addMonths(start, months);
   const startTime = start.getTime(); const span = end.getTime() - startTime;
   const position = (date: string) => Math.max(0, Math.min(100, ((new Date(`${date.slice(0, 10)}T12:00:00Z`).getTime() - startTime) / span) * 100));
