@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useOpsTasks, useOpsTeamMembers, useUpdateOpsTask, STATUS_LABELS, STATUS_COLORS, PRIORITY_COLORS, CATEGORY_LABELS, UI_STATUSES, UI_STATUS_LABELS, OpsTask, OpsTaskStatus } from "@/hooks/useOpsTasks";
 import { ArrowLeft, Plus, Search, Building2, Clock, CheckCircle2, Package } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
+import { useFacilityData, projectHub } from "@/lib/facilityProjects";
+import { useFacilityEdit } from "@/lib/facilityProjects";
+import { useNavigate } from "react-router-dom";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
@@ -30,6 +33,14 @@ export default function OpsFacilitiesDashboard() {
   const { data: allTasks = [], isLoading } = useOpsTasks(hub);
   const { data: _members = [] } = useOpsTeamMembers(hub);
   const updateTask = useUpdateOpsTask();
+  const { projects } = useFacilityData();
+  const { canEdit } = useFacilityEdit(projectHub(hub));
+  const navigate = useNavigate();
+  const matchingProjects = projects.filter(p => p.hub === projectHub(hub));
+  const linkProject = async (task: OpsTask, projectId: string | null) => {
+    if (!canEdit) return;
+    updateTask.mutate({ id: task.id, updates: { project_id: projectId } }, { onSuccess: () => setSelectedTask({ ...task, project_id: projectId }) });
+  };
 
   // Only facility requests
   const tasks = useMemo(() => allTasks.filter(t => t.task_mode === "facility_request"), [allTasks]);
@@ -217,6 +228,20 @@ export default function OpsFacilitiesDashboard() {
                 <DetailRow label="Notes" value={selectedTask.notes} />
                 <DetailRow label="Blocker Reason" value={selectedTask.blocker_reason} />
                 <DetailRow label="Completion Evidence" value={selectedTask.completion_evidence} />
+                <div className="space-y-2 border-t pt-4">
+                  <p className="text-sm font-medium">Project</p>
+                  <Select value={selectedTask.project_id || "none"} onValueChange={value => linkProject(selectedTask, value === "none" ? null : value)} disabled={!canEdit}>
+                    <SelectTrigger aria-label="Link to project"><SelectValue placeholder="Not linked" /></SelectTrigger>
+                    <SelectContent><SelectItem value="none">Not linked</SelectItem>{matchingProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
+                  </Select>
+                  {selectedTask.project_id && <Button variant="link" className="px-0" onClick={() => navigate(`/facilities/projects/${selectedTask.project_id}`)}>Open project →</Button>}
+                  {canEdit && <Button variant="outline" size="sm" onClick={async () => {
+                    const task = selectedTask;
+                    const { data, error } = await import("@/integrations/supabase/client").then(({ supabase }) => supabase.from("facility_projects").insert({ title: task.title, hub: projectHub(hub), summary: task.description, status: "Idea" }).select("id").single());
+                    if (error) { import("sonner").then(({ toast }) => toast.error(error.message)); return; }
+                    if (data) { linkProject(task, data.id); setSelectedTask(null); navigate(`/facilities/projects/${data.id}`); }
+                  }}>Create project from this request</Button>}
+                </div>
               </div>
               <DialogFooter className="mt-4">
                 {selectedTask.status === "new_request" && (

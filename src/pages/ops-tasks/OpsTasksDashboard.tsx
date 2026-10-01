@@ -10,7 +10,7 @@ import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown, Pencil } from "lucide-react";
 import { FacilityTaskEditDialog } from "@/components/ops-tasks/FacilityTaskEditDialog";
 import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEditDialog";
-import { useFacilityData, projectHub, Project } from "@/lib/facilityProjects";
+import { useFacilityData, projectHub, dateLabel } from "@/lib/facilityProjects";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
@@ -396,6 +396,11 @@ export default function OpsTasksDashboard() {
           </Button>
         ))}
       </div>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-semibold">Projects ({hubProjects.length})</h2><Button variant="outline" size="sm" asChild><Link to="/facilities/overview">All projects →</Link></Button></div>
+        {hubProjects.length ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">{hubProjects.map(p => <Link key={p.id} to={`/facilities/projects/${p.id}`} className="rounded-md border bg-card p-4 hover:border-accent space-y-1 block"><strong className="block leading-snug">{p.title}</strong><span className="text-sm text-muted-foreground">{p.status} · {p.health} · {dateLabel(p.target_date)}</span></Link>)}</div> : <p className="text-muted-foreground">No projects in this hub yet. Add one from the Projects page.</p>}
+      </section>
 
       {/* 3 Category Overview Cards (compact) */}
       <div className="grid md:grid-cols-3 gap-4">
