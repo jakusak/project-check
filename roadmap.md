@@ -1,4 +1,4 @@
 - [x] Add project tables, permissions and seed ten projects with milestones and dependencies.
-- [ ] Build portfolio, timeline, weekly review, project detail, list and contractors pages.
-- [ ] Integrate project links into request detail and hub dashboards.
+- [x] Build portfolio, timeline, weekly review, project detail, list and contractors pages.
+- [x] Integrate project links into request detail and hub dashboards.
 - [ ] Verify permissions, seed data and desktop/mobile views.
