@@ -10,6 +10,7 @@ import { useSupplyRequests } from "@/hooks/useSupplyRequests";
 import { Plus, Building2, ShoppingCart, Wrench, ArrowRight, CalendarDays, Landmark, X, CheckCircle2, ChevronDown, Pencil } from "lucide-react";
 import { FacilityTaskEditDialog } from "@/components/ops-tasks/FacilityTaskEditDialog";
 import { SupplyRequestEditDialog } from "@/components/ops-tasks/SupplyRequestEditDialog";
+import { useFacilityData, projectHub, Project } from "@/lib/facilityProjects";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
 
@@ -61,6 +62,8 @@ export default function OpsTasksDashboard() {
   const { data: members = [] } = useOpsTeamMembers(hub);
   const { data: supplyRequests = [], isLoading: supplyLoading, updatePlanningHorizon: updateSupplyHorizon, updateStatus: updateSupplyStatus } = useSupplyRequests(hub);
   const updateTask = useUpdateOpsTask();
+  const { projects } = useFacilityData();
+  const hubProjects = projects.filter(p => p.hub === projectHub(hub) && !["Done", "Cancelled"].includes(p.status));
 
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
