@@ -88,7 +88,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
       {/* Top Navigation Header - Backroads Style */}
-      <header className="bg-primary text-primary-foreground shadow-md relative z-50">
+      <header className="bg-primary text-primary-foreground shadow-md relative z-50 overflow-x-clip md:overflow-visible">
         <div className="flex flex-wrap items-center gap-y-1 min-h-14 px-4 py-2 md:py-0 overflow-visible">
           {/* Logo */}
           <Link to="/" className="flex shrink-0 items-center gap-3 mr-auto md:mr-8">
