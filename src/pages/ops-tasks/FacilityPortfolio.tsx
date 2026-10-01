@@ -15,11 +15,11 @@ import { useAuth } from '@/lib/auth';
 function usePortfolioFilters(projects: Project[]) {
   const { user } = useAuth();
   const storage = `facility-filters-${user?.id ?? 'guest'}`;
-  const [filters, setFilters] = useState<{ hubs: string[]; owner: string; status: string; health: string; priority: string }>(() => {
-    try { return { hubs: [], owner: 'all', status: 'all', health: 'all', priority: 'all', ...JSON.parse(localStorage.getItem(storage) || '{}') }; }
+   const [filters, setFilters] = useState<{ hubs: string[]; owner: string; status: string; health: string; priority: string }>(() => {
+     try { return { hubs: [], owner: 'all', status: 'all', health: 'all', priority: 'all', ...JSON.parse(localStorage.getItem(storage) || '{}') }; }
     catch { return { hubs: [], owner: 'all', status: 'all', health: 'all', priority: 'all' }; }
   });
-  const change = (patch: Partial<typeof filters>) => { const next = { ...filters, ...patch }; setFilters(next); localStorage.setItem(storage, JSON.stringify(next)); };
+   const change = (patch: Partial<typeof filters>) => { const next = { ...filters, ...patch }; setFilters(next); localStorage.setItem(storage, JSON.stringify(next)); };
   const visible = projects.filter(p => (!filters.hubs.length || filters.hubs.includes(p.hub)) && (filters.owner === 'all' || p.owner_id === filters.owner) && (filters.status === 'all' || p.status === filters.status) && (filters.health === 'all' || p.health === filters.health) && (filters.priority === 'all' || p.priority === filters.priority));
   return { filters, change, visible };
 }
@@ -72,7 +72,7 @@ export function FacilityProjectsList() {
   const { projects, milestones, loading } = useFacilityData();
   const { data: members = [] } = useOpsTeamMembers();
   const { filters, change, visible } = usePortfolioFilters(projects);
-  const [sort, setSort] = useState<keyof Project>('target_date');
+   const [sort, setSort] = useState<keyof Project>('target_date');
   const [desc, setDesc] = useState(false);
   const sorted = [...visible].sort((a, b) => String(a[sort] || '').localeCompare(String(b[sort] || '')) * (desc ? -1 : 1));
   const exportCsv = () => {

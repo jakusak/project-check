@@ -89,9 +89,9 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col w-full bg-background">
       {/* Top Navigation Header - Backroads Style */}
       <header className="bg-primary text-primary-foreground shadow-md relative z-50">
-        <div className="flex items-center h-14 px-4 overflow-visible">
+        <div className="flex flex-wrap items-center gap-y-1 min-h-14 px-4 overflow-visible">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 mr-8">
+          <Link to="/" className="flex shrink-0 items-center gap-3 mr-8">
             <img 
               src={backroadsLogo} 
               alt="Backroads Logo" 
@@ -101,7 +101,7 @@ export default function Layout() {
           </Link>
 
           {/* Main Navigation */}
-          <nav className="flex items-center gap-1 flex-1 flex-wrap">
+          <nav className="flex items-center gap-1 flex-1 min-w-0 flex-wrap">
             {/* Fleet Violations - restricted */}
             {hasFleetAccess && (
               <Link
@@ -132,6 +132,14 @@ export default function Layout() {
               </button>
               <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <div className="py-1">
+                  {[
+                    { to: "/facilities/overview", label: "Overview" },
+                    { to: "/facilities/timeline", label: "Timeline" },
+                    { to: "/facilities/review", label: "Weekly review" },
+                    { to: "/facilities/projects", label: "Projects" },
+                    { to: "/facilities/contractors", label: "Contractors" },
+                  ].map(item => <Link key={item.to} to={item.to} className={cn("block px-4 py-2.5 text-sm text-foreground hover:bg-muted", location.pathname === item.to && "bg-accent text-accent-foreground font-medium")}>{item.label}</Link>)}
+                  <div className="border-t my-1" />
                   {FACILITY_HUBS.map(item => (
                     <Link
                       key={item.key}
