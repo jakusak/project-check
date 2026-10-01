@@ -89,9 +89,9 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col w-full bg-background">
       {/* Top Navigation Header - Backroads Style */}
       <header className="bg-primary text-primary-foreground shadow-md relative z-50">
-        <div className="flex flex-wrap items-center gap-y-1 min-h-14 px-4 overflow-visible">
+        <div className="flex flex-wrap items-center gap-y-1 min-h-14 px-4 py-2 md:py-0 overflow-visible">
           {/* Logo */}
-          <Link to="/" className="flex shrink-0 items-center gap-3 mr-8">
+          <Link to="/" className="flex shrink-0 items-center gap-3 mr-auto md:mr-8">
             <img 
               src={backroadsLogo} 
               alt="Backroads Logo" 
@@ -101,7 +101,7 @@ export default function Layout() {
           </Link>
 
           {/* Main Navigation */}
-          <nav className="flex items-center gap-1 flex-1 min-w-0 flex-wrap">
+          <nav className="order-3 md:order-none flex items-center gap-1 w-full md:w-auto md:flex-1 min-w-0 flex-wrap">
             {/* Fleet Violations - restricted */}
             {hasFleetAccess && (
               <Link
@@ -158,7 +158,7 @@ export default function Layout() {
 
             {/* Workforce Planning Dropdown — allowlist gated */}
             {hasWorkforceAccess && (
-              <div className="relative group">
+              <div className="relative group focus-within:z-50">
                 <button
                   className={cn(
                     "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
@@ -170,7 +170,7 @@ export default function Layout() {
                   Workforce Planning
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="absolute top-full left-0 mt-1 w-48 bg-card rounded-md shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all z-50">
                   <div className="py-1">
                     {[
                       { hub: "pernes", label: "Pernes" },
@@ -444,7 +444,7 @@ export default function Layout() {
           </nav>
 
           {/* User Actions */}
-          <div className="flex items-center gap-2">
+          <div className="order-2 md:order-none flex items-center gap-2">
             <NotificationBell />
             <Button
               variant="ghost"
