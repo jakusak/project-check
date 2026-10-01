@@ -42,4 +42,4 @@ export function useFacilityMutation() {
   }, onSuccess: () => { qc.invalidateQueries({ queryKey: ['facility-projects'] }); qc.invalidateQueries({ queryKey: ['facility-milestones'] }); qc.invalidateQueries({ queryKey: ['facility-dependencies'] }); qc.invalidateQueries({ queryKey: ['facility-contractors'] }); qc.invalidateQueries({ queryKey: ['facility-updates'] }); qc.invalidateQueries({ queryKey: ['facility-weekly-notes'] }); toast.success('Saved'); }, onError: (error: Error) => toast.error(error.message) });
   return mutation;
 }
-export function healthClass(health: string) { return health === 'On track' ? 'text-accent' : health === 'At risk' ? 'text-warning' : 'text-destructive'; }
+export function healthClass(health: string) { return health === 'On track' ? 'text-accent' : health === 'At risk' ? 'text-amber-700 dark:text-amber-400' : 'text-destructive'; }

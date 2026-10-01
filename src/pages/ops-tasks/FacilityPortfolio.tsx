@@ -77,7 +77,7 @@ export function FacilityProjectsList() {
   const sorted = [...visible].sort((a, b) => String(a[sort] || '').localeCompare(String(b[sort] || '')) * (desc ? -1 : 1));
   const exportCsv = () => {
     const fields = ['title', 'hub', 'site', 'status', 'health', 'priority', 'target_date', 'next_step'] as const;
-    const csv = [fields.join(','), ...sorted.map(p => fields.map(f => `"${String(p[f] ?? '').replaceAll('"', '""')}"`).join(','))].join('\n');
+    const csv = [fields.join(','), ...sorted.map(p => fields.map(f => `"${String(p[f] ?? '').replace(/"/g, '""')}"`).join(','))].join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a'); a.href = url; a.download = 'facilities-projects.csv'; a.click(); URL.revokeObjectURL(url);
   };

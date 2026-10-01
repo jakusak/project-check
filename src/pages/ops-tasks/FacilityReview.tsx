@@ -43,7 +43,7 @@ export default function FacilityReview() {
   const week = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
   const { data: note } = useQuery({ queryKey: ['facility-weekly-notes', week], queryFn: async () => { const { data, error } = await supabase.from('facility_weekly_notes').select('*').eq('week_start', week).maybeSingle(); if (error) throw error; return data; } });
   const [draft, setDraft] = useState<string | null>(null);
-  const lastReview = projects.map(p => p.last_reviewed_at).filter(Boolean).sort().at(-1);
+  const lastReview = projects.map(p => p.last_reviewed_at).filter(Boolean).sort().slice(-1)[0];
   const active = projects.filter(p => !['Done', 'Cancelled'].includes(p.status));
   const old = format(subDays(new Date(), 14), 'yyyy-MM-dd');
   const sections: [string, { p: Project; m?: Milestone }[]][] = [
