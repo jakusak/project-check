@@ -468,6 +468,339 @@ export type Database = {
         }
         Relationships: []
       }
+      facility_contractors: {
+        Row: {
+          company_name: string
+          contact_name: string | null
+          email: string | null
+          hub: string
+          id: string
+          notes: string | null
+          phone: string | null
+          trade: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_name?: string | null
+          email?: string | null
+          hub: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          trade?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string | null
+          email?: string | null
+          hub?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          trade?: string | null
+        }
+        Relationships: []
+      }
+      facility_dependencies: {
+        Row: {
+          depends_on_milestone_id: string | null
+          depends_on_project_id: string | null
+          id: string
+          note: string | null
+          project_id: string
+        }
+        Insert: {
+          depends_on_milestone_id?: string | null
+          depends_on_project_id?: string | null
+          id?: string
+          note?: string | null
+          project_id: string
+        }
+        Update: {
+          depends_on_milestone_id?: string | null
+          depends_on_project_id?: string | null
+          id?: string
+          note?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_dependencies_depends_on_milestone_id_fkey"
+            columns: ["depends_on_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "facility_milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_dependencies_depends_on_project_id_fkey"
+            columns: ["depends_on_project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_dependencies_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_editors: {
+        Row: {
+          hub: string
+          user_id: string
+        }
+        Insert: {
+          hub: string
+          user_id: string
+        }
+        Update: {
+          hub?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      facility_milestones: {
+        Row: {
+          done: boolean
+          done_date: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          owner_id: string | null
+          project_id: string
+          sort_order: number
+          title: string
+          type: string
+        }
+        Insert: {
+          done?: boolean
+          done_date?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          project_id: string
+          sort_order?: number
+          title: string
+          type?: string
+        }
+        Update: {
+          done?: boolean
+          done_date?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          project_id?: string
+          sort_order?: number
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_milestones_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_project_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          id: string
+          label: string
+          project_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          id?: string
+          label: string
+          project_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          id?: string
+          label?: string
+          project_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_project_updates: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          project_id: string
+          text: string
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id: string
+          text: string
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_projects: {
+        Row: {
+          co_owner_id: string | null
+          completed_date: string | null
+          contractor_id: string | null
+          created_at: string
+          decision_needed: boolean
+          decision_note: string | null
+          health: string
+          health_note: string | null
+          hub: string
+          id: string
+          last_reviewed_at: string | null
+          next_step: string | null
+          owner_id: string | null
+          priority: string
+          site: string | null
+          start_date: string | null
+          status: string
+          summary: string | null
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          co_owner_id?: string | null
+          completed_date?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          decision_needed?: boolean
+          decision_note?: string | null
+          health?: string
+          health_note?: string | null
+          hub: string
+          id?: string
+          last_reviewed_at?: string | null
+          next_step?: string | null
+          owner_id?: string | null
+          priority?: string
+          site?: string | null
+          start_date?: string | null
+          status?: string
+          summary?: string | null
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          co_owner_id?: string | null
+          completed_date?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          decision_needed?: boolean
+          decision_note?: string | null
+          health?: string
+          health_note?: string | null
+          hub?: string
+          id?: string
+          last_reviewed_at?: string | null
+          next_step?: string | null
+          owner_id?: string | null
+          priority?: string
+          site?: string | null
+          start_date?: string | null
+          status?: string
+          summary?: string | null
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_projects_co_owner_id_fkey"
+            columns: ["co_owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_projects_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "facility_contractors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facility_projects_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_weekly_notes: {
+        Row: {
+          author: string | null
+          text: string
+          updated_at: string
+          week_start: string
+        }
+        Insert: {
+          author?: string | null
+          text?: string
+          updated_at?: string
+          week_start: string
+        }
+        Update: {
+          author?: string | null
+          text?: string
+          updated_at?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       fleet_access_allowlist: {
         Row: {
           added_by: string | null
@@ -1340,6 +1673,7 @@ export type Database = {
           planned_week: string | null
           planning_horizon: string | null
           priority: Database["public"]["Enums"]["ops_task_priority"]
+          project_id: string | null
           recurring_frequency: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by: string | null
           requested_due_date: string | null
@@ -1372,6 +1706,7 @@ export type Database = {
           planned_week?: string | null
           planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
+          project_id?: string | null
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
           requested_due_date?: string | null
@@ -1404,6 +1739,7 @@ export type Database = {
           planned_week?: string | null
           planning_horizon?: string | null
           priority?: Database["public"]["Enums"]["ops_task_priority"]
+          project_id?: string | null
           recurring_frequency?: Database["public"]["Enums"]["ops_recurring_frequency"]
           requested_by?: string | null
           requested_due_date?: string | null
@@ -1428,6 +1764,13 @@ export type Database = {
             columns: ["other_owner_id"]
             isOneToOne: false
             referencedRelation: "ops_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "facility_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -2060,6 +2403,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_edit_facility: { Args: { _hub: string }; Returns: boolean }
+      can_edit_facility_task: {
+        Args: { _hub: string; _task_id: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           _link?: string

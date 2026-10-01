@@ -80,6 +80,10 @@ import { WorkforceAccessGuard } from "./components/workforce/WorkforceAccessGuar
 import ManageWorkforceAccess from "./pages/admin/ManageWorkforceAccess";
 import PublicSupplyRequestForm from "./pages/public/PublicSupplyRequestForm";
 import PublicFacilitiesRequestForm from "./pages/public/PublicFacilitiesRequestForm";
+import FacilityOverview, { FacilityProjectsList, FacilityTimeline } from "./pages/ops-tasks/FacilityPortfolio";
+import FacilityReview from "./pages/ops-tasks/FacilityReview";
+import FacilityProjectDetail from "./pages/ops-tasks/FacilityProjectDetail";
+import FacilityContractors from "./pages/ops-tasks/FacilityContractors";
 
 const queryClient = new QueryClient();
 
@@ -140,7 +144,13 @@ const App = () => (
               <Route path="/fleet/vehicles" element={<FleetAccessGuard><FleetVehiclesList /></FleetAccessGuard>} />
               <Route path="/docs/prd" element={<PRDViewer />} />
               <Route path="/ops-tasks/dashboard" element={<Navigate to="/facilities/provence" replace />} />
-              <Route path="/facilities" element={<Navigate to="/facilities/provence" replace />} />
+              <Route path="/facilities" element={<Navigate to="/facilities/overview" replace />} />
+               <Route path="/facilities/overview" element={<FacilityOverview />} />
+               <Route path="/facilities/timeline" element={<FacilityTimeline />} />
+               <Route path="/facilities/review" element={<FacilityReview />} />
+               <Route path="/facilities/projects" element={<FacilityProjectsList />} />
+               <Route path="/facilities/projects/:id" element={<FacilityProjectDetail />} />
+               <Route path="/facilities/contractors" element={<FacilityContractors />} />
               <Route path="/facilities/:hub" element={<OpsTasksDashboard />} />
               <Route path="/ops-tasks" element={<OpsTasksList />} />
               <Route path="/ops-tasks/request" element={<OpsQuickRequest />} />
