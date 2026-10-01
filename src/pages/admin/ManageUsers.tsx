@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User, Crown } from "lucide-react";
+import { UserPlus, Trash2, Shield, Users, MapPin, Warehouse, User, Crown, KeyRound } from "lucide-react";
 
 type AppRole = 'admin' | 'super_admin' | 'field_staff' | 'opx' | 'hub_admin' | 'user';
 
@@ -101,6 +101,9 @@ export default function ManageUsers() {
   const [newUserId, setNewUserId] = useState("");
   const [newRole, setNewRole] = useState<AppRole>("field_staff");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwEmail, setPwEmail] = useState("");
+  const [pwValue, setPwValue] = useState("");
 
   // Fetch all profiles for lookups
   const { data: profiles } = useQuery({
@@ -171,6 +174,30 @@ export default function ManageUsers() {
     },
   });
 
+  const setPasswordMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("admin-set-password", {
+        body: { email: pwEmail.trim(), password: pwValue },
+      });
+      if (error) {
+        let msg = error.message;
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx) msg = (await ctx.json())?.error ?? msg;
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      toast.success(`Password updated for ${pwEmail.trim()}`);
+      setPwEmail("");
+      setPwValue("");
+      setPwOpen(false);
+    },
+    onError: (error: Error) => toast.error(`Could not set password: ${error.message}`),
+  });
+
   const handleAddRole = () => {
     if (!newUserId.trim()) {
       toast.error("Please enter a user ID");
@@ -220,6 +247,62 @@ export default function ManageUsers() {
             Assign and manage user roles
           </p>
         </div>
+
+        <div className="flex gap-2">
+        <Dialog open={pwOpen} onOpenChange={setPwOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <KeyRound className="mr-2 h-4 w-4" />
+              Set Password
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Set a user's password</DialogTitle>
+              <DialogDescription>
+                Sets a new password right away — no email needed. Share it with the person and ask them to update the password saved in their browser.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="pw-email">User email</Label>
+                <Input
+                  id="pw-email"
+                  type="email"
+                  list="pw-email-options"
+                  placeholder="name@backroads.com"
+                  value={pwEmail}
+                  onChange={(e) => setPwEmail(e.target.value)}
+                />
+                <datalist id="pw-email-options">
+                  {profiles?.filter(p => p.email).map(p => (
+                    <option key={p.id} value={p.email!} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pw-new">New password</Label>
+                <Input
+                  id="pw-new"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="At least 8 characters"
+                  value={pwValue}
+                  onChange={(e) => setPwValue(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPwOpen(false)}>Cancel</Button>
+              <Button
+                onClick={() => setPasswordMutation.mutate()}
+                disabled={setPasswordMutation.isPending || !pwEmail.trim() || pwValue.length < 8}
+              >
+                {setPasswordMutation.isPending ? "Saving..." : "Set Password"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -285,6 +368,7 @@ export default function ManageUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Role Legend */}
