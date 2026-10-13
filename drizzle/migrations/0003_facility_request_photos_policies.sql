@@ -1,0 +1,2 @@
+CREATE POLICY "Facility request photos upload" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'facility-request-photos' AND (storage.extension(name) IN ('jpg','jpeg','png','webp','gif','heic')));
+CREATE POLICY "Facility request photos read" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'facility-request-photos');

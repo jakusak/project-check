@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Building, CheckCircle } from "lucide-react";
+import PhotoPicker from "@/components/ops-tasks/PhotoPicker";
+import { uploadRequestPhotos } from "@/lib/requestPhotos";
 
 const CATEGORY_OPTIONS = [
   { value: "plumbing", label: "Plumbing" },
@@ -37,6 +39,7 @@ export default function PublicFacilitiesRequestForm() {
   const [location, setLocation] = useState("");
   const [requestedDueDate, setRequestedDueDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +48,11 @@ export default function PublicFacilitiesRequestForm() {
       return;
     }
     setSubmitting(true);
+    let photo_paths: string[] = [];
+    if (photos.length) {
+      try { photo_paths = await uploadRequestPhotos(photos); }
+      catch { setSubmitting(false); toast.error("Picture upload failed. Please try again."); return; }
+    }
     const { error } = await supabase.from("ops_tasks").insert({
       title: title.trim().slice(0, 200),
       description: description.trim().slice(0, 2000) || null,
@@ -56,6 +64,7 @@ export default function PublicFacilitiesRequestForm() {
       requested_due_date: requestedDueDate || null,
       notes: notes.trim().slice(0, 1000) || null,
       task_mode: "facility_request",
+      photo_paths: photo_paths.length ? photo_paths : null,
     } as any);
     setSubmitting(false);
     if (error) {
@@ -73,7 +82,7 @@ export default function PublicFacilitiesRequestForm() {
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
             <h2 className="text-2xl font-bold">Request Submitted!</h2>
             <p className="text-muted-foreground">Your facilities request has been received. The ops team will triage and schedule it.</p>
-            <Button onClick={() => { setSubmitted(false); setTitle(""); setDescription(""); setLocation(""); setRequestedDueDate(""); setNotes(""); setRequestedBy(""); }} variant="outline">
+            <Button onClick={() => { setSubmitted(false); setTitle(""); setDescription(""); setLocation(""); setRequestedDueDate(""); setNotes(""); setRequestedBy(""); setPhotos([]); }} variant="outline">
               Submit Another Request
             </Button>
           </CardContent>
@@ -146,6 +155,8 @@ export default function PublicFacilitiesRequestForm() {
               <Label htmlFor="notes">Notes</Label>
               <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional context..." rows={2} maxLength={1000} />
             </div>
+
+            <PhotoPicker files={photos} onChange={setPhotos} />
 
             <Button type="submit" className="w-full" disabled={submitting || !title.trim() || !requestedBy.trim()}>
               {submitting ? "Submitting..." : "Submit Request"}

@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateOpsTask, CATEGORY_LABELS, OpsTaskCategory, OpsTaskPriority } from "@/hooks/useOpsTasks";
 import { sendTaskNotification } from "@/lib/sendTaskNotification";
 import { ArrowLeft } from "lucide-react";
+import PhotoPicker from "@/components/ops-tasks/PhotoPicker";
+import { uploadRequestPhotos } from "@/lib/requestPhotos";
+import { toast } from "sonner";
 
 export default function OpsQuickRequest() {
   const navigate = useNavigate();
@@ -26,10 +29,19 @@ export default function OpsQuickRequest() {
   const [location, setLocation] = useState("");
   const [requestedDueDate, setRequestedDueDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !requestedBy) return;
+    let photo_paths: string[] = [];
+    if (photos.length) {
+      setUploading(true);
+      try { photo_paths = await uploadRequestPhotos(photos); }
+      catch { toast.error("Picture upload failed. Please try again."); setUploading(false); return; }
+      setUploading(false);
+    }
 
     createTask.mutate({
       title,
@@ -43,6 +55,7 @@ export default function OpsQuickRequest() {
       requested_due_date: requestedDueDate || null,
       notes: notes || null,
       task_mode: "facility_request",
+      photo_paths: photo_paths.length ? photo_paths : null,
     } as any, {
       onSuccess: () => {
         sendTaskNotification({
@@ -125,9 +138,11 @@ export default function OpsQuickRequest() {
               <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional context..." rows={2} />
             </div>
 
+            <PhotoPicker files={photos} onChange={setPhotos} />
+
             <div className="flex gap-2 pt-2">
-              <Button type="submit" disabled={createTask.isPending || !title || !requestedBy}>
-                {createTask.isPending ? "Submitting..." : "Submit Request"}
+              <Button type="submit" disabled={uploading || createTask.isPending || !title || !requestedBy}>
+                {uploading || createTask.isPending ? "Submitting..." : "Submit Request"}
               </Button>
               <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
             </div>

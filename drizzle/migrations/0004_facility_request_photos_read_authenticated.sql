@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Facility request photos read" ON storage.objects;
+CREATE POLICY "Facility request photos read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'facility-request-photos');
