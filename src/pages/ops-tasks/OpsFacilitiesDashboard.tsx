@@ -14,8 +14,27 @@ import { format, parseISO, isPast } from "date-fns";
 import { useFacilityData, projectHub } from "@/lib/facilityProjects";
 import { useFacilityEdit } from "@/lib/facilityProjects";
 import { useNavigate } from "react-router-dom";
+import { useRequestPhotoUrls } from "@/lib/requestPhotos";
+import { Image as ImageIcon } from "lucide-react";
 
 const TERMINAL = ["done", "cancelled", "cannot_complete"];
+
+function RequestPhotos({ paths }: { paths?: string[] | null }) {
+  const photos = useRequestPhotoUrls(paths);
+  if (!photos.length) return null;
+  return (
+    <div>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pictures</p>
+      <div className="flex flex-wrap gap-2 mt-1">
+        {photos.map(p => (
+          <a key={p.path} href={p.url} target="_blank" rel="noreferrer">
+            <img src={p.url} alt="Request attachment" className="h-28 w-28 object-cover rounded border" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function DetailRow({ label, value }: { label: string; value?: React.ReactNode }) {
   if (value === null || value === undefined || value === "") return null;
@@ -172,6 +191,7 @@ export default function OpsFacilitiesDashboard() {
                     <TableRow key={r.id} className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? "bg-red-50/50" : ""}`} onClick={() => setSelectedTask(r)}>
                       <TableCell className="font-medium max-w-[200px] truncate">
                         {r.title}
+                        {r.photo_paths && r.photo_paths.length > 0 && <ImageIcon className="inline h-3.5 w-3.5 ml-1.5 text-muted-foreground" aria-label="Has pictures" />}
                         {r.description && <div className="text-xs text-muted-foreground truncate">{r.description}</div>}
                       </TableCell>
                       <TableCell><Badge variant="outline" className="text-xs">{CATEGORY_LABELS[r.category]}</Badge></TableCell>
@@ -225,6 +245,7 @@ export default function OpsFacilitiesDashboard() {
                   <DetailRow label="Main Owner" value={selectedTask.main_owner?.name} />
                   <DetailRow label="Other Owner" value={selectedTask.other_owner?.name} />
                 </div>
+                <RequestPhotos paths={selectedTask.photo_paths} />
                 <DetailRow label="Notes" value={selectedTask.notes} />
                 <DetailRow label="Blocker Reason" value={selectedTask.blocker_reason} />
                 <DetailRow label="Completion Evidence" value={selectedTask.completion_evidence} />
