@@ -41,7 +41,6 @@ export interface OpsTask {
   work_type: string | null;
   task_mode: string | null;
   planning_horizon: string | null;
-  project_id: string | null;
   notes: string | null;
   photo_paths: string[] | null;
   created_at: string;
