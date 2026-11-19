@@ -143,7 +143,7 @@ export default function OpsFacilitiesDashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
+                  <TableHead className="min-w-[280px]">Request</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Location</TableHead>
@@ -159,9 +159,10 @@ export default function OpsFacilitiesDashboard() {
                   const isOverdue = r.target_end_date && isPast(parseISO(r.target_end_date)) && !TERMINAL.includes(r.status);
                   return (
                     <TableRow key={r.id} className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? "bg-red-50/50" : ""}`} onClick={() => setSelectedTask(r)}>
-                      <TableCell className="font-medium max-w-[200px] truncate">
-                        {r.title}
-                        {r.description && <div className="text-xs text-muted-foreground truncate">{r.description}</div>}
+                      <TableCell className="font-medium min-w-[280px] max-w-[420px] align-top whitespace-normal">
+                        <div className="break-words">{r.title}</div>
+                        {r.description && <div className="text-xs font-normal text-muted-foreground line-clamp-3 break-words mt-0.5">{r.description}</div>}
+                        <div className="text-[11px] font-normal text-primary mt-1">Click to read full details</div>
                       </TableCell>
                       <TableCell><Badge variant="outline" className="text-xs">{CATEGORY_LABELS[r.category]}</Badge></TableCell>
                       <TableCell><Badge className={`${PRIORITY_COLORS[r.priority]} text-xs capitalize`}>{r.priority}</Badge></TableCell>
